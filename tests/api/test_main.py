@@ -1,10 +1,14 @@
 """Tests for FastAPI application (scheduler/main.py)."""
 
+from collections.abc import Generator
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
+
+from scheduler.api.jobs import get_job_queue
+from scheduler.main import app
 
 
 @pytest.fixture
@@ -23,17 +27,21 @@ def mock_job_queue(mock_redis: MagicMock) -> MagicMock:
     mock.redis = mock_redis
     mock.connect = AsyncMock()
     mock.close = AsyncMock()
+    mock.enqueue = AsyncMock()  # Add enqueue method for job API tests
     return mock
 
 
 @pytest.fixture
-def client(mock_job_queue: MagicMock) -> TestClient:
+def client(mock_job_queue: MagicMock) -> Generator[TestClient, None, None]:
     """Create test client with mocked dependencies."""
     with patch("scheduler.main.JobQueue", return_value=mock_job_queue):
-        from scheduler.main import app
+        # Override the dependency for jobs router
+        app.dependency_overrides[get_job_queue] = lambda: mock_job_queue
 
         with TestClient(app) as test_client:
             yield test_client
+
+        # Don't clear overrides - let other tests override them if needed
 
 
 def test_root_endpoint(client: TestClient) -> None:
@@ -107,19 +115,18 @@ def test_cors_headers(client: TestClient) -> None:
 
 def test_validation_error_handler(client: TestClient) -> None:
     """Test validation error handler returns proper error response."""
-    # This will trigger a validation error (we'll create an endpoint that requires validation)
-    # For now, we'll test with a non-existent endpoint that would trigger validation
+    # This will trigger a validation error on the /jobs endpoint
     response = client.post(
-        "/jobs",  # Endpoint doesn't exist yet, but will test error handling
-        json={"invalid": "data"},
+        "/jobs",
+        json={"invalid": "data"},  # Missing required fields
     )
 
-    # Should return 404 for now (endpoint doesn't exist)
-    # When we implement /jobs endpoint, this test will need to be updated
-    assert response.status_code in [
-        status.HTTP_404_NOT_FOUND,
-        status.HTTP_422_UNPROCESSABLE_ENTITY,
-    ]
+    # Should return 422 for validation error
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    data = response.json()
+    assert "details" in data  # Custom error handler uses "details"
+    assert "error" in data
+    assert data["error"] == "validation_error"
 
 
 def test_openapi_docs_available(client: TestClient) -> None:
@@ -143,7 +150,7 @@ def test_global_exception_handler(client: TestClient, mock_redis: MagicMock) -> 
     mock_redis.ping.side_effect = RuntimeError("Unexpected error")
 
     # Patch the logger to not raise, but the exception should still be caught
-    with patch("scheduler.main.logger") as mock_logger:
+    with patch("scheduler.main.logger"):
         response = client.get("/health")
 
         # The exception should be caught and health should be degraded
