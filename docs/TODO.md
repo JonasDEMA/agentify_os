@@ -121,7 +121,7 @@
 
 ---
 
-## ✅ Phase 2: API & Orchestration (Woche 2-3)
+## ✅ Phase 2: API & Agent Management (Woche 2-3)
 
 ### 2.1 FastAPI Application
 - [ ] `scheduler/main.py` erstellen
@@ -129,10 +129,10 @@
   - [ ] App Instance
   - [ ] CORS Middleware
   - [ ] Exception Handlers (Global)
-  - [ ] Startup/Shutdown Events
+  - [ ] Startup/Shutdown Events (Redis Connection)
 - [ ] Health Check Endpoint (`GET /health`)
   - [ ] Check Redis Connection
-  - [ ] Check Database Connection
+  - [ ] Check Agent Registry
   - [ ] Return Status (healthy, degraded, unhealthy)
 - [ ] OpenAPI/Swagger Configuration
   - [ ] Title, Description, Version
@@ -145,90 +145,150 @@
   - [ ] Test CORS Headers
   - [ ] Test Exception Handling
 
-### 2.2 Inbound Gate (Webhooks)
-- [ ] `scheduler/api/inbound_gate.py` erstellen
-- [ ] `POST /schedule` Endpoint
-  - [ ] Request Model (ScheduleRequest: intent, task, context)
-  - [ ] Response Model (ScheduleResponse: job_id, status)
-  - [ ] Validation (Pydantic)
+### 2.2 Job API Endpoints
+- [ ] `scheduler/api/jobs.py` erstellen
+- [ ] `POST /jobs` Endpoint (Create Job)
+  - [ ] Request Model (CreateJobRequest: intent, description, context)
+  - [ ] Response Model (JobResponse: job_id, status, created_at)
+  - [ ] Intent Router → Task Graph
   - [ ] Enqueue Job to Redis
   - [ ] Return Job ID
-- [ ] `POST /lam/message` Endpoint
-  - [ ] Accept LAM Message (any type)
-  - [ ] Validate Message (Pydantic)
-  - [ ] Route to appropriate handler
-  - [ ] Return Acknowledgement
-- [ ] Authentication Middleware
-  - [ ] API Key Validation (Header: `X-API-Key`)
-  - [ ] JWT Validation (später)
-- [ ] Rate Limiting (slowapi)
-  - [ ] Per IP: 100 req/min
-  - [ ] Per API Key: 1000 req/min
-- [ ] Integration Tests (`tests/api/test_inbound_gate.py`)
-  - [ ] Test Schedule Endpoint (valid request)
-  - [ ] Test Schedule Endpoint (invalid request)
-  - [ ] Test LAM Message Endpoint
-  - [ ] Test Authentication (valid/invalid API key)
-  - [ ] Test Rate Limiting
-
-### 2.3 Scheduler API
-- [ ] `scheduler/api/scheduler_api.py` erstellen
-- [ ] `GET /jobs` Endpoint
+- [ ] `GET /jobs` Endpoint (List Jobs)
   - [ ] Query Parameters (limit, offset, status filter)
   - [ ] Pagination
   - [ ] Response Model (JobListResponse: jobs, total, page, page_size)
-- [ ] `GET /jobs/{job_id}` Endpoint
-  - [ ] Response Model (JobDetailResponse: job, tasks, messages)
+- [ ] `GET /jobs/{job_id}` Endpoint (Get Job Status)
+  - [ ] Response Model (JobDetailResponse: job, status, tasks)
   - [ ] 404 if not found
-- [ ] `DELETE /jobs/{job_id}` Endpoint
-  - [ ] Cancel Job
+- [ ] `DELETE /jobs/{job_id}` Endpoint (Cancel Job)
+  - [ ] Cancel Job via JobQueue
   - [ ] Update Status to "cancelled"
   - [ ] Return Success/Error
-- [ ] `POST /jobs/{job_id}/retry` Endpoint
-  - [ ] Retry Failed Job
-  - [ ] Reset Status to "pending"
-  - [ ] Increment retry_count
-  - [ ] Re-enqueue
-- [ ] WebSocket Endpoint (`/ws/jobs/{job_id}`)
+- [ ] `POST /jobs/{job_id}/retry` Endpoint (Retry Job)
+  - [ ] Retry Failed Job via JobQueue
+  - [ ] Return Success/Error
+- [ ] WebSocket Endpoint (`/ws/jobs/{job_id}`) - **Optional für V1**
   - [ ] Connect to Job Updates
   - [ ] Send Status Updates (real-time)
-  - [ ] Send Task Progress
   - [ ] Disconnect on Job Completion
-- [ ] Integration Tests (`tests/api/test_scheduler_api.py`)
+- [ ] Integration Tests (`tests/api/test_jobs.py`)
+  - [ ] Test Create Job
   - [ ] Test List Jobs
   - [ ] Test Get Job (existing/non-existing)
   - [ ] Test Cancel Job
   - [ ] Test Retry Job
-  - [ ] Test WebSocket Connection
-  - [ ] Test WebSocket Updates
 
-### 2.4 Task Orchestrator
-- [ ] `scheduler/orchestrator/task_orchestrator.py` erstellen
-- [ ] TaskOrchestrator Class
-  - [ ] `__init__(job_queue, executor_registry, message_bus)`
+### 2.3 Agent Registry & Management
+- [ ] `scheduler/agents/agent_registry.py` erstellen
+- [ ] Agent Model (Pydantic)
+  - [ ] id: str (UUID)
+  - [ ] name: str
+  - [ ] type: AgentType (DESKTOP_RPA, EMAIL, WEB, DATA)
+  - [ ] capabilities: list[ActionType]
+  - [ ] endpoint: str (REST API URL)
+  - [ ] status: AgentStatus (online, offline, busy)
+  - [ ] last_heartbeat: datetime
+  - [ ] metadata: dict (version, platform, etc.)
+- [ ] AgentRegistry Class
+  - [ ] `register(agent: Agent)` Method
+  - [ ] `unregister(agent_id: str)` Method
+  - [ ] `get_agent(agent_id: str)` Method
+  - [ ] `list_agents(capability: ActionType | None)` Method
+  - [ ] `update_heartbeat(agent_id: str)` Method
+  - [ ] `find_agent_for_task(action_type: ActionType)` Method
+- [ ] Agent Storage (Redis)
+  - [ ] Store agent data in Redis (key: `cpa:agents:{agent_id}`)
+  - [ ] TTL for heartbeat expiration
+- [ ] Unit Tests (`tests/agents/test_agent_registry.py`)
+  - [ ] Test Register Agent
+  - [ ] Test Unregister Agent
+  - [ ] Test List Agents
+  - [ ] Test Find Agent for Task
+  - [ ] Test Heartbeat Expiration
+
+### 2.4 Agent API Endpoints
+- [ ] `scheduler/api/agents.py` erstellen
+- [ ] `POST /agents/register` Endpoint
+  - [ ] Request Model (RegisterAgentRequest: name, type, capabilities, endpoint)
+  - [ ] Response Model (AgentResponse: agent_id, status)
+  - [ ] Register Agent in AgentRegistry
+  - [ ] Return Agent ID
+- [ ] `POST /agents/{id}/heartbeat` Endpoint
+  - [ ] Update last_heartbeat timestamp
+  - [ ] Return Success
+- [ ] `GET /agents` Endpoint
+  - [ ] Query Parameters (type, capability, status)
+  - [ ] Response Model (AgentListResponse: agents, total)
+- [ ] `GET /agents/{id}` Endpoint
+  - [ ] Response Model (AgentDetailResponse: agent details)
+  - [ ] 404 if not found
+- [ ] `DELETE /agents/{id}` Endpoint
+  - [ ] Unregister Agent
+  - [ ] Return Success
+- [ ] Integration Tests (`tests/api/test_agents.py`)
+  - [ ] Test Register Agent
+  - [ ] Test Heartbeat
+  - [ ] Test List Agents
+  - [ ] Test Get Agent
+  - [ ] Test Unregister Agent
+
+### 2.5 LAM Message Handler
+- [ ] `scheduler/api/lam_handler.py` erstellen
+- [ ] `POST /lam/message` Endpoint
+  - [ ] Accept LAM Message (any type)
+  - [ ] Validate Message (Pydantic)
+  - [ ] Route to appropriate handler based on type
+    - [ ] `inform` → Update Job Status
+    - [ ] `done` → Mark Task Complete
+    - [ ] `failure` → Mark Task Failed
+    - [ ] `offer` → Register Agent Capability
+  - [ ] Return Acknowledgement
+- [ ] Integration Tests (`tests/api/test_lam_handler.py`)
+  - [ ] Test Inform Message
+  - [ ] Test Done Message
+  - [ ] Test Failure Message
+  - [ ] Test Offer Message
+
+### 2.6 Task Orchestrator
+- [ ] `scheduler/orchestrator/orchestrator.py` erstellen
+- [ ] Orchestrator Class
+  - [ ] `__init__(job_queue, agent_registry, llm_wrapper)`
   - [ ] `process_job(job_id: str)` Method (Main Loop)
-    - [ ] Dequeue Job
-    - [ ] Build Task Graph
-    - [ ] Execute Tasks (parallel/sequential)
+    - [ ] Get Job from Queue
+    - [ ] Get Task Graph from Job
+    - [ ] For each Task in Graph:
+      - [ ] Find Agent for Task (via AgentRegistry)
+      - [ ] Send LAM Request to Agent (via REST API)
+      - [ ] Wait for Agent Response (inform/done/failure)
+      - [ ] Update Job Status
+    - [ ] Send Final Response (done/failure)
+  - [ ] `assign_task_to_agent(task: ToDo, agent: Agent)` Method
+    - [ ] Create LAM Request Message
+    - [ ] Send to Agent Endpoint (POST /tasks)
+    - [ ] Return correlation_id
+  - [ ] `handle_agent_response(message: LAMMessage)` Method
+    - [ ] Update Task Status
     - [ ] Update Job Status
-    - [ ] Send LAM Response (inform/failure)
-  - [ ] `execute_task_batch(tasks: list[ToDo])` Method (Parallel Execution)
+    - [ ] Continue with next Task
   - [ ] `handle_task_failure(task, error)` Method (Error Recovery)
-  - [ ] `send_progress_update(job_id, progress)` Method (WebSocket)
+    - [ ] Retry Logic
+    - [ ] Fallback to different Agent
 - [ ] Correlation ID Tracking
   - [ ] Store conversationId in Job
   - [ ] Include in all LAM Messages
 - [ ] Timeout Handling
-  - [ ] Respect `expected.deadline` from LAM Message
+  - [ ] Task-level timeout
+  - [ ] Job-level timeout
   - [ ] Cancel Job if deadline exceeded
 - [ ] Background Worker
   - [ ] Continuously poll Redis Queue
   - [ ] Process Jobs asynchronously
   - [ ] Graceful Shutdown
-- [ ] Integration Tests (`tests/orchestrator/test_task_orchestrator.py`)
+- [ ] Integration Tests (`tests/orchestrator/test_orchestrator.py`)
   - [ ] Test Simple Job (single task)
   - [ ] Test Complex Job (multiple tasks with dependencies)
-  - [ ] Test Parallel Execution
+  - [ ] Test Agent Assignment
+  - [ ] Test Agent Response Handling
   - [ ] Test Task Failure (retry)
   - [ ] Test Job Timeout
   - [ ] Test Correlation ID Tracking
@@ -237,36 +297,44 @@
 
 ## ✅ Phase 3: LLM Integration (Woche 3)
 
-### 3.1 LLM Provider Abstraction
-- [ ] `scheduler/llm/llm_provider.py` erstellen
+### 3.1 LLM Wrapper (Abstraction Layer)
+- [ ] `scheduler/llm/llm_wrapper.py` erstellen
 - [ ] Abstract LLMProvider Class
   - [ ] `generate(prompt: str, **kwargs)` Abstract Method → str
   - [ ] `generate_structured(prompt: str, schema: Type[BaseModel])` Abstract Method → BaseModel
-  - [ ] `get_embedding(text: str)` Abstract Method → list[float]
-- [ ] LLMProviderRegistry Class
-  - [ ] `register(name: str, provider: LLMProvider)`
-  - [ ] `get(name: str)` → LLMProvider
-  - [ ] Default Provider
+  - [ ] `get_embedding(text: str)` Abstract Method → list[float] (optional)
+- [ ] LLMWrapper Class
+  - [ ] `__init__(provider: LLMProvider)`
+  - [ ] `intent_to_task_graph(intent: str, description: str)` Method → TaskGraph
+  - [ ] `select_agent_for_task(task: ToDo, agents: list[Agent])` Method → Agent
+  - [ ] `analyze_error(error: str, context: dict)` Method → str (recovery suggestion)
 - [ ] `scheduler/llm/openai_provider.py` erstellen
 - [ ] OpenAIProvider Class (implements LLMProvider)
-  - [ ] `__init__(api_key: str, model: str)`
+  - [ ] `__init__(api_key: str, model: str = "gpt-4")`
   - [ ] `generate()` using Chat Completion API
   - [ ] `generate_structured()` using JSON Mode / Function Calling
-  - [ ] `get_embedding()` using Embeddings API
+  - [ ] `get_embedding()` using Embeddings API (optional)
   - [ ] Error Handling (rate limit, timeout, invalid response)
   - [ ] Retry Logic (exponential backoff)
+- [ ] `scheduler/llm/ollama_provider.py` erstellen (optional für V1)
+- [ ] OllamaProvider Class (implements LLMProvider)
+  - [ ] `__init__(base_url: str, model: str = "llama2")`
+  - [ ] `generate()` using Ollama API
+  - [ ] `generate_structured()` using JSON Mode
 - [ ] `scheduler/llm/mock_provider.py` erstellen (for testing)
 - [ ] MockProvider Class
   - [ ] Predefined Responses
   - [ ] No API Calls
-- [ ] Unit Tests (`tests/llm/test_llm_provider.py`)
+- [ ] Unit Tests (`tests/llm/test_llm_wrapper.py`)
   - [ ] Test OpenAI Provider (with mocked API)
   - [ ] Test Structured Output
   - [ ] Test Error Handling
   - [ ] Test Retry Logic
   - [ ] Test Mock Provider
+  - [ ] Test Intent → Task Graph Conversion
+  - [ ] Test Agent Selection
 
-### 3.2 LLM-based Intent Router
+### 3.2 LLM-based Intent Enhancement
 - [ ] `scheduler/llm/llm_intent_router.py` erstellen
 - [ ] LLMIntentRouter Class
   - [ ] `__init__(llm_provider: LLMProvider, fallback_router: IntentRouter)`

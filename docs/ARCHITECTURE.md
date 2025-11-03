@@ -2,32 +2,55 @@
 
 ## Übersicht
 
-Der **CPA Scheduler/Planner** ist die zentrale Orchestrierungskomponente der Cognitive Process Automation (CPA) Architektur. Er sitzt zwischen den Channels (Email, Chat, Voice) und der CPA Desktop AI und koordiniert die Ausführung von Tasks über das LAM-Protokoll (Lumina Agent Messages).
+Der **CPA Scheduler/Planner** ist die zentrale Orchestrierungskomponente der Cognitive Process Automation (CPA) Architektur. Er koordiniert die Ausführung von Tasks durch **Delegation an spezialisierte Agenten** über das LAM-Protokoll (Lumina Agent Messages).
+
+**Wichtig**: Der Scheduler führt **keine** feingranularen UI-Aktionen (Click, Type, etc.) selbst aus. Er delegiert high-level Tasks an spezialisierte Agenten (z.B. Desktop-RPA-Agent), die diese dann generisch umsetzen.
 
 ## Systemarchitektur
 
 ```
-┌─────────────────────────────────────────────────┐
-│ Apps & Agenten (LuminaOS Schicht 1)             │
-│ → Channels (Email, Chat, Voice/Vapi)            │
-└─────────────────┬───────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│ Layer 1: Apps & Channels                                    │
+│ → Email, Chat, Voice/Vapi                                   │
+└─────────────────┬───────────────────────────────────────────┘
+                  │ (User Requests)
+┌─────────────────▼───────────────────────────────────────────┐
+│ Layer 2: CPA SCHEDULER/PLANNER (diese Komponente)           │
+│ ┌─────────────────────────────────────────────────────────┐ │
+│ │ • Intent Router (NLU/Rules)                             │ │
+│ │ • Task Graph Builder (high-level Tasks)                 │ │
+│ │ • Job Queue (Redis)                                     │ │
+│ │ • Agent Registry & Discovery                            │ │
+│ │ • LAM Protocol Handler                                  │ │
+│ │ • LLM Wrapper (OpenAI/Ollama)                           │ │
+│ └─────────────────────────────────────────────────────────┘ │
+└─────────────────┬───────────────────────────────────────────┘
+                  │ (Task Delegation via LAM Protocol)
                   │
-┌─────────────────▼───────────────────────────────┐
-│ Orchestrator-Agenten (Schicht 2)                │
-│ ┌─────────────────────────────────────────────┐ │
-│ │ SCHEDULER/PLANNER                           │ │
-│ │ • Intent Router (NLU/Rules)                 │ │
-│ │ • Task Graph Builder (ToDo-Schema)          │ │
-│ │ • Job Queue (Redis/NATS)                    │ │
-│ │ • LAM Protocol Handler                      │ │
-│ └─────────────────────────────────────────────┘ │
-└─────────────────┬───────────────────────────────┘
-                  │
-┌─────────────────▼───────────────────────────────┐
-│ CPA-KI Engine (Schicht 3)                       │
-│ → Observe/Think/Act/Verify Loop                 │
-│ → Vision, OCR, UIA (später)                     │
-└──────────────────────────────────────────────────┘
+        ┌─────────┴─────────┬─────────────┬──────────────┐
+        │                   │             │              │
+┌───────▼────────┐  ┌───────▼──────┐  ┌──▼──────┐  ┌───▼──────┐
+│ Desktop-RPA    │  │ Email-Agent  │  │ Web-    │  │ Data-    │
+│ Agent          │  │              │  │ Agent   │  │ Agent    │
+│ (lokal)        │  │ (MS Graph)   │  │         │  │          │
+│                │  │              │  │         │  │          │
+│ • Vision/OCR   │  │ • Send/Read  │  │ • Scrape│  │ • Query  │
+│ • UI Automation│  │ • Attachments│  │ • Forms │  │ • ETL    │
+│ • Click/Type   │  │              │  │         │  │          │
+└────────────────┘  └──────────────┘  └─────────┘  └──────────┘
+```
+
+## Kommunikationsfluss
+
+```
+1. User Request → Scheduler (via Channel)
+2. Scheduler: Intent Recognition → Task Graph Creation
+3. Scheduler: Agent Discovery ("Wer kann Desktop-Automation?")
+4. Agent: Registration/Offer ("Ich kann Desktop-Automation!")
+5. Scheduler: Task Assignment (via LAM Protocol)
+6. Agent: Task Execution (feingranular, generisch)
+7. Agent: Status Updates → Scheduler
+8. Scheduler: Result Aggregation → User
 ```
 
 ## Technologie-Stack
@@ -47,9 +70,10 @@ Der **CPA Scheduler/Planner** ist die zentrale Orchestrierungskomponente der Cog
 - **Repository Pattern**: Austauschbare DB-Layer
 
 ### LLM Integration
-- **OpenAI API**: Default LLM Provider (GPT-4, GPT-3.5)
-- **LLM Provider Pattern**: Austauschbare Backends (später Ollama lokal)
-- **Structured Output**: JSON Mode / Function Calling
+- **LLM Wrapper**: Abstraction Layer für verschiedene LLM Backends
+- **OpenAI API**: Default Provider (GPT-4, GPT-3.5-turbo)
+- **Ollama**: Lokale LLM Option (geplant)
+- **Structured Output**: JSON Mode / Function Calling für Intent → Task Graph
 
 ### Observability
 - **structlog**: Strukturiertes Logging
@@ -110,17 +134,17 @@ Standardisiertes Nachrichtenprotokoll für Agent-Kommunikation.
 ### 2. Task Graph (`task_graph.py`)
 Dependency-basierte Task-Ausführung mit paralleler/sequenzieller Orchestrierung.
 
-**ToDo Schema:**
+**ToDo Schema (High-Level Tasks):**
 ```python
 class ToDo(BaseModel):
-    action: Literal["open_app", "click", "type", 
-                    "wait_for", "playwright", "uia", 
-                    "send_mail"]
-    selector: str | None = None
-    text: str | None = None
+    action: ActionType  # Enum: DESKTOP_AUTOMATION, EMAIL, WEB, DATA, etc.
+    selector: str | None = None  # Agent-spezifische Details
+    text: str | None = None      # Task-Beschreibung
     timeout: float = 8.0
-    depends_on: list[int] = []  # Task-Indices
+    depends_on: list[int] = []   # Task-Indices
 ```
+
+**Wichtig**: Tasks sind **high-level** (z.B. "DATEV öffnen und Dokument suchen"), nicht feingranular (z.B. "Click Button X"). Die feingranulare Ausführung übernimmt der zuständige Agent.
 
 **Features:**
 - Topologische Sortierung (Dependency Resolution)
@@ -142,73 +166,81 @@ Klassifiziert User-Intent und mappt zu Task-Templates.
 - Intent Extraction
 
 ### 4. Job Queue (`job_queue.py`)
-Redis-basierte Task Queue mit Retry-Logic.
+Redis-basierte Job Queue mit Retry-Logic.
 
 **Features:**
 - Enqueue/Dequeue
-- Job Status Tracking (pending, running, done, failed)
-- Exponential Backoff Retry
-- Dead Letter Queue
-- Priority Queues
+- Job Status Tracking (pending, running, done, failed, cancelled)
+- Retry Logic mit max_retries
+- Dead Letter Queue (geplant)
+- Priority Queues (geplant)
 
-### 5. Task Orchestrator (`task_orchestrator.py`)
-Hauptlogik für Task-Orchestrierung.
+### 5. Agent Registry (`agent_registry.py`)
+Verwaltung und Discovery von spezialisierten Agenten.
+
+**Agent Types:**
+- `Desktop-RPA-Agent`: Lokale Desktop-Automation (Vision, OCR, UI Automation)
+- `Email-Agent`: Email-Operationen via Microsoft Graph API
+- `Web-Agent`: Web Scraping & Automation
+- `Data-Agent`: Datenbank-Queries & ETL
+
+**Agent Registration:**
+- **Startup-Registration**: Agent registriert sich beim Start
+- **On-Demand**: Agent registriert sich bei erster Anfrage
+- **Health Checks**: Periodische Heartbeats
+- **Capabilities**: Agent gibt an, welche ActionTypes er unterstützt
+
+**Communication:**
+- **REST API**: Agent ↔ Scheduler Kommunikation
+- **LAM Protocol**: Standardisierte Nachrichten (request, inform, done, failure)
+
+### 6. Task Orchestrator (`orchestrator.py`)
+Hauptlogik für Task-Orchestrierung und Agent-Delegation.
 
 **Flow:**
-1. Receive LAM Request
-2. Intent Router → Task Graph
-3. Enqueue Tasks to Redis
-4. Monitor Execution
-5. Send LAM Inform/Failure Response
+1. Receive User Request (via API)
+2. Intent Router → Task Graph (high-level)
+3. Agent Discovery ("Wer kann DESKTOP_AUTOMATION?")
+4. Task Assignment (via LAM Protocol)
+5. Monitor Execution (Status Updates von Agenten)
+6. Result Aggregation
+7. Send Response to User
 
 **Features:**
 - Correlation ID Tracking
 - Timeout Handling
 - Error Recovery
 - Progress Reporting (WebSocket)
+- Multi-Agent Coordination
 
-### 6. Executors (`executors/`)
-Ausführungslogik für verschiedene Action-Types.
-
-**Executor Types:**
-- `PlaywrightExecutor`: Web Automation (goto, click, fill, wait_for)
-- `MailExecutor`: Email via Graph API (send, read, search)
-- `UIAExecutor`: Windows UI Automation (später)
-- `FileExecutor`: Filesystem Operations (später)
-
-**Interface:**
-```python
-class BaseExecutor(ABC):
-    @abstractmethod
-    async def execute(self, todo: ToDo) -> ExecutionResult:
-        pass
-    
-    @abstractmethod
-    async def verify(self, todo: ToDo) -> bool:
-        pass
-```
-
-### 7. LLM Provider (`llm_provider.py`)
-Abstraction Layer für verschiedene LLM-Backends.
+### 7. LLM Wrapper (`llm_wrapper.py`)
+Abstraction Layer für verschiedene LLM-Backends (lokal oder API).
 
 **Providers:**
-- `OpenAIProvider`: GPT-4, GPT-3.5
-- `OllamaProvider`: Lokale LLMs (geplant)
+- `OpenAIProvider`: GPT-4, GPT-3.5-turbo (Default)
+- `OllamaProvider`: Lokale LLMs (Llama, Mistral, etc.)
 - `MockProvider`: Testing
+
+**Use Cases:**
+- Intent → Task Graph Conversion
+- Task Description → Agent Selection
+- Error Analysis & Recovery Suggestions
 
 **Interface:**
 ```python
 class LLMProvider(ABC):
     @abstractmethod
     async def generate(self, prompt: str) -> str:
+        """Generate text completion."""
         pass
-    
+
     @abstractmethod
     async def generate_structured(
-        self, 
-        prompt: str, 
+        self,
+        prompt: str,
         schema: Type[BaseModel]
     ) -> BaseModel:
+        """Generate structured output (JSON Mode)."""
         pass
 ```
 
@@ -242,8 +274,8 @@ Short-term & Long-term Memory für Kontext-Management.
 
 ### Inbound Gate
 ```
-POST   /schedule              # Schedule new task
-POST   /lam/message           # Receive LAM message
+POST   /jobs                  # Create new job (User Request)
+POST   /lam/message           # Receive LAM message (Agent Communication)
 GET    /health                # Health check
 ```
 
@@ -253,7 +285,16 @@ GET    /jobs                  # List jobs (paginated)
 GET    /jobs/{job_id}         # Get job status
 DELETE /jobs/{job_id}         # Cancel job
 POST   /jobs/{job_id}/retry   # Retry failed job
-WS     /ws/jobs/{job_id}      # Live job updates
+WS     /ws/jobs/{job_id}      # Live job updates (WebSocket)
+```
+
+### Agent Management
+```
+POST   /agents/register       # Agent registration
+POST   /agents/{id}/heartbeat # Agent heartbeat
+GET    /agents                # List registered agents
+GET    /agents/{id}           # Get agent details
+DELETE /agents/{id}           # Unregister agent
 ```
 
 ### Audit & Monitoring
