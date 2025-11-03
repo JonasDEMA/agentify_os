@@ -57,26 +57,26 @@
   - [x] Test Empty Graph
   - [x] Test Single Task
 
-### 1.4 Intent Router (Rule-based V1)
-- [ ] `scheduler/core/intent_router.py` erstellen
-- [ ] IntentRouter Class
-  - [ ] `route(message: str)` Method → Intent
-  - [ ] Regex/Keyword Matching
-  - [ ] Intent Registry (load from YAML/JSON)
-  - [ ] Fallback Intent ("unknown")
-- [ ] `scheduler/config/intents.yaml` erstellen
-  - [ ] Define Sample Intents (send_mail, search_document, export_pdf, etc.)
-  - [ ] Regex Patterns per Intent
-  - [ ] Task Templates per Intent
-- [ ] Intent Model (Pydantic)
-  - [ ] name: str
-  - [ ] patterns: list[str]
-  - [ ] task_template: list[ToDo]
-- [ ] Unit Tests (`tests/core/test_intent_router.py`)
-  - [ ] Test Known Intents
-  - [ ] Test Unknown Intent (fallback)
-  - [ ] Test Case Insensitivity
-  - [ ] Test Multiple Patterns per Intent
+### 1.4 Intent Router (Rule-based V1) ✅
+- [x] `scheduler/core/intent_router.py` erstellen
+- [x] IntentRouter Class
+  - [x] `route(message: str)` Method → Intent
+  - [x] Regex/Keyword Matching
+  - [x] Intent Registry (load from YAML/JSON)
+  - [x] Fallback Intent ("unknown")
+- [x] `scheduler/config/intents.yaml` erstellen
+  - [x] Define Sample Intents (send_mail, search_document, export_pdf, etc.)
+  - [x] Regex Patterns per Intent
+  - [x] Task Templates per Intent
+- [x] Intent Model (Pydantic)
+  - [x] name: str
+  - [x] patterns: list[str]
+  - [x] task_template: list[ToDo]
+- [x] Unit Tests (`tests/core/test_intent_router.py`)
+  - [x] Test Known Intents
+  - [x] Test Unknown Intent (fallback)
+  - [x] Test Case Insensitivity
+  - [x] Test Multiple Patterns per Intent
 
 ### 1.5 Job Queue (Redis)
 - [ ] `scheduler/queue/job_queue.py` erstellen

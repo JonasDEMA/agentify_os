@@ -2,7 +2,7 @@
 
 **Projekt**: CPA Scheduler/Planner
 **Start**: 2025-11-03
-**Aktueller Status**: ✅ LAM Protocol implementiert
+**Aktueller Status**: ✅ Intent Router implementiert
 
 ---
 
@@ -34,21 +34,48 @@
 - [x] Ruff Linting: ✅ Keine Fehler
 - [x] MyPy Type Checking: ✅ Keine Fehler
 
+### Task Graph Implementation (2025-11-03)
+- [x] `scheduler/core/task_graph.py` erstellt
+- [x] ToDo Pydantic Model mit ActionType Enum
+- [x] ExecutionResult Model
+- [x] TaskGraph Class mit Dependency Management
+- [x] Topological Sort (Kahn's Algorithm)
+- [x] Parallel Batch Detection
+- [x] Cycle Detection (DFS)
+- [x] `scheduler/core/task_executor_interface.py` erstellt
+- [x] BaseExecutor Abstract Class
+- [x] 19 Unit Tests geschrieben und bestanden
+- [x] 98% Code Coverage
+
+### Intent Router Implementation (2025-11-03)
+- [x] `scheduler/core/intent_router.py` erstellt
+- [x] Intent Pydantic Model
+- [x] IntentRouter Class mit Regex-basiertem Matching
+- [x] Case-insensitive Pattern Matching
+- [x] Fallback Intent ("unknown")
+- [x] load_from_dict() für YAML/JSON Import
+- [x] `scheduler/config/intents.yaml` erstellt mit 15+ Intents
+- [x] 18 Unit Tests geschrieben und bestanden
+- [x] 91% Code Coverage
+- [x] Ruff Linting: ✅ Keine Fehler
+- [x] MyPy Type Checking: ✅ Keine Fehler
+
 ---
 
-## 🚧 Nächste Schritte (Phase 1.3 - ToDo-Schema & Task Graph)
+## 🚧 Nächste Schritte (Phase 1.5 - Job Queue)
 
 ### Sofort zu erledigen:
-1. **ToDo-Schema & Task Graph** (`scheduler/core/task_graph.py`)
-   - [ ] ToDo Pydantic Model
-   - [ ] TaskGraph Class mit Dependency Resolution
-   - [ ] Topologische Sortierung
-   - [ ] Parallel Execution Groups
+1. **Job Queue (Redis)** (`scheduler/queue/job_queue.py`)
+   - [ ] JobQueue Class mit Redis
+   - [ ] Job Model (Pydantic)
+   - [ ] enqueue(), dequeue(), get_status() Methods
+   - [ ] Retry Logic mit Exponential Backoff
    - [ ] Unit Tests
 
-3. **Intent Router** (`scheduler/core/intent_router.py`)
-   - [ ] Rule-based Intent Classification
-   - [ ] Intent Registry (YAML)
+2. **API Endpoints** (`scheduler/api/`)
+   - [ ] FastAPI Setup
+   - [ ] POST /jobs - Create Job
+   - [ ] GET /jobs/{id} - Get Job Status
    - [ ] Unit Tests
 
 ---
@@ -57,14 +84,14 @@
 
 **Ziel**: Grundlegende Komponenten implementieren (LAM Protocol, Task Graph, Intent Router, Job Queue)
 
-**Fortschritt**: 1.1 ✅ | 1.2 ✅ | 1.3 ⏳ | 1.4 ⏳ | 1.5 ⏳
+**Fortschritt**: 1.1 ✅ | 1.2 ✅ | 1.3 ✅ | 1.4 ✅ | 1.5 ⏳
 
 ### Phase 1 Übersicht:
 - ✅ **1.1 Projekt-Struktur** (abgeschlossen)
 - ✅ **1.2 LAM Protocol** (abgeschlossen)
-- ⏳ **1.3 ToDo-Schema & Task Graph** (nächster Schritt)
-- ⏳ **1.4 Intent Router**
-- ⏳ **1.5 Job Queue (Redis)**
+- ✅ **1.3 ToDo-Schema & Task Graph** (abgeschlossen)
+- ✅ **1.4 Intent Router** (abgeschlossen)
+- ⏳ **1.5 Job Queue (Redis)** (nächster Schritt)
 
 **Geschätzte Dauer**: 1-2 Wochen  
 **Start**: 2025-11-03  
@@ -91,22 +118,38 @@
 ## 📊 Metriken
 
 ### Code-Statistiken
-- **Zeilen Code**: ~750 (Setup, Config, LAM Protocol)
-- **Test Coverage**: 92% (LAM Protocol)
-- **Anzahl Module**: 1 (lam_protocol.py)
-- **Anzahl Tests**: 18
+- **Zeilen Code**: ~1.200 (Setup, Config, Core Modules)
+- **Test Coverage**: 93%+ (Durchschnitt)
+- **Anzahl Module**: 4 (lam_protocol, task_graph, task_executor_interface, intent_router)
+- **Anzahl Tests**: 55
 
 ### Entwicklungs-Fortschritt
-- **Gesamt-Fortschritt**: 10% (2/20 Phasen)
-- **Phase 1 Fortschritt**: 40% (2/5 Aufgaben)
-- **Offene TODOs**: ~185
-- **Abgeschlossene TODOs**: 25
+- **Gesamt-Fortschritt**: 15% (4/20 Phasen)
+- **Phase 1 Fortschritt**: 80% (4/5 Aufgaben)
+- **Offene TODOs**: ~165
+- **Abgeschlossene TODOs**: 45
 
 ---
 
 ## 🔄 Letzte Änderungen
 
-### 2025-11-03 (Nachmittag)
+### 2025-11-03 (Nachmittag - Teil 3)
+- ✅ Intent Router implementiert (`scheduler/core/intent_router.py`)
+- ✅ Intent Config erstellt (`scheduler/config/intents.yaml`) mit 15+ Intents
+- ✅ 18 Unit Tests geschrieben und bestanden
+- ✅ Code Coverage: 91%
+- ✅ Linting & Type Checking: ✅ Alle Checks grün
+- ✅ Git Repository auf GitHub gepusht
+- ✅ TODO.md und PROJECT_STATUS.md aktualisiert
+
+### 2025-11-03 (Nachmittag - Teil 2)
+- ✅ Task Graph implementiert (`scheduler/core/task_graph.py`)
+- ✅ Task Executor Interface erstellt (`scheduler/core/task_executor_interface.py`)
+- ✅ 19 Unit Tests geschrieben und bestanden
+- ✅ Code Coverage: 98%
+- ✅ Git Repository initialisiert mit 4 strukturierten Commits
+
+### 2025-11-03 (Nachmittag - Teil 1)
 - ✅ LAM Protocol implementiert (`scheduler/core/lam_protocol.py`)
 - ✅ 18 Unit Tests geschrieben und bestanden
 - ✅ Code Coverage: 92%
@@ -169,5 +212,5 @@
 
 ---
 
-**Letzte Aktualisierung**: 2025-11-03 14:30 UTC
+**Letzte Aktualisierung**: 2025-11-03 15:45 UTC
 
