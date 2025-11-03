@@ -378,9 +378,175 @@
 
 ---
 
-## ✅ Phase 4: Database & Persistence (Woche 4)
+## ✅ Phase 4: Desktop RPA Agent - Basic Implementation (Woche 4) - COMPLETE
 
-### 4.1 Repository Pattern
+### 4.1 Desktop RPA Agent - Basic Executors ✅
+- [x] `agents/desktop_rpa/` Package erstellen
+- [x] `agents/desktop_rpa/main.py` - FastAPI Application
+  - [x] `/health` Endpoint
+  - [x] `/tasks` Endpoint
+  - [x] Lifespan Management
+  - [x] Structured Logging
+- [x] `agents/desktop_rpa/config/settings.py` - Configuration
+- [x] `agents/desktop_rpa/executors/` - Basic Executors
+  - [x] `base.py` - Base Executor Interface
+  - [x] `click_executor.py` - Click Actions
+  - [x] `type_executor.py` - Type Actions
+  - [x] `wait_executor.py` - Wait Actions
+  - [x] `screenshot_executor.py` - Screenshot Actions
+- [x] PyAutoGUI Integration
+- [x] Pillow for Screenshots
+- [x] Manual Testing (Health Check, Screenshot, Wait)
+- [x] README.md Documentation
+
+---
+
+## ⏳ Phase 5: Cognitive RPA Agent 🆕 **CORE CPA CAPABILITY**
+
+**See**: `docs/COGNITIVE_RPA_REQUIREMENTS.md` for detailed requirements and architecture
+
+### 5.1 LLM Wrapper (Foundation) ⏳ **NEXT**
+- [ ] `agents/desktop_rpa/cognitive/llm_wrapper.py` erstellen
+- [ ] LLMWrapper Class
+  - [ ] `ask_for_next_action(goal, state, screenshot, context)` Method
+  - [ ] `ask_for_strategy(goal, context)` Method
+  - [ ] ChatGPT API Integration (GPT-4o/GPT-4 Vision)
+  - [ ] Screenshot → Base64 encoding
+  - [ ] Prompt engineering for Desktop RPA
+  - [ ] Response parsing and validation
+  - [ ] Error handling and retries
+- [ ] LLMRequest and LLMResponse Models (Pydantic)
+- [ ] Configuration (API key, model, temperature, etc.)
+- [ ] Unit Tests (`tests/cognitive/test_llm_wrapper.py`)
+  - [ ] Test with mock LLM
+  - [ ] Test screenshot encoding
+  - [ ] Test prompt generation
+  - [ ] Test response parsing
+  - [ ] Test error handling
+
+### 5.2 Vision Layer ⏳
+- [ ] `agents/desktop_rpa/vision/windows_api.py` erstellen
+  - [ ] Windows UI Automation integration (`pywinauto` or `uiautomation`)
+  - [ ] Detect windows and titles
+  - [ ] Find GUI elements (buttons, text fields, etc.)
+  - [ ] Get element properties (text, position, state)
+- [ ] `agents/desktop_rpa/vision/screen_analyzer.py` erstellen
+  - [ ] OCR integration (pytesseract)
+  - [ ] Text extraction from screenshots
+  - [ ] Fallback when UI Automation fails
+- [ ] `agents/desktop_rpa/vision/state_detector.py` erstellen
+  - [ ] Rule-based state detection
+  - [ ] Window title matching
+  - [ ] Element presence checking
+  - [ ] State detection rules (JSON/YAML)
+- [ ] Unit Tests (`tests/vision/test_*.py`)
+  - [ ] Test Windows API integration
+  - [ ] Test OCR
+  - [ ] Test state detection
+
+### 5.3 State Graph ⏳
+- [ ] `agents/desktop_rpa/cognitive/state_graph.py` erstellen
+- [ ] State and Transition Models (Pydantic)
+- [ ] StateGraph Class
+  - [ ] `add_state(state: State)` Method
+  - [ ] `add_transition(transition: Transition)` Method
+  - [ ] `find_path(from_state, to_state)` Method (A* or Dijkstra)
+  - [ ] `get_current_state()` Method
+  - [ ] `execute_transition(transition)` Method
+- [ ] SQLite Schema for State Graphs
+  - [ ] `state_graphs` table
+  - [ ] `states` table
+  - [ ] `transitions` table
+  - [ ] Graph versioning (revision history)
+- [ ] Graph Visualization Export
+  - [ ] Export to GraphViz DOT format
+  - [ ] Export to Mermaid format
+- [ ] Unit Tests (`tests/cognitive/test_state_graph.py`)
+  - [ ] Test graph building
+  - [ ] Test path finding
+  - [ ] Test state detection
+  - [ ] Test SQLite storage
+
+### 5.4 Strategy Manager ⏳
+- [ ] `agents/desktop_rpa/cognitive/strategy_manager.py` erstellen
+- [ ] Strategy Model (Pydantic)
+- [ ] StrategyManager Class
+  - [ ] `create_strategy(strategy: Strategy)` Method
+  - [ ] `get_strategy(strategy_id)` Method
+  - [ ] `list_strategies(filters)` Method
+  - [ ] `execute_strategy(strategy_id, context)` Method
+  - [ ] `update_success_rate(strategy_id, success)` Method
+- [ ] JSON Strategy Format Specification
+- [ ] SQLite Schema for Strategies
+  - [ ] `strategies` table
+  - [ ] Strategy versioning
+- [ ] Unit Tests (`tests/cognitive/test_strategy_manager.py`)
+  - [ ] Test CRUD operations
+  - [ ] Test strategy execution
+  - [ ] Test success tracking
+  - [ ] Test SQLite storage
+
+### 5.5 Experience Memory ⏳
+- [ ] `agents/desktop_rpa/cognitive/experience_memory.py` erstellen
+- [ ] Experience Model (Pydantic)
+- [ ] ExperienceMemory Class
+  - [ ] `save_experience(experience: Experience)` Method
+  - [ ] `get_experience(experience_id)` Method
+  - [ ] `find_similar_experiences(goal, state)` Method
+  - [ ] `analyze_patterns()` Method (success patterns, common obstacles)
+- [ ] SQLite Schema for Experiences
+  - [ ] `experiences` table
+  - [ ] `obstacles` table
+  - [ ] `obstacle_solutions` table
+- [ ] Unit Tests (`tests/cognitive/test_experience_memory.py`)
+  - [ ] Test experience storage
+  - [ ] Test experience retrieval
+  - [ ] Test pattern analysis
+  - [ ] Test SQLite storage
+
+### 5.6 Goal Planner ⏳
+- [ ] `agents/desktop_rpa/planner/goal_planner.py` erstellen
+- [ ] GoalPlanner Class
+  - [ ] `decompose_goal(goal)` Method → list[sub_goals]
+  - [ ] `map_goal_to_strategy(goal)` Method → Strategy | None
+  - [ ] `plan_execution(goal)` Method → ExecutionPlan
+- [ ] `agents/desktop_rpa/planner/action_planner.py` erstellen
+- [ ] ActionPlanner Class
+  - [ ] `plan_actions(strategy, context)` Method → list[actions]
+  - [ ] `check_preconditions(strategy)` Method → bool
+  - [ ] `sequence_actions(actions)` Method → ordered list
+- [ ] Integration with LLM, State Graph, Strategy Manager
+- [ ] Unit Tests (`tests/planner/test_*.py`)
+  - [ ] Test goal decomposition
+  - [ ] Test strategy mapping
+  - [ ] Test action planning
+  - [ ] Test precondition checking
+
+### 5.7 Integration & Learning Loop ⏳
+- [ ] Integrate all cognitive components
+- [ ] Implement main learning loop
+  - [ ] Receive goal
+  - [ ] Check for existing strategy
+  - [ ] Execute strategy or ask LLM
+  - [ ] Handle obstacles
+  - [ ] Learn from experience
+  - [ ] Update state graph
+  - [ ] Save strategy
+- [ ] End-to-End Testing with real scenarios
+  - [ ] Test: "Open Outlook and send email"
+  - [ ] Test: "Find file in folder and send via email"
+  - [ ] Test: "Handle pop-up and continue"
+- [ ] Performance Optimization
+- [ ] Documentation
+  - [ ] User guide for cognitive features
+  - [ ] API documentation
+  - [ ] Example strategies
+
+---
+
+## ⏳ Phase 6: Database & Persistence (Woche 5-6)
+
+### 6.1 Repository Pattern
 - [ ] `scheduler/repository/repository_interface.py` erstellen
 - [ ] Abstract JobRepository
   - [ ] `save(job: Job)` Abstract Method
@@ -413,7 +579,7 @@
   - [ ] Test Filtering
   - [ ] Test Transactions
 
-### 4.2 Audit Log
+### 6.2 Audit Log
 - [ ] `scheduler/audit/audit_log.py` erstellen
 - [ ] AuditLog Class
   - [ ] `log_action(action, reason, result, screenshot_path)` Method
@@ -439,7 +605,7 @@
   - [ ] Test Query (with filters)
   - [ ] Test Screenshot Storage
 
-### 4.3 Context Memory (RAG)
+### 6.3 Context Memory (RAG)
 - [ ] `scheduler/memory/context_memory.py` erstellen
 - [ ] ContextMemory Class
   - [ ] Short-term Memory (Redis)
@@ -472,9 +638,9 @@
 
 ---
 
-## 🔄 Phase 5: Minimal CPA Integration (Woche 4-5)
+## 🔄 Phase 7: Minimal CPA Integration (Woche 6-7)
 
-### 5.1 Executor Framework
+### 7.1 Executor Framework
 - [ ] `scheduler/executors/executor_registry.py` erstellen
 - [ ] ExecutorRegistry Class
   - [ ] `register(action_type: str, executor: BaseExecutor)`
@@ -486,7 +652,7 @@
   - [ ] Test Dispatch
   - [ ] Test Unknown Action Type (error)
 
-### 5.2 Playwright Executor
+### 7.2 Playwright Executor
 - [ ] `scheduler/executors/playwright_executor.py` erstellen
 - [ ] PlaywrightExecutor Class (extends BaseExecutor)
   - [ ] `__init__(headless: bool = True)`
@@ -512,7 +678,7 @@
   - [ ] Test Screenshot
   - [ ] Test Error Handling (element not found)
 
-### 5.3 Mail Executor (Graph API)
+### 7.3 Mail Executor (Graph API)
 - [ ] `scheduler/executors/mail_executor.py` erstellen
 - [ ] MailExecutor Class (extends BaseExecutor)
   - [ ] `__init__(client_id, client_secret, tenant_id)`
@@ -533,7 +699,7 @@
   - [ ] Test Search Mail
   - [ ] Test OAuth2 Flow
 
-### 5.4 End-to-End Workflow
+### 7.4 End-to-End Workflow
 - [ ] Example Workflow: "Open Portal → Download PDF → Send Mail"
 - [ ] `tests/integration/test_e2e_workflow.py` erstellen
   - [ ] Setup Test Environment (Redis, SQLite, Mock LLM)
@@ -549,9 +715,9 @@
 
 ---
 
-## 📊 Phase 6: Observability & Security (Woche 5-6)
+## 📊 Phase 8: Observability & Security (Woche 7-8)
 
-### 6.1 OpenTelemetry Integration
+### 8.1 OpenTelemetry Integration
 - [ ] `scheduler/telemetry/telemetry.py` erstellen
 - [ ] OpenTelemetry Setup
   - [ ] Tracer Provider
@@ -585,7 +751,7 @@
   - [ ] Test Metrics Recording
   - [ ] Test Log Export
 
-### 6.2 Security & Policies
+### 8.2 Security & Policies
 - [ ] `scheduler/security/policies.py` erstellen
 - [ ] PolicyEngine Class
   - [ ] `check_app_allowed(app_name: str)` Method → bool
@@ -612,7 +778,7 @@
   - [ ] Test Rate Limiting
   - [ ] Test PII Detection
 
-### 6.3 Monitoring & Alerts
+### 8.3 Monitoring & Alerts
 - [ ] Prometheus Metrics Export
   - [ ] `/metrics` Endpoint (prometheus_client)
 - [ ] Grafana Dashboards (already in 6.1)
@@ -627,9 +793,9 @@
 
 ---
 
-## 🚀 Phase 7: Deployment & DevOps (Woche 6)
+## 🚀 Phase 9: Deployment & DevOps (Woche 8-9)
 
-### 7.1 Docker Setup
+### 9.1 Docker Setup
 - [ ] `Dockerfile` erstellen
   - [ ] Multi-stage Build (builder + runtime)
   - [ ] Python 3.11 Base Image
@@ -650,7 +816,7 @@
   - [ ] `docker-compose up`
   - [ ] Verify Health Check
 
-### 7.2 Railway Deployment
+### 9.2 Railway Deployment
 - [ ] `railway.toml` erstellen (if needed)
 - [ ] Railway Project Setup
   - [ ] Create New Project
@@ -666,7 +832,7 @@
   - [ ] Verify Deployment
   - [ ] Test Health Endpoint
 
-### 7.3 CI/CD
+### 9.3 CI/CD
 - [ ] `.github/workflows/ci.yml` erstellen
   - [ ] Trigger: Push, Pull Request
   - [ ] Jobs:
@@ -691,9 +857,9 @@
 
 ---
 
-## 📚 Phase 8: Documentation & Testing (Woche 7)
+## 📚 Phase 10: Documentation & Testing (Woche 9-10)
 
-### 8.1 API Documentation
+### 10.1 API Documentation
 - [ ] OpenAPI/Swagger (auto-generated by FastAPI)
 - [ ] Postman Collection
   - [ ] Export from Swagger
@@ -705,7 +871,7 @@
   - [ ] Send LAM Message
   - [ ] Query Audit Log
 
-### 8.2 Developer Documentation
+### 10.2 Developer Documentation
 - [ ] Architecture Overview (already in `docs/ARCHITECTURE.md`)
 - [ ] LAM Protocol Guide (`docs/LAM_PROTOCOL.md`)
   - [ ] Message Types
@@ -721,7 +887,7 @@
   - [ ] Environment Variables
   - [ ] Troubleshooting
 
-### 8.3 Testing
+### 10.3 Testing
 - [ ] Unit Test Coverage > 80%
   - [ ] Run `pytest --cov`
   - [ ] Identify gaps
@@ -739,19 +905,19 @@
 
 ---
 
-## 🔮 Phase 9: Advanced Features (Later)
+## 🔮 Phase 11: Advanced Features (Later)
 
-### 9.1 Agent Discovery
+### 11.1 Agent Discovery
 - [ ] Agent Registry (who can do what?)
 - [ ] Capability Negotiation (Offer/Assign Flow)
 - [ ] Load Balancing (multiple workers)
 
-### 9.2 Human-in-the-Loop
+### 11.2 Human-in-the-Loop
 - [ ] Approval Workflow (4-Augen-Prinzip)
 - [ ] Interactive Prompts (user input)
 - [ ] Review UI (web dashboard)
 
-### 9.3 Migration zu Temporal
+### 11.3 Migration zu Temporal
 - [ ] Temporal Workflow Definition
 - [ ] Migration Script (Redis → Temporal)
 - [ ] Backward Compatibility
