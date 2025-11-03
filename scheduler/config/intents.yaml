@@ -1,0 +1,202 @@
+# Intent Configuration
+# Defines intents and their matching patterns for the Intent Router
+
+intents:
+  # Email-related intents
+  - name: send_mail
+    description: Send an email
+    patterns:
+      - "send.*email"
+      - "send.*mail"
+      - "email.*to"
+      - "compose.*email"
+      - "write.*email"
+    examples:
+      - "send email to john@example.com"
+      - "send mail to the team"
+      - "email this to my boss"
+
+  - name: read_mail
+    description: Read emails
+    patterns:
+      - "read.*email"
+      - "read.*mail"
+      - "check.*email"
+      - "check.*inbox"
+      - "show.*email"
+    examples:
+      - "read my emails"
+      - "check my inbox"
+      - "show unread emails"
+
+  # Document-related intents
+  - name: search_document
+    description: Search for a document
+    patterns:
+      - "search.*for"
+      - "find.*document"
+      - "find.*file"
+      - "locate.*document"
+      - "where.*is.*file"
+    examples:
+      - "search for invoice"
+      - "find document xyz"
+      - "locate the contract"
+
+  - name: export_pdf
+    description: Export document to PDF
+    patterns:
+      - "export.*pdf"
+      - "save.*pdf"
+      - "create.*pdf"
+      - "convert.*pdf"
+      - "generate.*pdf"
+    examples:
+      - "export to pdf"
+      - "save as pdf"
+      - "create a pdf report"
+
+  - name: open_document
+    description: Open a document
+    patterns:
+      - "open.*document"
+      - "open.*file"
+      - "show.*document"
+      - "display.*file"
+    examples:
+      - "open document xyz"
+      - "open the contract"
+      - "show me the invoice"
+
+  # Application-related intents
+  - name: open_app
+    description: Open an application
+    patterns:
+      - "open.*"
+      - "start.*"
+      - "launch.*"
+      - "run.*"
+    examples:
+      - "open chrome"
+      - "start excel"
+      - "launch outlook"
+
+  - name: close_app
+    description: Close an application
+    patterns:
+      - "close.*"
+      - "quit.*"
+      - "exit.*"
+      - "stop.*"
+    examples:
+      - "close chrome"
+      - "quit excel"
+      - "exit outlook"
+
+  # Web-related intents
+  - name: web_search
+    description: Search the web
+    patterns:
+      - "search.*web"
+      - "google.*"
+      - "search.*internet"
+      - "look.*up"
+    examples:
+      - "search web for python tutorials"
+      - "google machine learning"
+      - "look up weather forecast"
+
+  - name: navigate_url
+    description: Navigate to a URL
+    patterns:
+      - "go.*to.*"
+      - "navigate.*to"
+      - "open.*url"
+      - "visit.*"
+    examples:
+      - "go to google.com"
+      - "navigate to github"
+      - "visit example.com"
+
+  # Data-related intents
+  - name: extract_data
+    description: Extract data from a source
+    patterns:
+      - "extract.*data"
+      - "scrape.*"
+      - "get.*data.*from"
+      - "pull.*data"
+    examples:
+      - "extract data from the table"
+      - "scrape product prices"
+      - "get data from the website"
+
+  - name: analyze_data
+    description: Analyze data
+    patterns:
+      - "analyze.*"
+      - "calculate.*"
+      - "compute.*"
+      - "summarize.*"
+    examples:
+      - "analyze sales data"
+      - "calculate total revenue"
+      - "summarize the report"
+
+  # Task management intents
+  - name: create_task
+    description: Create a new task
+    patterns:
+      - "create.*task"
+      - "add.*task"
+      - "new.*task"
+      - "schedule.*"
+    examples:
+      - "create task for tomorrow"
+      - "add task to my list"
+      - "schedule meeting"
+
+  - name: list_tasks
+    description: List tasks
+    patterns:
+      - "list.*task"
+      - "show.*task"
+      - "what.*task"
+      - "my.*task"
+    examples:
+      - "list my tasks"
+      - "show all tasks"
+      - "what tasks do I have"
+
+  # System-related intents
+  - name: screenshot
+    description: Take a screenshot
+    patterns:
+      - "screenshot"
+      - "capture.*screen"
+      - "take.*picture"
+      - "snap.*screen"
+    examples:
+      - "take a screenshot"
+      - "capture the screen"
+      - "snap a picture of this"
+
+  - name: wait
+    description: Wait for a condition
+    patterns:
+      - "wait.*for"
+      - "pause.*until"
+      - "hold.*until"
+    examples:
+      - "wait for the page to load"
+      - "pause until element appears"
+      - "hold until ready"
+
+  # Fallback intent
+  - name: unknown
+    description: Unknown intent (fallback)
+    patterns:
+      - ".*"
+    examples:
+      - "anything that doesn't match other intents"
+
