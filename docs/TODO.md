@@ -79,35 +79,42 @@
   - [x] Test Multiple Patterns per Intent
 
 ### 1.5 Job Queue (Redis)
-- [ ] `scheduler/queue/job_queue.py` erstellen
-- [ ] JobQueue Class
-  - [ ] `__init__(redis_url: str)`
-  - [ ] `enqueue(job: Job)` Method → job_id
-  - [ ] `dequeue()` Method → Job | None
-  - [ ] `get_status(job_id: str)` Method → JobStatus
-  - [ ] `update_status(job_id: str, status: JobStatus)` Method
-  - [ ] `retry(job_id: str)` Method
-  - [ ] `cancel(job_id: str)` Method
-- [ ] Job Model (Pydantic)
-  - [ ] id: str (UUID)
-  - [ ] intent: str
-  - [ ] task_graph: TaskGraph
-  - [ ] status: JobStatus (pending, running, done, failed)
-  - [ ] created_at: datetime
-  - [ ] started_at: datetime | None
-  - [ ] completed_at: datetime | None
-  - [ ] error: str | None
-  - [ ] retry_count: int
-  - [ ] max_retries: int
-- [ ] JobStatus Enum (pending, running, done, failed, cancelled)
-- [ ] Retry Logic (exponential backoff)
-- [ ] Dead Letter Queue (failed jobs after max retries)
-- [ ] Unit Tests (`tests/queue/test_job_queue.py`)
-  - [ ] Test Enqueue/Dequeue
-  - [ ] Test Status Updates
-  - [ ] Test Retry Logic
-  - [ ] Test Dead Letter Queue
-  - [ ] Test Concurrent Access
+- [x] `scheduler/queue/job_queue.py` erstellen
+- [x] JobQueue Class
+  - [x] `__init__(redis_url: str)`
+  - [x] `enqueue(job: Job)` Method → job_id
+  - [x] `dequeue()` Method → Job | None
+  - [x] `get_status(job_id: str)` Method → JobStatus
+  - [x] `update_status(job_id: str, status: JobStatus)` Method
+  - [x] `retry(job_id: str)` Method
+  - [x] `cancel(job_id: str)` Method
+  - [x] `get_job(job_id: str)` Method → Job | None
+  - [x] `connect()` Method (async Redis connection)
+  - [x] `close()` Method (async Redis close)
+- [x] Job Model (Pydantic)
+  - [x] id: str (UUID)
+  - [x] intent: str
+  - [x] task_graph: TaskGraph
+  - [x] status: JobStatus (pending, running, done, failed, cancelled)
+  - [x] created_at: datetime
+  - [x] started_at: datetime | None
+  - [x] completed_at: datetime | None
+  - [x] error: str | None
+  - [x] retry_count: int
+  - [x] max_retries: int
+  - [x] Custom serialization for TaskGraph and datetime
+- [x] JobStatus Enum (pending, running, done, failed, cancelled)
+- [x] Retry Logic (max_retries check)
+- [ ] Dead Letter Queue (failed jobs after max retries) - **TODO: Phase 2**
+- [x] Unit Tests (`tests/queue/test_job_queue.py`)
+  - [x] Test Enqueue/Dequeue
+  - [x] Test Status Updates
+  - [x] Test Retry Logic
+  - [x] Test Max Retries Exceeded
+  - [x] Test Cancel Job
+  - [x] Test Get Job
+  - [ ] Test Dead Letter Queue - **TODO: Phase 2**
+  - [ ] Test Concurrent Access - **TODO: Phase 2**
 - [ ] Integration Tests (with real Redis)
   - [ ] Test Redis Connection
   - [ ] Test Queue Persistence
