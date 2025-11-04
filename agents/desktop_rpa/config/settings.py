@@ -47,6 +47,38 @@ class Settings(BaseSettings):
     pyautogui_pause: float = Field(default=0.5, description="Pause between PyAutoGUI actions")
     pyautogui_failsafe: bool = Field(default=True, description="Enable PyAutoGUI failsafe")
 
+    # LLM Settings (Cognitive Layer)
+    openai_api_key: str = Field(
+        default="",
+        description="OpenAI API Key",
+    )
+    llm_model: str = Field(
+        default="gpt-4o",
+        description="LLM model to use (gpt-4o, gpt-4-vision-preview, etc.)",
+    )
+    llm_temperature: float = Field(
+        default=0.7,
+        ge=0.0,
+        le=2.0,
+        description="LLM temperature (0.0 = deterministic, 2.0 = creative)",
+    )
+    llm_max_tokens: int = Field(
+        default=1000,
+        description="Max tokens for LLM response",
+    )
+    llm_timeout: float = Field(
+        default=30.0,
+        description="LLM request timeout in seconds",
+    )
+    llm_max_retries: int = Field(
+        default=3,
+        description="Max retries for LLM requests",
+    )
+    enable_vision: bool = Field(
+        default=True,
+        description="Enable vision capabilities (send screenshots to LLM)",
+    )
+
 
 # Global settings instance
 settings = Settings()
