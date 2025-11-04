@@ -14,25 +14,33 @@ from agents.desktop_rpa.cognitive.cognitive_executor import CognitiveExecutor
 
 class CPAMonitor:
     """Main UI for CPA Agent Monitoring."""
-    
+
     def __init__(self):
         """Initialize the monitor UI."""
         self.root = tk.Tk()
         self.root.title("🤖 CPA Agent Monitor - LuminaOS")
-        self.root.geometry("1200x800")
-        
+
+        # Config file for window position/size
+        self.config_file = Path("ui_config.json")
+
         # State
         self.executor: CognitiveExecutor | None = None
         self.current_task: dict[str, Any] | None = None
         self.is_running = False
         self.learning_history: list[dict[str, Any]] = []
-        
+
         # Load templates
         self.templates = self._load_templates()
-        
+
+        # Load and apply window geometry
+        self._load_window_geometry()
+
         # Setup UI
         self._setup_ui()
-        
+
+        # Bind window close event to save geometry
+        self.root.protocol("WM_DELETE_WINDOW", self._on_closing)
+
         # Start update loop
         self._schedule_update()
     
@@ -42,10 +50,12 @@ class CPAMonitor:
         main_frame = ttk.Frame(self.root, padding="10")
         main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         
-        # Configure grid weights
+        # Configure grid weights - right side gets more space
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
-        main_frame.columnconfigure(1, weight=1)
+        main_frame.columnconfigure(0, weight=1)  # Left panel - less weight
+        main_frame.columnconfigure(1, weight=3)  # Right panel - more weight (3x)
+        main_frame.rowconfigure(0, weight=1)
         main_frame.rowconfigure(1, weight=1)
         
         # Left Panel - Control
@@ -66,15 +76,15 @@ class CPAMonitor:
         ttk.Label(control_frame, text="📋 Task Templates:").grid(row=0, column=0, sticky=tk.W, pady=(0, 5))
         
         self.template_var = tk.StringVar()
-        template_combo = ttk.Combobox(control_frame, textvariable=self.template_var, width=30)
+        template_combo = ttk.Combobox(control_frame, textvariable=self.template_var, width=25)
         template_combo['values'] = list(self.templates.keys())
         template_combo.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
         template_combo.bind('<<ComboboxSelected>>', self._on_template_selected)
-        
+
         # Custom prompt
         ttk.Label(control_frame, text="✍️ Custom Task:").grid(row=2, column=0, sticky=tk.W, pady=(0, 5))
-        
-        self.task_text = scrolledtext.ScrolledText(control_frame, width=40, height=8, wrap=tk.WORD)
+
+        self.task_text = scrolledtext.ScrolledText(control_frame, width=30, height=6, wrap=tk.WORD)
         self.task_text.grid(row=3, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
         
         # Buttons
@@ -116,9 +126,10 @@ class CPAMonitor:
         
         # Activity log
         ttk.Label(monitor_frame, text="📝 Activity Log:").grid(row=1, column=0, sticky=tk.W, pady=(10, 5))
-        
-        self.log_text = scrolledtext.ScrolledText(monitor_frame, width=60, height=20, wrap=tk.WORD)
+
+        self.log_text = scrolledtext.ScrolledText(monitor_frame, width=80, height=25, wrap=tk.WORD)
         self.log_text.grid(row=2, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        monitor_frame.rowconfigure(2, weight=1)  # Log expands vertically
         self.log_text.config(state=tk.DISABLED)
         
         # Configure tags for colored text
@@ -312,10 +323,95 @@ class CPAMonitor:
             self.goal_label.config(text=self.current_task.get("goal", "N/A"))
             self.state_label.config(text=self.executor.current_state)
             # Note: step count would need to be exposed by executor
-        
+
         # Schedule next update
         self.root.after(500, self._schedule_update)
-    
+
+    def _load_window_geometry(self):
+        """Load window position and size from config file."""
+        default_width = 1400
+        default_height = 900
+
+        if self.config_file.exists():
+            try:
+                with open(self.config_file, 'r') as f:
+                    config = json.load(f)
+
+                width = config.get('width', default_width)
+                height = config.get('height', default_height)
+                x = config.get('x')
+                y = config.get('y')
+
+                # Check if position is valid (visible on screen)
+                if x is not None and y is not None:
+                    screen_width = self.root.winfo_screenwidth()
+                    screen_height = self.root.winfo_screenheight()
+
+                    # Check if window would be visible
+                    if (x >= 0 and y >= 0 and
+                        x + width <= screen_width and
+                        y + height <= screen_height):
+                        # Valid position - use it
+                        self.root.geometry(f"{width}x{height}+{x}+{y}")
+                        return
+
+                # Invalid or no position - center on screen
+                self._center_window(width, height)
+
+            except Exception as e:
+                print(f"Error loading window geometry: {e}")
+                self._center_window(default_width, default_height)
+        else:
+            # No config file - use default centered
+            self._center_window(default_width, default_height)
+
+    def _center_window(self, width: int, height: int):
+        """Center window on screen."""
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+
+        x = (screen_width - width) // 2
+        y = (screen_height - height) // 2
+
+        self.root.geometry(f"{width}x{height}+{x}+{y}")
+
+    def _save_window_geometry(self):
+        """Save current window position and size to config file."""
+        try:
+            # Get current geometry
+            geometry = self.root.geometry()  # Format: "WIDTHxHEIGHT+X+Y"
+
+            # Parse geometry string
+            size, position = geometry.split('+', 1)
+            width, height = map(int, size.split('x'))
+            x, y = map(int, position.split('+'))
+
+            # Save to config
+            config = {
+                'width': width,
+                'height': height,
+                'x': x,
+                'y': y,
+            }
+
+            with open(self.config_file, 'w') as f:
+                json.dump(config, f, indent=2)
+
+        except Exception as e:
+            print(f"Error saving window geometry: {e}")
+
+    def _on_closing(self):
+        """Handle window close event."""
+        # Save window geometry
+        self._save_window_geometry()
+
+        # Stop any running task
+        if self.is_running:
+            self.is_running = False
+
+        # Close window
+        self.root.destroy()
+
     def run(self):
         """Run the UI."""
         self.root.mainloop()
