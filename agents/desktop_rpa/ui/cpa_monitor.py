@@ -243,6 +243,11 @@ class CPAMonitor:
             self._log(f"🧠 {message}", "thinking")
             self.status_label.config(text="🟣 Thinking")
 
+        elif event_type == "vision":
+            message = data.get("message", "Detecting UI elements...")
+            self._log(f"👁️  {message}", "info")
+            self.status_label.config(text="👁️  Vision")
+
         elif event_type == "action_suggested":
             action = data.get("action", "unknown")
             reasoning = data.get("reasoning", "")
@@ -272,8 +277,8 @@ class CPAMonitor:
     async def _execute_task(self, goal: str):
         """Execute a task using the cognitive executor."""
         try:
-            # Create executor with callback
-            self.executor = CognitiveExecutor(callback=self._on_executor_event)
+            # Create executor with callback and Vision Layer enabled
+            self.executor = CognitiveExecutor(callback=self._on_executor_event, use_vision=True)
             self.current_task = {"goal": goal}
 
             # Execute

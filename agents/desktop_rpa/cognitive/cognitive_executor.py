@@ -1,4 +1,4 @@
-"""Cognitive Executor - LLM-guided task execution."""
+"""Cognitive Executor - LLM-guided task execution with Vision Layer."""
 
 import asyncio
 import logging
@@ -11,6 +11,7 @@ import pyautogui
 from agents.desktop_rpa.cognitive.llm_wrapper import LLMWrapper
 from agents.desktop_rpa.cognitive.models import LLMRequest
 from agents.desktop_rpa.config.settings import settings
+from agents.desktop_rpa.vision.element_detector import ElementDetector
 
 logger = logging.getLogger(__name__)
 
@@ -26,17 +27,31 @@ class CognitiveExecutor:
     5. Repeats until goal is achieved
     """
 
-    def __init__(self, llm_wrapper: LLMWrapper | None = None, callback=None):
+    def __init__(self, llm_wrapper: LLMWrapper | None = None, callback=None, use_vision: bool = True):
         """Initialize cognitive executor.
 
         Args:
             llm_wrapper: LLM wrapper instance (creates new one if None)
             callback: Optional callback function for UI updates (receives event dict)
+            use_vision: Whether to use Vision Layer (UI Automation + OCR)
         """
         self.llm = llm_wrapper or LLMWrapper()
         self.screenshot_dir = Path(settings.screenshot_dir)
         self.screenshot_dir.mkdir(parents=True, exist_ok=True)
         self.callback = callback
+        self.use_vision = use_vision
+
+        # Vision Layer
+        if use_vision:
+            try:
+                self.element_detector = ElementDetector()
+                logger.info("Vision Layer enabled")
+            except Exception as e:
+                logger.warning(f"Failed to initialize Vision Layer: {e}")
+                self.element_detector = None
+                self.use_vision = False
+        else:
+            self.element_detector = None
 
         # Execution state
         self.current_state = "unknown"
@@ -45,7 +60,7 @@ class CognitiveExecutor:
         self.obstacles: list[dict[str, Any]] = []
         self.max_steps = 20  # Prevent infinite loops
 
-        logger.info("Cognitive Executor initialized")
+        logger.info(f"Cognitive Executor initialized (Vision: {self.use_vision})")
 
     async def execute(self, todo: dict[str, Any]) -> dict[str, Any]:
         """Execute a task using LLM guidance.
@@ -91,6 +106,24 @@ class CognitiveExecutor:
                 print(f"📸 Screenshot taken: {screenshot_path.name}")
                 self._notify("screenshot", {"path": str(screenshot_path)})
 
+                # Detect UI elements (Vision Layer)
+                ui_elements_text = ""
+                if self.use_vision and self.element_detector:
+                    print(f"👁️  Detecting UI elements...")
+                    self._notify("vision", {"message": "Detecting UI elements..."})
+
+                    try:
+                        elements = await asyncio.to_thread(
+                            self.element_detector.detect_all_elements,
+                            screenshot_path=screenshot_path,
+                            use_ocr=True,
+                        )
+                        ui_elements_text = self.element_detector.format_elements_for_llm(elements)
+                        print(f"✅ Detected {len(elements)} UI elements")
+                    except Exception as e:
+                        logger.warning(f"Vision Layer error: {e}")
+                        print(f"⚠️  Vision Layer error: {e}")
+
                 # Ask LLM for next action
                 request = LLMRequest(
                     goal=goal,
@@ -99,6 +132,7 @@ class CognitiveExecutor:
                     context={
                         "step": step,
                         "max_steps": self.max_steps,
+                        "ui_elements": ui_elements_text,  # Add UI elements to context
                     },
                     previous_actions=self.previous_actions[-5:],  # Last 5 actions
                     obstacles=self.obstacles,
@@ -274,30 +308,53 @@ class CognitiveExecutor:
             return {"status": "error", "error": str(e)}
 
     async def _execute_click(self, selector: str | None) -> dict[str, Any]:
-        """Execute click action.
-        
+        """Execute click action with Vision Layer support.
+
         Args:
-            selector: Click target (coordinates or "center")
-            
+            selector: Click target (coordinates, "center", or element name)
+
         Returns:
             Execution result
         """
         if not selector:
             return {"status": "error", "error": "No selector provided"}
-        
-        if selector == "center":
-            # Click center of screen
-            screen_width, screen_height = await asyncio.to_thread(pyautogui.size)
-            x, y = screen_width // 2, screen_height // 2
-        elif "," in selector:
-            # Parse coordinates
+
+        x, y = None, None
+
+        # Try Vision Layer first (if enabled and selector is not coordinates)
+        if self.use_vision and self.element_detector and not selector.replace(",", "").replace(" ", "").isdigit():
             try:
-                x, y = map(int, selector.split(","))
-            except ValueError:
-                return {"status": "error", "error": f"Invalid coordinates: {selector}"}
-        else:
-            return {"status": "error", "error": f"Invalid selector: {selector}"}
-        
+                print(f"🔍 Searching for element: {selector}")
+                element = await asyncio.to_thread(
+                    self.element_detector.find_element,
+                    search_text=selector,
+                )
+
+                if element:
+                    x, y = element.center_x, element.center_y
+                    print(f"✅ Found element via Vision Layer: {element.name} at ({x}, {y})")
+                    logger.info(f"Found element via Vision Layer: {element}")
+                else:
+                    print(f"⚠️  Element not found via Vision Layer: {selector}")
+            except Exception as e:
+                logger.warning(f"Vision Layer search error: {e}")
+                print(f"⚠️  Vision Layer error: {e}")
+
+        # Fallback to coordinate parsing
+        if x is None or y is None:
+            if selector == "center":
+                # Click center of screen
+                screen_width, screen_height = await asyncio.to_thread(pyautogui.size)
+                x, y = screen_width // 2, screen_height // 2
+            elif "," in selector:
+                # Parse coordinates
+                try:
+                    x, y = map(int, selector.split(","))
+                except ValueError:
+                    return {"status": "error", "error": f"Invalid coordinates: {selector}"}
+            else:
+                return {"status": "error", "error": f"Element not found and invalid coordinates: {selector}"}
+
         # Move mouse slowly to position (so user can see it)
         await asyncio.to_thread(pyautogui.moveTo, x, y, duration=1.0)
 
