@@ -45,7 +45,7 @@ class ExecutionResult(BaseModel):
     duration: float = Field(..., description="Execution duration in seconds")
 
 
-class TaskGraph:
+class TaskGraph(BaseModel):
     """Task graph for managing task dependencies and execution order.
 
     Supports:
@@ -55,9 +55,7 @@ class TaskGraph:
     - Cycle detection
     """
 
-    def __init__(self) -> None:
-        """Initialize empty task graph."""
-        self.tasks: dict[str, ToDo] = {}
+    tasks: dict[str, ToDo] = Field(default_factory=dict, description="Tasks in the graph")
 
     def add_task(self, todo: ToDo) -> str:
         """Add a task to the graph.

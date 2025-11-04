@@ -6,9 +6,9 @@ import logging
 from agents.desktop_rpa.cognitive.cognitive_executor import CognitiveExecutor
 from agents.desktop_rpa.config.settings import settings
 
-# Configure logging
+# Configure logging - only WARNING and above to console
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.WARNING,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 
@@ -17,18 +17,40 @@ logger = logging.getLogger(__name__)
 
 async def demo_simple_task():
     """Demo: Simple task - Open Start Menu."""
+    print("\n" + "=" * 80)
+    print("🎯 DEMO 1: Simple Task - Open Start Menu")
+    print("=" * 80)
+    print("\n📋 GOAL: Open the Windows Start Menu")
+    print("⏱️  Starting execution...\n")
+
     logger.info("=" * 80)
     logger.info("DEMO: Simple Task - Open Start Menu")
     logger.info("=" * 80)
-    
+
     executor = CognitiveExecutor()
-    
+
     task = {
         "goal": "Open the Windows Start Menu",
     }
-    
+
     result = await executor.execute(task)
-    
+
+    print("\n" + "=" * 80)
+    print("📊 RESULT:")
+    print("=" * 80)
+    print(f"✅ Status: {result['status']}")
+    print(f"📈 Steps taken: {result['steps']}")
+    print(f"🎯 Final State: {result['final_state']}")
+    print("\n📝 Actions taken:")
+    for i, action in enumerate(result['actions'], 1):
+        confidence_emoji = "🟢" if action['confidence'] >= 0.8 else "🟡" if action['confidence'] >= 0.6 else "🔴"
+        print(f"  {i}. {confidence_emoji} {action['action_type'].upper()}")
+        print(f"     💭 Reasoning: {action['reasoning']}")
+        print(f"     📊 Confidence: {action['confidence']:.2f}")
+        print(f"     ✅ Result: {action['result']}")
+        print()
+    print("=" * 80)
+
     logger.info("\n" + "=" * 80)
     logger.info("RESULT:")
     logger.info("=" * 80)
@@ -39,24 +61,46 @@ async def demo_simple_task():
     for i, action in enumerate(result['actions'], 1):
         logger.info(f"  {i}. {action['action_type']} - {action['reasoning']}")
     logger.info("=" * 80)
-    
+
     return result
 
 
 async def demo_complex_task():
     """Demo: Complex task - Open Notepad and type text."""
+    print("\n" + "=" * 80)
+    print("🎯 DEMO 2: Complex Task - Open Notepad and Type Text")
+    print("=" * 80)
+    print("\n📋 GOAL: Open Notepad and type 'Hello from Cognitive RPA Agent!'")
+    print("⏱️  Starting execution...\n")
+
     logger.info("\n" + "=" * 80)
     logger.info("DEMO: Complex Task - Open Notepad and Type Text")
     logger.info("=" * 80)
-    
+
     executor = CognitiveExecutor()
-    
+
     task = {
         "goal": "Open Notepad and type 'Hello from Cognitive RPA Agent!'",
     }
-    
+
     result = await executor.execute(task)
-    
+
+    print("\n" + "=" * 80)
+    print("📊 RESULT:")
+    print("=" * 80)
+    print(f"✅ Status: {result['status']}")
+    print(f"📈 Steps taken: {result['steps']}")
+    print(f"🎯 Final State: {result['final_state']}")
+    print("\n📝 Actions taken:")
+    for i, action in enumerate(result['actions'], 1):
+        confidence_emoji = "🟢" if action['confidence'] >= 0.8 else "🟡" if action['confidence'] >= 0.6 else "🔴"
+        print(f"  {i}. {confidence_emoji} {action['action_type'].upper()}")
+        print(f"     💭 Reasoning: {action['reasoning']}")
+        print(f"     📊 Confidence: {action['confidence']:.2f}")
+        print(f"     ✅ Result: {action['result']}")
+        print()
+    print("=" * 80)
+
     logger.info("\n" + "=" * 80)
     logger.info("RESULT:")
     logger.info("=" * 80)
@@ -70,24 +114,52 @@ async def demo_complex_task():
             f"(confidence={action['confidence']:.2f}) - {action['reasoning']}"
         )
     logger.info("=" * 80)
-    
+
     return result
 
 
 async def demo_with_obstacles():
     """Demo: Task with potential obstacles."""
+    print("\n" + "=" * 80)
+    print("🎯 DEMO 3: Task with Potential Obstacles")
+    print("=" * 80)
+    print("\n📋 GOAL: Find and open the Calculator application")
+    print("⏱️  Starting execution...\n")
+
     logger.info("\n" + "=" * 80)
     logger.info("DEMO: Task with Potential Obstacles")
     logger.info("=" * 80)
-    
+
     executor = CognitiveExecutor()
-    
+
     task = {
         "goal": "Find and open the Calculator application",
     }
-    
+
     result = await executor.execute(task)
-    
+
+    print("\n" + "=" * 80)
+    print("📊 RESULT:")
+    print("=" * 80)
+    print(f"✅ Status: {result['status']}")
+    print(f"📈 Steps taken: {result['steps']}")
+    print(f"🎯 Final State: {result['final_state']}")
+    print("\n📝 Actions taken:")
+    for i, action in enumerate(result['actions'], 1):
+        confidence_emoji = "🟢" if action['confidence'] >= 0.8 else "🟡" if action['confidence'] >= 0.6 else "🔴"
+        print(f"  {i}. {confidence_emoji} {action['action_type'].upper()}")
+        print(f"     💭 Reasoning: {action['reasoning']}")
+        print(f"     📊 Confidence: {action['confidence']:.2f}")
+        print(f"     ✅ Result: {action['result']}")
+        print()
+
+    if result.get('obstacles'):
+        print("\n⚠️  Obstacles encountered:")
+        for i, obstacle in enumerate(result['obstacles'], 1):
+            print(f"  {i}. ❌ Step {obstacle['step']}: {obstacle['error']}")
+
+    print("=" * 80)
+
     logger.info("\n" + "=" * 80)
     logger.info("RESULT:")
     logger.info("=" * 80)
@@ -100,14 +172,14 @@ async def demo_with_obstacles():
             f"  {i}. {action['action_type']} "
             f"(confidence={action['confidence']:.2f}) - {action['reasoning']}"
         )
-    
+
     if result.get('obstacles'):
         logger.info("\nObstacles encountered:")
         for i, obstacle in enumerate(result['obstacles'], 1):
             logger.info(f"  {i}. Step {obstacle['step']}: {obstacle['error']}")
-    
+
     logger.info("=" * 80)
-    
+
     return result
 
 

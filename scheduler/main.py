@@ -6,11 +6,12 @@ from contextlib import asynccontextmanager
 from typing import Any
 
 import structlog
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from scheduler.api import jobs
 from scheduler.config.settings import settings
 from scheduler.queue.job_queue import JobQueue
 
@@ -32,6 +33,23 @@ logger = structlog.get_logger()
 
 # Global state
 job_queue: JobQueue | None = None
+
+
+def get_job_queue() -> JobQueue:
+    """Dependency to get JobQueue instance.
+
+    Returns:
+        JobQueue instance
+
+    Raises:
+        HTTPException: If JobQueue is not initialized
+    """
+    if job_queue is None:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Job queue not initialized",
+        )
+    return job_queue
 
 
 @asynccontextmanager
@@ -87,6 +105,12 @@ app.add_middleware(
     allow_methods=settings.cors_methods_list,
     allow_headers=[settings.cors_allow_headers],
 )
+
+# Set dependency for jobs router
+jobs.get_job_queue = get_job_queue
+
+# Include routers
+app.include_router(jobs.router)
 
 
 # Exception handlers

@@ -11,14 +11,13 @@ import pyautogui
 from agents.desktop_rpa.cognitive.llm_wrapper import LLMWrapper
 from agents.desktop_rpa.cognitive.models import LLMRequest
 from agents.desktop_rpa.config.settings import settings
-from agents.desktop_rpa.executors.base import BaseExecutor
 
 logger = logging.getLogger(__name__)
 
 
-class CognitiveExecutor(BaseExecutor):
+class CognitiveExecutor:
     """Executor that uses LLM to guide task execution.
-    
+
     This executor:
     1. Receives a high-level goal
     2. Takes screenshots to understand current state
@@ -29,20 +28,20 @@ class CognitiveExecutor(BaseExecutor):
 
     def __init__(self, llm_wrapper: LLMWrapper | None = None):
         """Initialize cognitive executor.
-        
+
         Args:
             llm_wrapper: LLM wrapper instance (creates new one if None)
         """
         self.llm = llm_wrapper or LLMWrapper()
         self.screenshot_dir = Path(settings.screenshot_dir)
         self.screenshot_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Execution state
         self.current_state = "unknown"
         self.previous_actions: list[dict[str, Any]] = []
         self.obstacles: list[dict[str, Any]] = []
         self.max_steps = 20  # Prevent infinite loops
-        
+
         logger.info("Cognitive Executor initialized")
 
     async def execute(self, todo: dict[str, Any]) -> dict[str, Any]:
@@ -59,21 +58,28 @@ class CognitiveExecutor(BaseExecutor):
             raise ValueError("Task must have 'goal' field")
         
         logger.info(f"Starting cognitive execution: goal='{goal}'")
-        
+        print(f"\n🤖 Starting cognitive execution...")
+        print(f"🎯 Goal: {goal}\n")
+
         # Reset state
         self.current_state = "desktop_visible"
         self.previous_actions = []
         self.obstacles = []
-        
+
         # Execution loop
         for step in range(1, self.max_steps + 1):
             logger.info(f"Step {step}/{self.max_steps}: state={self.current_state}")
+
+            print(f"\n{'─' * 60}")
+            print(f"📍 Step {step}/{self.max_steps}")
+            print(f"🔍 Current state: {self.current_state}")
             
             try:
                 # Take screenshot
                 screenshot_path = await self._take_screenshot(f"step_{step}")
                 screenshot_base64 = LLMWrapper.encode_screenshot(screenshot_path)
-                
+                print(f"📸 Screenshot taken: {screenshot_path.name}")
+
                 # Ask LLM for next action
                 request = LLMRequest(
                     goal=goal,
@@ -86,22 +92,35 @@ class CognitiveExecutor(BaseExecutor):
                     previous_actions=self.previous_actions[-5:],  # Last 5 actions
                     obstacles=self.obstacles,
                 )
-                
+
+                print(f"🧠 Asking LLM for next action...")
                 response = await self.llm.ask_for_next_action(request)
-                
+
                 logger.info(
                     f"LLM suggested: {response.suggestion.action_type} "
                     f"(confidence={response.suggestion.confidence:.2f})"
                 )
                 logger.info(f"Reasoning: {response.suggestion.reasoning}")
+
+                confidence_emoji = "🟢" if response.suggestion.confidence >= 0.8 else "🟡" if response.suggestion.confidence >= 0.6 else "🔴"
+                print(f"{confidence_emoji} LLM suggests: {response.suggestion.action_type.upper()}")
+                print(f"   💭 Reasoning: {response.suggestion.reasoning}")
+                print(f"   📊 Confidence: {response.suggestion.confidence:.2f}")
+                if response.suggestion.selector:
+                    print(f"   🎯 Selector: {response.suggestion.selector}")
+                if response.suggestion.value:
+                    print(f"   ✍️  Value: {response.suggestion.value}")
                 
                 # Check for warnings
                 if response.warnings:
                     for warning in response.warnings:
                         logger.warning(f"LLM Warning: {warning}")
-                
+                        print(f"⚠️  Warning: {warning}")
+
                 # Execute suggested action
+                print(f"⚙️  Executing action...")
                 action_result = await self._execute_action(response.suggestion)
+                print(f"✅ Action completed: {action_result.get('status', 'unknown')}")
                 
                 # Record action
                 self.previous_actions.append({
@@ -118,10 +137,12 @@ class CognitiveExecutor(BaseExecutor):
                 # Update state
                 if response.next_state_prediction:
                     self.current_state = response.next_state_prediction
-                
+                    print(f"🔄 State updated to: {self.current_state}")
+
                 # Check if goal is achieved
                 if self._is_goal_achieved(response, action_result):
                     logger.info(f"Goal achieved in {step} steps!")
+                    print(f"\n🎉 Goal achieved in {step} steps!")
                     return {
                         "status": "success",
                         "steps": step,
@@ -134,19 +155,21 @@ class CognitiveExecutor(BaseExecutor):
                 
             except Exception as e:
                 logger.error(f"Error in step {step}: {e}", exc_info=True)
-                
+                print(f"❌ Error in step {step}: {e}")
+
                 # Record obstacle
                 self.obstacles.append({
                     "step": step,
                     "error": str(e),
                     "timestamp": datetime.now().isoformat(),
                 })
-                
+
                 # Continue to next step (LLM might suggest recovery)
                 continue
-        
+
         # Max steps reached
         logger.warning(f"Max steps ({self.max_steps}) reached without achieving goal")
+        print(f"\n⚠️  Max steps ({self.max_steps}) reached without achieving goal")
         return {
             "status": "incomplete",
             "steps": self.max_steps,
@@ -155,16 +178,7 @@ class CognitiveExecutor(BaseExecutor):
             "obstacles": self.obstacles,
         }
 
-    async def verify(self, todo: dict[str, Any]) -> bool:
-        """Verify task execution (not implemented for cognitive executor).
-        
-        Args:
-            todo: Task to verify
-            
-        Returns:
-            Always True (verification is part of execution loop)
-        """
-        return True
+
 
     async def _take_screenshot(self, name: str) -> Path:
         """Take a screenshot.
@@ -242,10 +256,13 @@ class CognitiveExecutor(BaseExecutor):
         else:
             return {"status": "error", "error": f"Invalid selector: {selector}"}
         
+        # Move mouse slowly to position (so user can see it)
+        await asyncio.to_thread(pyautogui.moveTo, x, y, duration=1.0)
+
         # Click
-        await asyncio.to_thread(pyautogui.click, x, y)
+        await asyncio.to_thread(pyautogui.click)
         logger.info(f"Clicked at ({x}, {y})")
-        
+
         return {"status": "success", "action": "click", "x": x, "y": y}
 
     async def _execute_type(self, text: str | None) -> dict[str, Any]:
