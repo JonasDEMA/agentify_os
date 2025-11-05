@@ -11,6 +11,7 @@ import pyautogui
 from agents.desktop_rpa.cognitive.llm_wrapper import LLMWrapper
 from agents.desktop_rpa.cognitive.models import LLMRequest
 from agents.desktop_rpa.config.settings import settings
+from agents.desktop_rpa.state_graph import PathFinder, StateGraph, StateTracker
 from agents.desktop_rpa.vision.element_detector import ElementDetector
 
 logger = logging.getLogger(__name__)
@@ -27,19 +28,21 @@ class CognitiveExecutor:
     5. Repeats until goal is achieved
     """
 
-    def __init__(self, llm_wrapper: LLMWrapper | None = None, callback=None, use_vision: bool = True):
+    def __init__(self, llm_wrapper: LLMWrapper | None = None, callback=None, use_vision: bool = True, use_state_graph: bool = True):
         """Initialize cognitive executor.
 
         Args:
             llm_wrapper: LLM wrapper instance (creates new one if None)
             callback: Optional callback function for UI updates (receives event dict)
             use_vision: Whether to use Vision Layer (UI Automation + OCR)
+            use_state_graph: Whether to use State Graph for navigation
         """
         self.llm = llm_wrapper or LLMWrapper()
         self.screenshot_dir = Path(settings.screenshot_dir)
         self.screenshot_dir.mkdir(parents=True, exist_ok=True)
         self.callback = callback
         self.use_vision = use_vision
+        self.use_state_graph = use_state_graph
 
         # Vision Layer
         if use_vision:
@@ -53,6 +56,21 @@ class CognitiveExecutor:
         else:
             self.element_detector = None
 
+        # State Graph
+        if use_state_graph:
+            self.state_graph = self._create_default_graph()
+            self.state_tracker = StateTracker(self.state_graph, initial_state="desktop_visible")
+            self.path_finder = PathFinder(self.state_graph)
+            logger.info("State Graph enabled")
+        else:
+            self.state_graph = None
+            self.state_tracker = None
+            self.path_finder = None
+                self.element_detector = None
+                self.use_vision = False
+        else:
+            self.element_detector = None
+
         # Execution state
         self.current_state = "unknown"
         self.current_step = 0
@@ -60,7 +78,43 @@ class CognitiveExecutor:
         self.obstacles: list[dict[str, Any]] = []
         self.max_steps = 20  # Prevent infinite loops
 
-        logger.info(f"Cognitive Executor initialized (Vision: {self.use_vision})")
+        logger.info(f"Cognitive Executor initialized (Vision: {self.use_vision}, State Graph: {self.use_state_graph})")
+
+    def _create_default_graph(self) -> StateGraph:
+        """Create default state graph with common Windows states."""
+        graph = StateGraph()
+
+        # Common states
+        graph.add_node("desktop_visible", "Desktop is visible")
+        graph.add_node("start_menu_open", "Start menu is open")
+        graph.add_node("search_active", "Search box is active")
+        graph.add_node("notepad_open", "Notepad is open")
+        graph.add_node("calculator_open", "Calculator is open")
+        graph.add_node("browser_open", "Web browser is open")
+        graph.add_node("file_explorer_open", "File Explorer is open")
+
+        # Common transitions
+        # Desktop -> Start Menu
+        graph.add_transition("desktop_visible", "start_menu_open", "click_start", confidence=0.95, cost=1.0)
+        graph.add_transition("start_menu_open", "desktop_visible", "press_escape", confidence=0.95, cost=1.0)
+
+        # Start Menu -> Search
+        graph.add_transition("start_menu_open", "search_active", "start_typing", confidence=0.90, cost=0.5)
+
+        # Search -> Applications
+        graph.add_transition("search_active", "notepad_open", "search_and_open_notepad", confidence=0.85, cost=2.0)
+        graph.add_transition("search_active", "calculator_open", "search_and_open_calculator", confidence=0.85, cost=2.0)
+        graph.add_transition("search_active", "browser_open", "search_and_open_browser", confidence=0.85, cost=2.0)
+        graph.add_transition("search_active", "file_explorer_open", "search_and_open_explorer", confidence=0.85, cost=2.0)
+
+        # Applications -> Desktop
+        graph.add_transition("notepad_open", "desktop_visible", "close_notepad", confidence=0.90, cost=1.0)
+        graph.add_transition("calculator_open", "desktop_visible", "close_calculator", confidence=0.90, cost=1.0)
+        graph.add_transition("browser_open", "desktop_visible", "close_browser", confidence=0.90, cost=1.0)
+        graph.add_transition("file_explorer_open", "desktop_visible", "close_explorer", confidence=0.90, cost=1.0)
+
+        logger.info(f"Created default state graph: {graph}")
+        return graph
 
     async def execute(self, todo: dict[str, Any]) -> dict[str, Any]:
         """Execute a task using LLM guidance.
@@ -86,6 +140,10 @@ class CognitiveExecutor:
         self.current_state = "desktop_visible"
         self.previous_actions = []
         self.obstacles = []
+
+        # Reset state tracker
+        if self.use_state_graph and self.state_tracker:
+            self.state_tracker.reset("desktop_visible")
 
         # Execution loop
         for step in range(1, self.max_steps + 1):
@@ -193,18 +251,49 @@ class CognitiveExecutor:
                 
                 # Update state
                 if response.next_state_prediction:
+                    old_state = self.current_state
                     self.current_state = response.next_state_prediction
                     print(f"🔄 State updated to: {self.current_state}")
+
+                    # Update state tracker
+                    if self.use_state_graph and self.state_tracker:
+                        self.state_tracker.update_state(
+                            self.current_state,
+                            action_taken=response.suggestion.action_type,
+                            metadata={"step": step, "confidence": response.suggestion.confidence}
+                        )
+
+                        # Check for loops
+                        if self.state_tracker.is_looping():
+                            logger.warning("Loop detected in state transitions")
+                            print("⚠️  Loop detected! Trying alternative approach...")
+
+                            # Add to obstacles
+                            self.obstacles.append({
+                                "step": step,
+                                "error": "Loop detected in state transitions",
+                                "timestamp": datetime.now().isoformat(),
+                            })
 
                 # Check if goal is achieved
                 if self._is_goal_achieved(response, action_result):
                     logger.info(f"Goal achieved in {step} steps!")
                     print(f"\n🎉 Goal achieved in {step} steps!")
+
+                    # Get state graph summary
+                    state_summary = {}
+                    if self.use_state_graph and self.state_tracker:
+                        state_summary = self.state_tracker.get_summary()
+                        print(f"\n📊 State Graph Summary:")
+                        print(f"   - Path taken: {' -> '.join(self.state_tracker.get_path_taken())}")
+                        print(f"   - Total states visited: {state_summary['unique_states']}")
+
                     result = {
                         "status": "success",
                         "steps": step,
                         "final_state": self.current_state,
                         "actions": self.previous_actions,
+                        "state_summary": state_summary,
                     }
                     self._notify("completed", result)
                     return result
