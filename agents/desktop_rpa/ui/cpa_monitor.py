@@ -10,6 +10,7 @@ from tkinter import scrolledtext, ttk
 from typing import Any
 
 from agents.desktop_rpa.cognitive.cognitive_executor import CognitiveExecutor
+from agents.desktop_rpa.ui.onboarding_wizard import check_and_run_onboarding
 
 
 class CPAMonitor:
@@ -50,11 +51,11 @@ class CPAMonitor:
         main_frame = ttk.Frame(self.root, padding="10")
         main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         
-        # Configure grid weights - right side gets more space
+        # Configure grid weights - left side wider for templates, right side for monitoring
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
-        main_frame.columnconfigure(0, weight=1)  # Left panel - less weight
-        main_frame.columnconfigure(1, weight=3)  # Right panel - more weight (3x)
+        main_frame.columnconfigure(0, weight=2)  # Left panel - wider for templates (2x)
+        main_frame.columnconfigure(1, weight=3)  # Right panel - monitoring (3x)
         main_frame.rowconfigure(0, weight=1)
         main_frame.rowconfigure(1, weight=1)
         
@@ -76,7 +77,7 @@ class CPAMonitor:
         ttk.Label(control_frame, text="📋 Task Templates:").grid(row=0, column=0, sticky=tk.W, pady=(0, 5))
         
         self.template_var = tk.StringVar()
-        template_combo = ttk.Combobox(control_frame, textvariable=self.template_var, width=25)
+        template_combo = ttk.Combobox(control_frame, textvariable=self.template_var, width=40)
         template_combo['values'] = list(self.templates.keys())
         template_combo.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
         template_combo.bind('<<ComboboxSelected>>', self._on_template_selected)
@@ -84,7 +85,7 @@ class CPAMonitor:
         # Custom prompt
         ttk.Label(control_frame, text="✍️ Custom Task:").grid(row=2, column=0, sticky=tk.W, pady=(0, 5))
 
-        self.task_text = scrolledtext.ScrolledText(control_frame, width=30, height=6, wrap=tk.WORD)
+        self.task_text = scrolledtext.ScrolledText(control_frame, width=45, height=6, wrap=tk.WORD)
         self.task_text.grid(row=3, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
         
         # Buttons
@@ -168,14 +169,15 @@ class CPAMonitor:
     def _load_templates(self) -> dict[str, str]:
         """Load task templates."""
         return {
-            "Open Start Menu": "Open the Windows Start Menu by clicking the Start button",
-            "Open Notepad": "Open Notepad application from the Start Menu",
-            "Open Calculator": "Find and open the Calculator application",
-            "Open File Explorer": "Open Windows File Explorer",
-            "Search in Start Menu": "Open Start Menu and search for 'Control Panel'",
+            "Start Menu": "Open the Windows Start Menu by clicking the Start button",
+            "Notepad": "Open Notepad application from the Start Menu",
+            "Calculator": "Find and open the Calculator application",
+            "File Explorer": "Open Windows File Explorer",
+            "Search Control Panel": "Open Start Menu and search for 'Control Panel'",
             "Type in Notepad": "Open Notepad and type 'Hello from CPA Agent!'",
-            "Take Screenshot": "Take a screenshot of the current desktop",
-            "Open Browser": "Open the default web browser",
+            "Screenshot": "Take a screenshot of the current desktop",
+            "Browser": "Open the default web browser",
+            "Ransomware Protection": "Activate Ransomware Protection in Windows Security",
         }
     
     def _on_template_selected(self, event):
@@ -419,6 +421,9 @@ class CPAMonitor:
 
     def run(self):
         """Run the UI."""
+        # Check if onboarding is needed (after window is shown)
+        self.root.after(500, lambda: check_and_run_onboarding(self.root))
+
         self.root.mainloop()
 
 

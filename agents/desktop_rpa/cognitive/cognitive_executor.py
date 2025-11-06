@@ -8,11 +8,15 @@ from typing import Any
 
 import pyautogui
 
+from agents.desktop_rpa.agent_comm import AgentDiscovery, AgentRegistry
+from agents.desktop_rpa.agent_comm.models import AgentRequest
 from agents.desktop_rpa.cognitive.llm_wrapper import LLMWrapper
 from agents.desktop_rpa.cognitive.models import LLMRequest
+from agents.desktop_rpa.config.luminaos_config import luminaos_config
 from agents.desktop_rpa.config.settings import settings
 from agents.desktop_rpa.state_graph import PathFinder, StateGraph, StateTracker
 from agents.desktop_rpa.vision.element_detector import ElementDetector
+from agents.desktop_rpa.window_manager import WindowManager, UserPrompt
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +32,7 @@ class CognitiveExecutor:
     5. Repeats until goal is achieved
     """
 
-    def __init__(self, llm_wrapper: LLMWrapper | None = None, callback=None, use_vision: bool = True, use_state_graph: bool = True):
+    def __init__(self, llm_wrapper: LLMWrapper | None = None, callback=None, use_vision: bool = True, use_state_graph: bool = True, use_window_manager: bool = True, use_agent_comm: bool = True):
         """Initialize cognitive executor.
 
         Args:
@@ -36,6 +40,8 @@ class CognitiveExecutor:
             callback: Optional callback function for UI updates (receives event dict)
             use_vision: Whether to use Vision Layer (UI Automation + OCR)
             use_state_graph: Whether to use State Graph for navigation
+            use_window_manager: Whether to use Window Manager for intelligent window handling
+            use_agent_comm: Whether to use Agent Communication for LuminaOS integration
         """
         self.llm = llm_wrapper or LLMWrapper()
         self.screenshot_dir = Path(settings.screenshot_dir)
@@ -43,6 +49,8 @@ class CognitiveExecutor:
         self.callback = callback
         self.use_vision = use_vision
         self.use_state_graph = use_state_graph
+        self.use_window_manager = use_window_manager
+        self.use_agent_comm = use_agent_comm
 
         # Vision Layer
         if use_vision:
@@ -66,10 +74,38 @@ class CognitiveExecutor:
             self.state_graph = None
             self.state_tracker = None
             self.path_finder = None
-                self.element_detector = None
-                self.use_vision = False
+
+        # Window Manager
+        if use_window_manager:
+            try:
+                self.window_manager = WindowManager()
+                logger.info("Window Manager enabled")
+            except Exception as e:
+                logger.warning(f"Failed to initialize Window Manager: {e}")
+                self.window_manager = None
+                self.use_window_manager = False
         else:
-            self.element_detector = None
+            self.window_manager = None
+
+        # Agent Communication (LuminaOS)
+        if use_agent_comm and luminaos_config.enabled:
+            try:
+                self.agent_discovery = AgentDiscovery(
+                    api_token=luminaos_config.api_token,
+                    gateway_url=luminaos_config.gateway_url,
+                    sender_id=luminaos_config.sender_id,
+                    timeout=luminaos_config.timeout,
+                )
+                self.agent_registry = AgentRegistry()
+                logger.info("Agent Communication enabled (LuminaOS)")
+            except Exception as e:
+                logger.warning(f"Failed to initialize Agent Communication: {e}")
+                self.agent_discovery = None
+                self.agent_registry = None
+                self.use_agent_comm = False
+        else:
+            self.agent_discovery = None
+            self.agent_registry = None
 
         # Execution state
         self.current_state = "unknown"
@@ -77,8 +113,9 @@ class CognitiveExecutor:
         self.previous_actions: list[dict[str, Any]] = []
         self.obstacles: list[dict[str, Any]] = []
         self.max_steps = 20  # Prevent infinite loops
+        self.pending_user_prompts: list[UserPrompt] = []  # Store prompts for SMS
 
-        logger.info(f"Cognitive Executor initialized (Vision: {self.use_vision}, State Graph: {self.use_state_graph})")
+        logger.info(f"Cognitive Executor initialized (Vision: {self.use_vision}, State Graph: {self.use_state_graph}, Window Manager: {self.use_window_manager}, Agent Comm: {self.use_agent_comm})")
 
     def _create_default_graph(self) -> StateGraph:
         """Create default state graph with common Windows states."""
@@ -136,14 +173,50 @@ class CognitiveExecutor:
         # Notify UI
         self._notify("start", {"goal": goal})
 
+        # Check for already open windows (Window Manager)
+        if self.use_window_manager and self.window_manager:
+            print(f"🪟 Checking for already open windows...")
+            self._notify("window_check", {"message": "Checking for open windows..."})
+
+            try:
+                # Detect open windows
+                open_windows = self.window_manager.detect_open_windows()
+                if open_windows:
+                    print(f"✅ Found {len(open_windows)} open windows:")
+                    for window in open_windows[:5]:  # Show first 5
+                        print(f"   • {window.app_name}")
+
+                    # Check if goal mentions specific app
+                    goal_lower = goal.lower()
+                    for app_name in ["notepad", "calculator", "outlook", "excel", "word", "chrome", "firefox", "edge"]:
+                        if app_name in goal_lower:
+                            existing_window = self.window_manager.is_app_open(app_name.capitalize())
+                            if existing_window:
+                                print(f"🎯 {app_name.capitalize()} is already open!")
+                                print(f"   Bringing to foreground instead of opening new instance...")
+                                self._notify("window_reuse", {"app": app_name.capitalize(), "window": existing_window.title})
+
+                                # Bring to foreground
+                                if self.window_manager.bring_to_foreground(existing_window):
+                                    print(f"✅ {app_name.capitalize()} brought to foreground")
+                                    # Update initial state
+                                    self.current_state = f"{app_name}_open"
+                                else:
+                                    print(f"⚠️  Failed to bring {app_name.capitalize()} to foreground")
+                                break
+            except Exception as e:
+                logger.warning(f"Window Manager error: {e}")
+                print(f"⚠️  Window Manager error: {e}")
+
         # Reset state
-        self.current_state = "desktop_visible"
+        if not hasattr(self, 'current_state') or self.current_state == "unknown":
+            self.current_state = "desktop_visible"
         self.previous_actions = []
         self.obstacles = []
 
         # Reset state tracker
         if self.use_state_graph and self.state_tracker:
-            self.state_tracker.reset("desktop_visible")
+            self.state_tracker.reset(self.current_state)
 
         # Execution loop
         for step in range(1, self.max_steps + 1):
@@ -491,8 +564,89 @@ class CognitiveExecutor:
         # Wait
         await asyncio.sleep(duration)
         logger.info(f"Waited {duration} seconds")
-        
+
         return {"status": "success", "action": "wait", "duration": duration}
+
+    async def _send_user_prompt_sms(self, prompt: UserPrompt, phone_number: str | None = None) -> bool:
+        """Send user prompt via SMS using LuminaOS agent.
+
+        Args:
+            prompt: User prompt to send
+            phone_number: Phone number to send to (optional, uses default if None)
+
+        Returns:
+            True if SMS sent successfully, False otherwise
+        """
+        if not self.use_agent_comm or not self.agent_discovery:
+            logger.warning("Agent Communication not enabled, cannot send SMS")
+            return False
+
+        try:
+            # Get phone number from settings or use provided one
+            if not phone_number:
+                phone_number = settings.user_phone_number
+
+            # If still no phone number, log warning and return
+            if not phone_number:
+                logger.warning("No phone number configured, cannot send SMS")
+                print("⚠️  No phone number configured. Please set USER_PHONE_NUMBER in .env file.")
+                return False
+
+            # Format message
+            message = f"🤖 CPA Agent needs your decision:\n\n{prompt.message}\n\nOptions: {', '.join(prompt.options)}"
+
+            logger.info(f"Sending SMS notification for prompt: {prompt.prompt_type}")
+            print(f"📱 Sending SMS notification...")
+
+            # Try to get SMS agent from registry first
+            sms_agent = None
+            if self.agent_registry:
+                sms_agent = self.agent_registry.get_preferred_agent("sms")
+
+            # If not in registry, discover
+            if not sms_agent:
+                logger.info("SMS agent not in registry, discovering...")
+                sms_agent = await self.agent_discovery.find_agent_by_capability("sms")
+
+                # Save to registry for next time
+                if sms_agent and self.agent_registry:
+                    self.agent_registry.register_agent(sms_agent)
+
+            if not sms_agent:
+                logger.warning("No SMS agent available")
+                print(f"⚠️  No SMS agent available")
+                return False
+
+            # Send SMS request with correct parameter names
+            request = AgentRequest(
+                capability="sms",
+                parameters={
+                    "recipient_number": phone_number,  # Use recipient_number
+                    "message_text": message,  # Use message_text
+                },
+                priority="high",
+            )
+
+            response = await self.agent_discovery.send_request(sms_agent, request)
+
+            if response.success:
+                logger.info("SMS sent successfully")
+                print(f"✅ SMS notification sent to {phone_number}")
+                return True
+            else:
+                logger.error(f"Failed to send SMS: {response.error}")
+                print(f"❌ Failed to send SMS: {response.error}")
+
+                # Remove agent from registry if it failed
+                if self.agent_registry:
+                    self.agent_registry.update_agent_status(sms_agent.id, "offline")
+
+                return False
+
+        except Exception as e:
+            logger.error(f"Error sending SMS: {e}")
+            print(f"❌ Error sending SMS: {e}")
+            return False
 
     def _is_goal_achieved(self, response: Any, action_result: dict[str, Any]) -> bool:
         """Check if goal is achieved.

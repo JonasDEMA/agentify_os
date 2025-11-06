@@ -79,6 +79,12 @@ class Settings(BaseSettings):
         description="Enable vision capabilities (send screenshots to LLM)",
     )
 
+    # User Settings
+    user_phone_number: str = Field(
+        default="",
+        description="User's phone number for SMS notifications (format: +49...)",
+    )
+
 
 # Global settings instance
 settings = Settings()
