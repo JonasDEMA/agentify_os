@@ -31,7 +31,7 @@ venv.bak/
 .venv/
 
 # Poetry
-poetry.lock
+# poetry.lock - COMMENTED OUT: Railway needs this file!
 
 # PyCharm
 .idea/
