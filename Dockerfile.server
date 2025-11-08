@@ -19,7 +19,8 @@ WORKDIR /app
 COPY pyproject.toml poetry.lock* README.md ./
 
 # Create minimal package structure for Poetry
-RUN mkdir -p scheduler agents/desktop_rpa
+RUN mkdir -p scheduler agents/desktop_rpa && \
+    touch scheduler/__init__.py agents/__init__.py agents/desktop_rpa/__init__.py
 
 # Install dependencies (production only)
 RUN poetry config virtualenvs.create false \
