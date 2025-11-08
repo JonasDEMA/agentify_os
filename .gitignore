@@ -108,3 +108,9 @@ secrets/
 *.key
 *.crt
 
+# CPA Server
+.agent_credentials.json
+.admin_token.txt
+uploads/
+cpa_server.db
+
