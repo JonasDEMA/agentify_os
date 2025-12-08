@@ -1,0 +1,76 @@
+sequenceDiagram
+    participant U as 👤 User
+    participant T as 📞 Teams Call
+    participant A as 🎭 Harmony Avatar
+    participant B as 🧠 Harmony AI Brain
+    participant CS as 🧬 CoreSense
+    participant WF as 🔄 Workflow
+    participant MA as 📝 Meeting Assistant
+    participant KG as 📚 Knowledge Graph
+    participant N as 🔔 Notifications
+    participant MP as 🏪 Marketplace
+
+    U->>T: Start Teams Meeting
+    T->>A: Harmony Avatar joins call
+    A->>B: Initialize context
+    B->>CS: Load user preferences & needs
+    CS-->>B: User profile + meeting context
+    
+    Note over A,B: Harmony Avatar listens & observes
+    
+    T->>A: Audio stream
+    A->>B: Transcribe & analyze
+    B->>CS: Check if intervention needed
+    
+    alt User asks for help
+        U->>A: "Please take notes"
+        A->>B: Process request
+        B->>WF: Create note-taking task
+        WF->>MA: Activate meeting assistant
+        MA->>KG: Store meeting data
+    end
+    
+    alt Proactive assistance
+        B->>CS: Detect action items mentioned
+        B->>A: "I noticed 3 action items, shall I track them?"
+        A->>T: Speak in meeting
+        U->>A: "Yes, please"
+        B->>WF: Create tracking tasks
+    end
+    
+    Note over B,MP: Check if solution exists
+    
+    B->>MP: Query for "meeting notes distribution"
+    
+    alt Solution exists in marketplace
+        MP-->>B: Found agent: "MeetingPro v2.1"
+        B->>U: "I can use MeetingPro for better formatting. Cost: €0.05/meeting. OK?"
+        U->>B: "Yes"
+        B->>MP: Purchase & activate agent
+        MP->>MA: Delegate to MeetingPro agent
+    else No solution exists
+        B->>MP: Request human-AI co-development
+        MP->>U: "No solution found. Shall we create one together?"
+        U->>B: "Yes, but later"
+        B->>WF: Use basic built-in solution
+    end
+    
+    Note over MA: Meeting ends
+    
+    T->>A: Call ended
+    MA->>KG: Finalize notes & action items
+    MA->>N: Send notes to all participants
+    N->>U: Email + Teams message with notes
+    
+    loop Follow-up reminders
+        WF->>CS: Check action item deadlines
+        CS->>N: Send reminder to assignees
+        N->>U: "Reminder: Task X due tomorrow"
+    end
+    
+    Note over B,KG: Harmony AI learns from meeting
+    
+    MA->>KG: Store meeting patterns
+    KG->>CS: Update user preferences
+    B->>MP: Rate MeetingPro agent (5 stars)
+

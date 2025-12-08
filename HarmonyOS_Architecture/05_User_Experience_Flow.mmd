@@ -1,0 +1,90 @@
+graph TB
+    subgraph "End User Journey"
+        U1[👤 User opens App]
+        U2[🎯 Selects Task<br/>'Meeting Assistant']
+        U3[🤖 Harmony Avatar asks:<br/>'Shall I join?']
+        U4[✅ User: 'Yes']
+        U5[🎭 Harmony Avatar joins]
+        U6[📝 Takes notes]
+        U7[💡 Suggests Agent:<br/>'MeetingPro €0.05']
+        U8{User decides}
+        U9A[✅ Purchases Agent]
+        U9B[❌ Uses Basic]
+        U10[📧 Receives Notes]
+        U11[⭐ Rates Experience]
+    end
+
+    subgraph "Solution Provider Journey"
+        P1[👨‍💻 Developer registers]
+        P2[📋 Creates Agent Manifest]
+        P3[💻 Develops Agent<br/>with SDK]
+        P4[🧪 Tests locally]
+        P5[📤 Submits to Marketplace]
+        P6[🔍 Review Process]
+        P7{Approved?}
+        P8A[✅ Agent live]
+        P8B[❌ Feedback + Revision]
+        P9[📊 Monitoring Dashboard]
+        P10[💰 Receives Payout]
+        P11[🔄 Iterates based<br/>on Feedback]
+    end
+
+    subgraph "Marketplace Intelligence"
+        M1[🔍 Analyzes Demand]
+        M2[💡 Identifies Gaps]
+        M3[🤝 Matches Developer<br/>with Demand]
+        M4[📈 Tracks Performance]
+        M5[⭐ Aggregates Ratings]
+        M6[💸 Processes Payments]
+    end
+
+    %% User Flow
+    U1 --> U2
+    U2 --> U3
+    U3 --> U4
+    U4 --> U5
+    U5 --> U6
+    U6 --> U7
+    U7 --> U8
+    U8 -->|Yes| U9A
+    U8 -->|No| U9B
+    U9A --> U10
+    U9B --> U10
+    U10 --> U11
+
+    %% Provider Flow
+    P1 --> P2
+    P2 --> P3
+    P3 --> P4
+    P4 --> P5
+    P5 --> P6
+    P6 --> P7
+    P7 -->|Yes| P8A
+    P7 -->|No| P8B
+    P8B --> P3
+    P8A --> P9
+    P9 --> P10
+    P10 --> P11
+    P11 --> P3
+
+    %% Marketplace Intelligence
+    U11 --> M5
+    M5 --> M4
+    M4 --> M1
+    M1 --> M2
+    M2 --> M3
+    M3 --> P1
+    U9A --> M6
+    M6 --> P10
+    P8A --> M4
+
+    %% Cross-connections
+    U7 -.->|Recommendation| M1
+    P9 -.->|Analytics| M4
+
+    style U8 fill:#ffe66d,stroke:#f4a261,stroke-width:3px
+    style P7 fill:#ffe66d,stroke:#f4a261,stroke-width:3px
+    style M1 fill:#4ecdc4,stroke:#0a9396,stroke-width:3px
+    style U9A fill:#95e1d3,stroke:#38ada9,stroke-width:2px
+    style P8A fill:#95e1d3,stroke:#38ada9,stroke-width:2px
+

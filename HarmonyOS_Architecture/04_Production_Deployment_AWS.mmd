@@ -1,0 +1,159 @@
+graph TB
+    subgraph "User Devices"
+        UD1[📱 Mobile Apps]
+        UD2[💻 Web Browsers]
+        UD3[🖥️ Desktop Clients]
+        UD4[📞 Phone/Teams]
+    end
+
+    subgraph "CDN & Edge"
+        CF[☁️ CloudFront CDN]
+        R53[🌐 Route 53 DNS]
+    end
+
+    subgraph "AWS Region: eu-central-1"
+        subgraph "Public Subnet"
+            ALB[⚖️ Application Load Balancer]
+            NAT[🔀 NAT Gateway]
+        end
+
+        subgraph "Private Subnet - Web Tier"
+            WEB1[🌐 Next.js App<br/>ECS Task 1]
+            WEB2[🌐 Next.js App<br/>ECS Task 2]
+            WEB3[🌐 Next.js App<br/>ECS Task 3]
+        end
+
+        subgraph "Private Subnet - API Tier"
+            API1[🚀 FastAPI Gateway<br/>ECS Task 1]
+            API2[🚀 FastAPI Gateway<br/>ECS Task 2]
+            API3[🚀 FastAPI Gateway<br/>ECS Task 3]
+        end
+
+        subgraph "Private Subnet - Services"
+            BRAIN[🧠 Harmony AI Brain<br/>ECS Task]
+            AVATAR[🎭 Harmony Avatar<br/>ECS Task]
+            MARKET[🏪 Marketplace<br/>ECS Task]
+            MEETING[📝 Meeting Assistant<br/>ECS Task]
+            RPA[🤖 CPA/RPA Service<br/>EC2 Windows]
+        end
+
+        subgraph "Private Subnet - Workers"
+            CELERY1[⚙️ Celery Worker 1]
+            CELERY2[⚙️ Celery Worker 2]
+            CELERY3[⚙️ Celery Worker 3]
+        end
+
+        subgraph "Data Tier"
+            RDS[(🗄️ PostgreSQL<br/>Multi-AZ)]
+            REDIS[(💾 Redis Cluster<br/>3 Nodes)]
+            NEO4J[(🕸️ Neo4j<br/>Causal Cluster)]
+            S3[(📦 S3 Buckets<br/>Screenshots/Files)]
+        end
+
+        subgraph "Message Queue"
+            RMQ[🐰 RabbitMQ<br/>Cluster]
+        end
+
+        subgraph "Monitoring"
+            CW[📊 CloudWatch]
+            DD[📈 Datadog]
+        end
+    end
+
+    subgraph "External Services"
+        OPENAI[🤖 OpenAI API]
+        TWILIO[☎️ Twilio]
+        TEAMS[👥 Microsoft Teams]
+        STRIPE[💳 Stripe]
+        PINECONE[🔍 Pinecone Vector DB]
+    end
+
+    subgraph "Edge Locations"
+        EDGE1[⚡ Edge Node 1<br/>Energy System]
+        EDGE2[⚡ Edge Node 2<br/>IoT Devices]
+        EDGE3[⚡ Edge Node 3<br/>Local RPA]
+    end
+
+    %% User to CDN
+    UD1 --> R53
+    UD2 --> R53
+    UD3 --> R53
+    UD4 --> TWILIO
+
+    %% DNS to CDN
+    R53 --> CF
+
+    %% CDN to Load Balancer
+    CF --> ALB
+
+    %% Load Balancer to Web Tier
+    ALB --> WEB1
+    ALB --> WEB2
+    ALB --> WEB3
+
+    %% Web to API
+    WEB1 --> API1
+    WEB2 --> API2
+    WEB3 --> API3
+
+    %% API to Services
+    API1 --> BRAIN
+    API2 --> AVATAR
+    API3 --> MARKET
+    API1 --> MEETING
+    API2 --> RPA
+
+    %% Services to Message Queue
+    BRAIN --> RMQ
+    AVATAR --> RMQ
+    MARKET --> RMQ
+    MEETING --> RMQ
+
+    %% Message Queue to Workers
+    RMQ --> CELERY1
+    RMQ --> CELERY2
+    RMQ --> CELERY3
+
+    %% Services to Data
+    BRAIN --> RDS
+    BRAIN --> REDIS
+    BRAIN --> NEO4J
+    MARKET --> RDS
+    MEETING --> RDS
+    MEETING --> S3
+    RPA --> S3
+
+    %% Workers to Data
+    CELERY1 --> RDS
+    CELERY2 --> REDIS
+    CELERY3 --> NEO4J
+
+    %% Services to External
+    BRAIN --> OPENAI
+    AVATAR --> OPENAI
+    MEETING --> OPENAI
+    BRAIN --> TEAMS
+    MARKET --> STRIPE
+    BRAIN --> PINECONE
+
+    %% Monitoring
+    API1 --> CW
+    BRAIN --> DD
+    AVATAR --> DD
+    MARKET --> DD
+
+    %% Edge to Cloud
+    EDGE1 -.->|MQTT| RMQ
+    EDGE2 -.->|MQTT| RMQ
+    EDGE3 -.->|VPN| RPA
+
+    %% NAT for outbound
+    BRAIN --> NAT
+    AVATAR --> NAT
+    NAT --> OPENAI
+
+    style BRAIN fill:#ff6b6b,stroke:#c92a2a,stroke-width:3px
+    style MARKET fill:#4ecdc4,stroke:#0a9396,stroke-width:3px
+    style RDS fill:#ffe66d,stroke:#f4a261,stroke-width:3px
+    style ALB fill:#a8dadc,stroke:#457b9d,stroke-width:3px
+

@@ -1,0 +1,130 @@
+graph TB
+    subgraph "User Layer"
+        U1[📱 Mobile App<br/>iOS/Android]
+        U2[💻 Web UI<br/>Browser]
+        U3[🖥️ Desktop Client<br/>Windows/Mac/Linux]
+        U4[📞 Phone/Teams<br/>Voice Interface]
+    end
+
+    subgraph "Avatar & Interaction Layer"
+        A1[🎭 Harmony Avatar<br/>Video Presence]
+        A2[🎤 Voice I/O<br/>STT/TTS]
+        A3[💬 Chat Interface<br/>Multi-Channel]
+        A4[📹 Video Presence<br/>Teams/Zoom]
+        A5[🔔 Notification Hub<br/>Push/Email/SMS]
+    end
+
+    subgraph "Orchestration Core - Harmony AI Brain"
+        O1[🧠 Harmony AI Brain<br/>LLM Orchestrator]
+        O2[📋 Task Scheduler<br/>Cron + Events]
+        O3[🔄 Workflow Engine<br/>BPMN 2.0]
+        O4[🎯 Intent Router<br/>NLU Engine]
+        O5[📊 Context Manager<br/>Memory & State]
+    end
+
+    subgraph "Execution Layer"
+        E1[☎️ Telephony Service<br/>Twilio/Teams]
+        E2[🤖 CPA/RPA Engine<br/>Desktop Automation]
+        E3[🔌 API Gateway<br/>External Tools]
+        E4[📝 Meeting Assistant<br/>Notes & Actions]
+        E5[⚡ Edge Compute<br/>IoT & Energy]
+    end
+
+    subgraph "Agent Marketplace"
+        M1[🏪 Marketplace Hub<br/>Discovery]
+        M2[📋 Agent Registry<br/>Catalog]
+        M3[💰 Billing Engine<br/>Usage Tracking]
+        M4[⭐ Rating System<br/>Reviews & Trust]
+    end
+
+    subgraph "Agent Economy"
+        AG1[🤖 Solution Agents<br/>Pre-built Skills]
+        AG2[👥 Human-AI Co-Dev<br/>Custom Solutions]
+        AG3[🏢 Enterprise Agents<br/>SaaS Integrations]
+        AG4[🌐 Community Agents<br/>Open Source]
+    end
+
+    subgraph "Data & Intelligence Layer"
+        D1[🧬 CoreSense DB<br/>User & System Needs]
+        D2[📚 Knowledge Graph<br/>Entities & Relations]
+        D3[📅 Calendar Integration<br/>Google/Outlook]
+        D4[💾 Vector Store<br/>Embeddings]
+        D5[📈 Analytics Engine<br/>Metrics & Insights]
+    end
+
+    subgraph "Infrastructure Layer"
+        I1[☁️ Cloud Services<br/>AWS/Azure/GCP]
+        I2[🔐 Auth & Security<br/>OAuth/SSO/MFA]
+        I3[🚀 API Gateway<br/>Kong/AWS]
+        I4[📡 Message Queue<br/>RabbitMQ/Kafka]
+        I5[🗄️ Database Cluster<br/>PostgreSQL/Redis/Neo4j]
+    end
+
+    %% User to Avatar
+    U1 --> A1
+    U2 --> A3
+    U3 --> A2
+    U4 --> A4
+
+    %% Avatar to Orchestration
+    A1 --> O1
+    A2 --> O1
+    A3 --> O4
+    A4 --> O1
+    A5 --> O5
+
+    %% Orchestration Core
+    O1 --> O2
+    O1 --> O3
+    O4 --> O1
+    O5 --> O1
+
+    %% Orchestration to Execution
+    O1 --> E1
+    O1 --> E2
+    O1 --> E3
+    O1 --> E4
+    O2 --> E5
+
+    %% Orchestration to Marketplace
+    O1 --> M1
+    M1 --> M2
+    M2 --> M3
+    M2 --> M4
+
+    %% Marketplace to Agents
+    M2 --> AG1
+    M2 --> AG2
+    M2 --> AG3
+    M2 --> AG4
+
+    %% Agents to Execution
+    AG1 --> E2
+    AG2 --> E3
+    AG3 --> E4
+
+    %% Execution to Data
+    E1 --> D1
+    E2 --> D2
+    E3 --> D3
+    E4 --> D4
+    E5 --> D5
+
+    %% Data Layer
+    D1 --> D2
+    D2 --> D4
+    D3 --> D1
+    D5 --> D1
+
+    %% Infrastructure supports all
+    I1 --> O1
+    I2 --> O1
+    I3 --> O1
+    I4 --> O2
+    I5 --> D1
+
+    style O1 fill:#ff6b6b,stroke:#c92a2a,stroke-width:4px
+    style M1 fill:#4ecdc4,stroke:#0a9396,stroke-width:3px
+    style D1 fill:#ffe66d,stroke:#f4a261,stroke-width:3px
+    style I1 fill:#a8dadc,stroke:#457b9d,stroke-width:2px
+
