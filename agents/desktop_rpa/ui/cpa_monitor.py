@@ -11,6 +11,7 @@ from typing import Any
 
 from agents.desktop_rpa.cognitive.cognitive_executor import CognitiveExecutor
 from agents.desktop_rpa.ui.onboarding_wizard import check_and_run_onboarding
+from agents.desktop_rpa.ui.icon_generator import get_icon
 
 
 class CPAMonitor:
@@ -29,6 +30,25 @@ class CPAMonitor:
         self.current_task: dict[str, Any] | None = None
         self.is_running = False
         self.learning_history: list[dict[str, Any]] = []
+
+        # Load icons
+        self.icons = {
+            'gear': get_icon('gear', 16),
+            'search': get_icon('search', 16),
+            'list': get_icon('list', 16),
+            'edit': get_icon('edit', 16),
+            'play': get_icon('play', 16),
+            'stop': get_icon('stop', 16),
+            'chart': get_icon('chart', 16),
+            'eye': get_icon('eye', 16),
+            'book': get_icon('book', 16),
+            'circle_green': get_icon('circle_green', 12),
+            'circle_orange': get_icon('circle_orange', 12),
+            'circle_red': get_icon('circle_red', 12),
+            'circle_blue': get_icon('circle_blue', 12),
+            'circle_purple': get_icon('circle_purple', 12),
+            'circle_gray': get_icon('circle_gray', 12),
+        }
 
         # Load templates
         self.templates = self._load_templates()
@@ -70,43 +90,60 @@ class CPAMonitor:
     
     def _setup_control_panel(self, parent):
         """Setup control panel."""
-        control_frame = ttk.LabelFrame(parent, text="🎮 Control Panel", padding="10")
+        control_frame = ttk.LabelFrame(parent, text="Control Panel", padding="10")
         control_frame.grid(row=0, column=0, rowspan=2, sticky=(tk.W, tk.E, tk.N, tk.S), padx=(0, 5))
-        
-        # Template selection
-        ttk.Label(control_frame, text="📋 Task Templates:").grid(row=0, column=0, sticky=tk.W, pady=(0, 5))
-        
+
+        # Template selection with search
+        search_label = ttk.Label(control_frame, text=" Search Templates:", font=("Segoe UI", 9), image=self.icons['search'], compound=tk.LEFT)
+        search_label.grid(row=0, column=0, sticky=tk.W, pady=(0, 5))
+
+        ttk.Label(control_frame, text="� Search Templates:", font=("Segoe UI", 9)).grid(row=0, column=0, sticky=tk.W, pady=(0, 5))
+
+        # Search box
+        self.search_var = tk.StringVar()
+        self.search_var.trace('w', self._on_search_changed)
+        search_entry = ttk.Entry(control_frame, textvariable=self.search_var, width=40, font=("Segoe UI", 10))
+        search_entry.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(0, 5))
+
+        ttk.Label(control_frame, text="📋 Select Template:", font=("Segoe UI", 9)).grid(row=2, column=0, sticky=tk.W, pady=(10, 5))
+
+        # Template dropdown
         self.template_var = tk.StringVar()
-        template_combo = ttk.Combobox(control_frame, textvariable=self.template_var, width=40)
-        template_combo['values'] = list(self.templates.keys())
-        template_combo.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
-        template_combo.bind('<<ComboboxSelected>>', self._on_template_selected)
+        self.template_combo = ttk.Combobox(control_frame, textvariable=self.template_var, width=40, font=("Segoe UI", 10))
+
+        # Sort templates alphabetically
+        sorted_templates = sorted(self.templates.keys())
+        self.template_combo['values'] = sorted_templates
+        self.all_templates = sorted_templates  # Keep reference for search
+
+        self.template_combo.grid(row=3, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
+        self.template_combo.bind('<<ComboboxSelected>>', self._on_template_selected)
 
         # Custom prompt
-        ttk.Label(control_frame, text="✍️ Custom Task:").grid(row=2, column=0, sticky=tk.W, pady=(0, 5))
+        ttk.Label(control_frame, text="✏ Custom Task:", font=("Segoe UI", 9)).grid(row=4, column=0, sticky=tk.W, pady=(10, 5))
 
-        self.task_text = scrolledtext.ScrolledText(control_frame, width=45, height=6, wrap=tk.WORD)
-        self.task_text.grid(row=3, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
-        
+        self.task_text = scrolledtext.ScrolledText(control_frame, width=45, height=6, wrap=tk.WORD, font=("Segoe UI", 10))
+        self.task_text.grid(row=5, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
+
         # Buttons
         button_frame = ttk.Frame(control_frame)
-        button_frame.grid(row=4, column=0, sticky=(tk.W, tk.E), pady=(10, 0))
-        
-        self.start_btn = ttk.Button(button_frame, text="▶️ Start Task", command=self._start_task)
+        button_frame.grid(row=6, column=0, sticky=(tk.W, tk.E), pady=(10, 0))
+
+        self.start_btn = ttk.Button(button_frame, text="▶ Start Task", command=self._start_task)
         self.start_btn.grid(row=0, column=0, padx=(0, 5))
-        
-        self.stop_btn = ttk.Button(button_frame, text="⏹️ Stop", command=self._stop_task, state=tk.DISABLED)
+
+        self.stop_btn = ttk.Button(button_frame, text="■ Stop", command=self._stop_task, state=tk.DISABLED)
         self.stop_btn.grid(row=0, column=1)
-        
+
         # Status
-        ttk.Label(control_frame, text="📊 Status:").grid(row=5, column=0, sticky=tk.W, pady=(20, 5))
-        
-        self.status_label = ttk.Label(control_frame, text="⚪ Idle", font=("Arial", 10, "bold"))
-        self.status_label.grid(row=6, column=0, sticky=tk.W)
+        ttk.Label(control_frame, text="📊 Status:", font=("Segoe UI", 9)).grid(row=7, column=0, sticky=tk.W, pady=(20, 5))
+
+        self.status_label = ttk.Label(control_frame, text="○ Idle", font=("Segoe UI", 10, "bold"), foreground="gray")
+        self.status_label.grid(row=8, column=0, sticky=tk.W)
     
     def _setup_monitor_panel(self, parent):
         """Setup monitoring panel."""
-        monitor_frame = ttk.LabelFrame(parent, text="👁️ Live Monitoring", padding="10")
+        monitor_frame = ttk.LabelFrame(parent, text="👁 Live Monitoring", padding="10")
         monitor_frame.grid(row=0, column=1, sticky=(tk.W, tk.E, tk.N, tk.S))
         
         # Current task info
@@ -142,17 +179,17 @@ class CPAMonitor:
     
     def _setup_learning_panel(self, parent):
         """Setup learning history panel."""
-        learning_frame = ttk.LabelFrame(parent, text="🎓 Learning History", padding="10")
+        learning_frame = ttk.LabelFrame(parent, text="📚 Learning History", padding="10")
         learning_frame.grid(row=1, column=1, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(10, 0))
-        
+
         # Treeview for learning history
         columns = ("timestamp", "task", "strategy", "confidence")
         self.learning_tree = ttk.Treeview(learning_frame, columns=columns, show="headings", height=8)
-        
-        self.learning_tree.heading("timestamp", text="⏰ Timestamp")
+
+        self.learning_tree.heading("timestamp", text="⏰ Time")
         self.learning_tree.heading("task", text="🎯 Task")
-        self.learning_tree.heading("strategy", text="📋 Strategy")
-        self.learning_tree.heading("confidence", text="📊 Confidence")
+        self.learning_tree.heading("strategy", text="� Strategy")
+        self.learning_tree.heading("confidence", text="📊 Score")
         
         self.learning_tree.column("timestamp", width=150)
         self.learning_tree.column("task", width=200)
@@ -180,6 +217,18 @@ class CPAMonitor:
             "Ransomware Protection": "Activate Ransomware Protection in Windows Security",
         }
     
+    def _on_search_changed(self, *args):
+        """Handle search text change - filter templates."""
+        search_text = self.search_var.get().lower()
+
+        if not search_text:
+            # Show all templates if search is empty
+            self.template_combo['values'] = self.all_templates
+        else:
+            # Filter templates that contain search text
+            filtered = [t for t in self.all_templates if search_text in t.lower()]
+            self.template_combo['values'] = filtered
+
     def _on_template_selected(self, event):
         """Handle template selection."""
         template_name = self.template_var.get()
@@ -191,15 +240,15 @@ class CPAMonitor:
         """Start executing a task."""
         task_goal = self.task_text.get("1.0", tk.END).strip()
         if not task_goal:
-            self._log("⚠️ Please enter a task goal!", "warning")
+            self._log("⚠ Please enter a task goal!", "warning")
             return
 
         self.is_running = True
         self.start_btn.config(state=tk.DISABLED)
         self.stop_btn.config(state=tk.NORMAL)
-        self.status_label.config(text="🟢 Running")
+        self.status_label.config(text="● Running", foreground="green")
 
-        self._log(f"🚀 Starting task: {task_goal}", "info")
+        self._log(f"▶ Starting task: {task_goal}", "info")
 
         # Run task in background thread
         thread = threading.Thread(target=self._run_task_async, args=(task_goal,), daemon=True)
@@ -219,8 +268,8 @@ class CPAMonitor:
         self.is_running = False
         self.start_btn.config(state=tk.NORMAL)
         self.stop_btn.config(state=tk.DISABLED)
-        self.status_label.config(text="🟡 Stopped")
-        self._log("⏹️ Task stopped by user", "warning")
+        self.status_label.config(text="● Stopped", foreground="orange")
+        self._log("■ Task stopped by user", "warning")
     
     def _on_executor_event(self, event: dict):
         """Handle events from the executor."""
@@ -228,7 +277,7 @@ class CPAMonitor:
         data = event.get("data", {})
 
         if event_type == "start":
-            self._log(f"🚀 Starting task: {data.get('goal')}", "info")
+            self._log(f"▶ Starting task: {data.get('goal')}", "info")
 
         elif event_type == "step":
             step = data.get("step", 0)
@@ -238,43 +287,43 @@ class CPAMonitor:
             self.state_label.config(text=state)
 
         elif event_type == "screenshot":
-            self._log("📸 Taking screenshot...", "info")
+            self._log("� Taking screenshot...", "info")
 
         elif event_type == "thinking":
             message = data.get("message", "Thinking...")
-            self._log(f"🧠 {message}", "thinking")
-            self.status_label.config(text="🟣 Thinking")
+            self._log(f"💭 {message}", "thinking")
+            self.status_label.config(text="● Thinking", foreground="purple")
 
         elif event_type == "vision":
             message = data.get("message", "Detecting UI elements...")
-            self._log(f"👁️  {message}", "info")
-            self.status_label.config(text="👁️  Vision")
+            self._log(f"👁 {message}", "info")
+            self.status_label.config(text="● Vision", foreground="blue")
 
         elif event_type == "action_suggested":
             action = data.get("action", "unknown")
             reasoning = data.get("reasoning", "")
             confidence = data.get("confidence", 0.0)
-            confidence_emoji = "🟢" if confidence >= 0.8 else "🟡" if confidence >= 0.6 else "🔴"
+            confidence_emoji = "●" if confidence >= 0.8 else "◐" if confidence >= 0.6 else "○"
             self._log(f"{confidence_emoji} Suggested: {action.upper()} (confidence: {confidence:.2f})", "info")
-            self._log(f"   💭 {reasoning}", "info")
+            self._log(f"   → {reasoning}", "info")
 
         elif event_type == "executing":
             action = data.get("action", "unknown")
-            self._log(f"⚙️  Executing: {action.upper()}", "info")
-            self.status_label.config(text=f"🟢 Executing {action}")
+            self._log(f"⚙ Executing: {action.upper()}", "info")
+            self.status_label.config(text=f"● Executing {action}", foreground="green")
 
         elif event_type == "action_completed":
             result = data.get("result", {})
             status = result.get("status", "unknown")
             if status == "success":
-                self._log("✅ Action completed successfully", "success")
+                self._log("✓ Action completed successfully", "success")
             else:
-                self._log(f"⚠️ Action result: {status}", "warning")
+                self._log(f"⚠ Action result: {status}", "warning")
 
         elif event_type == "completed":
             steps = data.get("steps", 0)
-            self._log(f"🎉 Task completed in {steps} steps!", "success")
-            self.status_label.config(text="🟢 Completed")
+            self._log(f"✓ Task completed in {steps} steps!", "success")
+            self.status_label.config(text="● Completed", foreground="green")
 
     async def _execute_task(self, goal: str):
         """Execute a task using the cognitive executor."""
@@ -290,15 +339,15 @@ class CPAMonitor:
             if result["status"] == "success":
                 self._add_learning_entry(goal, result)
             else:
-                self._log(f"⚠️ Task incomplete: {result.get('final_state', 'unknown')}", "warning")
+                self._log(f"⚠ Task incomplete: {result.get('final_state', 'unknown')}", "warning")
 
         except Exception as e:
-            self._log(f"❌ Error: {e}", "error")
+            self._log(f"✗ Error: {e}", "error")
         finally:
             self.is_running = False
             self.start_btn.config(state=tk.NORMAL)
             self.stop_btn.config(state=tk.DISABLED)
-            self.status_label.config(text="⚪ Idle")
+            self.status_label.config(text="○ Idle", foreground="gray")
     
     def _add_learning_entry(self, task: str, result: dict[str, Any]):
         """Add entry to learning history."""
