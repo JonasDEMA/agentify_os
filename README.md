@@ -1,277 +1,455 @@
-# 🤖 CPA Scheduler/Planner
+# 🤖 CPA Agent Platform
 
-**Central orchestration component for Cognitive Process Automation (CPA)**
+**Universal, Ethics-First Agent Runtime for Cloud, Edge & Desktop**
 
-The CPA Scheduler/Planner is the heart of the CPA architecture, orchestrating tasks between channels (Email, Chat, Voice) and the CPA Desktop AI using the LAM (Lumina Agent Messages) protocol.
+> **📚 This is the main entry point for the CPA Agent Platform documentation.**
+> Start here to understand the platform, then explore the linked resources below.
 
-## 🎯 Features
+The **CPA Agent Platform** is a production-ready framework for building, deploying, and managing AI agents with **guaranteed ethics compliance**, **universal deployment**, and **3 lines of code** to get started.
 
-- **LAM Protocol**: Standardized agent-to-agent communication
-- **Task Orchestration**: Dependency-based parallel/sequential task execution
-- **LLM Integration**: OpenAI GPT-4 for intent routing and task planning
-- **Multi-Executor**: Web (Playwright), Email (Graph API), Desktop (UIA)
-- **Observability**: OpenTelemetry tracing, Prometheus metrics, Grafana dashboards
-- **Security**: API key auth, rate limiting, policy engine, audit trail
-- **Scalable**: Redis queue, async execution, horizontal scaling ready
-
-## 🏗️ Architecture
-
-```
-┌─────────────────────────────────────┐
-│ Channels (Email, Chat, Voice)       │
-└─────────────┬───────────────────────┘
-              │
-┌─────────────▼───────────────────────┐
-│ Scheduler/Planner                   │
-│ • Intent Router                     │
-│ • Task Graph Builder                │
-│ • Job Queue (Redis)                 │
-│ • LAM Protocol Handler              │
-└─────────────┬───────────────────────┘
-              │
-┌─────────────▼───────────────────────┐
-│ CPA Desktop AI                      │
-│ • Observe/Think/Act/Verify          │
-│ • Executors (Playwright, UIA, Mail) │
-└─────────────────────────────────────┘
-```
-
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed architecture documentation.
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-- Python 3.11+
-- Poetry
-- Docker & Docker Compose (optional)
-- Redis (or use Docker)
-- OpenAI API Key
-
-### Local Setup
-
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd 01_CPA
-   ```
-
-2. **Install dependencies**
-   ```bash
-   poetry install
-   ```
-
-3. **Configure environment**
-   ```bash
-   cp .env.example .env
-   # Edit .env and add your API keys
-   ```
-
-4. **Start Redis**
-   ```bash
-   docker-compose up redis -d
-   ```
-
-5. **Run database migrations**
-   ```bash
-   poetry run alembic upgrade head
-   ```
-
-6. **Install Playwright browsers**
-   ```bash
-   poetry run playwright install chromium
-   ```
-
-7. **Start the scheduler**
-   ```bash
-   poetry run uvicorn scheduler.main:app --reload
-   ```
-
-8. **Access the API**
-   - API: http://localhost:8000
-   - Swagger Docs: http://localhost:8000/docs
-   - Health Check: http://localhost:8000/health
-
-### Docker Setup
-
-1. **Build and start all services**
-   ```bash
-   docker-compose up -d
-   ```
-
-2. **View logs**
-   ```bash
-   docker-compose logs -f scheduler
-   ```
-
-3. **Stop services**
-   ```bash
-   docker-compose down
-   ```
-
-### With Observability Stack
-
-```bash
-docker-compose --profile observability up -d
-```
-
-Access:
-- Jaeger UI: http://localhost:16686
-- Prometheus: http://localhost:9091
-- Grafana: http://localhost:3000 (admin/admin)
-
-## 📚 Documentation
-
-- [Architecture](docs/ARCHITECTURE.md) - System architecture and design
-- [TODO](docs/TODO.md) - Development roadmap and tasks
-- [API Examples](docs/API_EXAMPLES.md) - API usage examples (coming soon)
-- [LAM Protocol](docs/LAM_PROTOCOL.md) - LAM message specification (coming soon)
-- [Executor Guide](docs/EXECUTOR_GUIDE.md) - Custom executor development (coming soon)
-
-## 🧪 Testing
-
-```bash
-# Run all tests
-poetry run pytest
-
-# Run with coverage
-poetry run pytest --cov
-
-# Run specific test file
-poetry run pytest tests/core/test_task_graph.py
-
-# Run integration tests
-poetry run pytest tests/integration/
-
-# Run load tests
-poetry run locust -f tests/load/locustfile.py
-```
-
-## 🔧 Development
-
-### Code Quality
-
-```bash
-# Linting
-poetry run ruff check .
-
-# Type checking
-poetry run mypy scheduler/
-
-# Formatting
-poetry run black .
-
-# Pre-commit hooks
-poetry run pre-commit install
-poetry run pre-commit run --all-files
-```
-
-### Project Structure
-
-```
-01_CPA/
-├── scheduler/              # Main application code
-│   ├── core/              # Core components (LAM, Task Graph, Intent Router)
-│   ├── api/               # FastAPI endpoints
-│   ├── orchestrator/      # Task orchestration logic
-│   ├── llm/               # LLM provider abstraction
-│   ├── queue/             # Job queue (Redis)
-│   ├── repository/        # Database repositories
-│   ├── executors/         # Task executors (Playwright, Mail, etc.)
-│   ├── security/          # Auth, policies, secrets
-│   ├── telemetry/         # OpenTelemetry, metrics
-│   └── config/            # Configuration files
-├── tests/                 # Test suite
-├── docs/                  # Documentation
-├── data/                  # Data storage (SQLite, screenshots)
-└── docker-compose.yml     # Docker setup
-```
-
-## 🌐 API Endpoints
-
-### Inbound Gate
-- `POST /schedule` - Schedule a new task
-- `POST /lam/message` - Receive LAM message
-- `GET /health` - Health check
-
-### Job Management
-- `GET /jobs` - List jobs (paginated)
-- `GET /jobs/{job_id}` - Get job status
-- `DELETE /jobs/{job_id}` - Cancel job
-- `POST /jobs/{job_id}/retry` - Retry failed job
-- `WS /ws/jobs/{job_id}` - Live job updates (WebSocket)
-
-### Monitoring
-- `GET /metrics` - Prometheus metrics
-- `GET /audit` - Query audit log
-
-## 🔐 Security
-
-- **Authentication**: API Key (Header: `X-API-Key`)
-- **Rate Limiting**: Per IP and per API key
-- **Policy Engine**: App allowlist, action blacklist, PII detection
-- **Audit Trail**: Every action logged with screenshot
-- **Secrets Management**: Environment variables (later: Vault integration)
-
-## 📊 Monitoring
-
-- **Tracing**: OpenTelemetry → Jaeger
-- **Metrics**: Prometheus
-- **Dashboards**: Grafana
-- **Logging**: structlog (JSON format)
-
-## 🚢 Deployment
-
-### Railway
-
-1. Create new project on Railway
-2. Connect GitHub repository
-3. Add Redis add-on
-4. Set environment variables (see `.env.example`)
-5. Deploy from `main` branch
-
-See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for detailed deployment guide (coming soon).
-
-## 🛣️ Roadmap
-
-- [x] Project setup
-- [ ] Phase 1: Foundation & Core (LAM, Task Graph, Intent Router)
-- [ ] Phase 2: API & Orchestration
-- [ ] Phase 3: LLM Integration
-- [ ] Phase 4: Database & Persistence
-- [ ] Phase 5: Minimal CPA Integration (Playwright, Mail)
-- [ ] Phase 6: Observability & Security
-- [ ] Phase 7: Deployment & DevOps
-- [ ] Phase 8: Documentation & Testing
-- [ ] Phase 9: Advanced Features (Agent Discovery, Human-in-the-Loop)
-
-See [docs/TODO.md](docs/TODO.md) for detailed task list.
-
-## 🤝 Contributing
-
-1. Create a feature branch
-2. Make your changes
-3. Write tests
-4. Run code quality checks
-5. Submit a pull request
-
-## 📝 License
-
-[Your License Here]
-
-## 🙏 Acknowledgments
-
-Built with:
-- [FastAPI](https://fastapi.tiangolo.com/)
-- [Pydantic](https://docs.pydantic.dev/)
-- [Playwright](https://playwright.dev/)
-- [OpenAI](https://openai.com/)
-- [Redis](https://redis.io/)
-- [OpenTelemetry](https://opentelemetry.io/)
+Built on the **Agent Standard v1** - the world's first universal agent wrapper with runtime-active ethics, desire-based health monitoring, and mandatory four-eyes principle.
 
 ---
 
-**Status**: 🚧 In Development  
-**Version**: 0.1.0  
-**Last Updated**: 2025-11-03
+## 🗺️ **Documentation Navigation**
 
+| Document | Description |
+|----------|-------------|
+| **[README.md](README.md)** ⬅️ **You are here** | Main entry point, overview, quick start |
+| **[Agent Standard v1 Spec](core/agent_standard/README.md)** | Complete specification of the Agent Standard |
+| **[Quick Start Guide](core/agent_standard/QUICKSTART.md)** | Get started in 5 minutes |
+| **[Architecture](ARCHITECTURE.md)** | System architecture, 14 agent areas, integration patterns |
+| **[Deployment Guide](DEPLOYMENT.md)** | Deploy to Cloud/Edge/Desktop |
+| **[Documentation Index](DOCUMENTATION_INDEX.md)** | Complete documentation index |
+| **[AI Prompts](core/agent_standard/prompts/)** | Pre-built prompts for AI assistants |
+| **[Examples](core/agent_standard/examples/)** | Real-world agent examples |
+| **[Contributing](CONTRIBUTING.md)** | How to contribute |
+| **[Changelog](CHANGELOG.md)** | Version history |
+
+---
+
+## ⚡ **Quick Start (3 Lines)**
+
+```python
+from core.agent_standard.decorators import agent_tool
+
+@agent_tool(ethics=["no_harm"], desires=["trust"])
+def my_function(x: int) -> int:
+    return x * 2
+
+# That's it! Fully compliant with Agent Standard v1!
+```
+
+---
+
+## 🎯 **Why CPA Agent Platform?**
+
+### **The Problem**
+
+- ❌ AI agents lack runtime-active ethics
+- ❌ No standardized compliance framework
+- ❌ Different behavior on Cloud vs Edge vs Desktop
+- ❌ No health monitoring or oversight
+- ❌ Complex integration with existing code
+
+### **The Solution**
+
+- ✅ **Ethics-First**: Runtime-active ethics, not documentation
+- ✅ **Universal Runtime**: Same agent, same behavior everywhere
+- ✅ **3 Lines to Compliance**: Minimal code changes
+- ✅ **Health Monitoring**: Desire-based tension tracking
+- ✅ **Four-Eyes Principle**: Mandatory separation of instruction and oversight
+- ✅ **Zero-Config Deployment**: Cloud, Edge, Desktop - no changes needed
+
+---
+
+## 🚀 **Features**
+
+### **Agent Standard v1 Core**
+
+- **Ethics Engine**: Runtime-active hard/soft constraints
+- **Desire Monitor**: Continuous health tracking with auto-escalation
+- **Oversight Controller**: Four-eyes principle enforcement
+- **Manifest-Driven**: Single source of truth for all configuration
+- **Universal Runtime**: Identical behavior on Cloud/Edge/Desktop
+
+### **CPA Desktop Automation**
+
+- **Desktop Automation**: Click, type, screenshot, window management
+- **Vision Layer**: OCR, element detection, screenshot analysis
+- **Cognitive Execution**: LLM-guided automation
+- **Multi-Platform**: Windows, macOS, Linux
+
+### **Developer Experience**
+
+- **3 Lines to Compliance**: `@agent_tool` decorator
+- **AI-Assisted Development**: Pre-built prompts for GitHub Copilot, Cursor, Augment
+- **CLI Tool**: `agent-std init`, `validate`, `run`
+- **Zero-Config Deployment**: Same manifest everywhere
+
+---
+
+## 📦 **Installation**
+
+```bash
+# Clone repository
+git clone https://github.com/JonasDEMA/cpa_agent_platform.git
+cd cpa_agent_platform
+
+# Install dependencies
+poetry install
+
+# Verify installation
+agent-std --version
+```
+
+---
+
+## 🎓 **Quick Start Guide**
+
+### **1. Create Your First Agent**
+
+```bash
+# Interactive wizard
+agent-std init my-agent
+
+# Follow prompts:
+# - Agent name: My First Agent
+# - Description: My first Agent Standard v1 agent
+# - Ethics: no_harm
+# - Oversight: human:supervisor
+```
+
+### **2. Implement Your Logic**
+
+```python
+# my-agent/agent.py
+from core.agent_standard.decorators import agent_tool
+
+@agent_tool(
+    name="greet",
+    description="Greet a user",
+    ethics=["no_harm"],
+    desires=["trust", "helpfulness"]
+)
+async def greet(name: str) -> str:
+    """Greet a user by name."""
+    return f"Hello, {name}!"
+```
+
+### **3. Validate & Run**
+
+```bash
+# Validate compliance
+agent-std validate
+
+# Run agent
+agent-std run
+```
+
+### **4. Deploy Anywhere**
+
+```bash
+# Cloud (Railway)
+railway up
+
+# Edge (Raspberry Pi)
+docker run -d my-agent:latest
+
+# Desktop (Windows/Mac/Linux)
+agent-std run manifest.json
+```
+
+**Same manifest. Same code. Same behavior. Everywhere.**
+
+---
+
+## 📚 **Documentation**
+
+### **Core Documentation**
+
+- **[Agent Standard v1 Spec](core/agent_standard/README.md)** - Complete specification
+- **[Quick Start Guide](core/agent_standard/QUICKSTART.md)** - Get started in 5 minutes
+- **[Architecture](ARCHITECTURE.md)** - System architecture and design
+- **[Deployment Guide](DEPLOYMENT.md)** - Deploy to Cloud/Edge/Desktop
+
+### **Developer Resources**
+
+- **[AI Prompts](core/agent_standard/prompts/)** - Pre-built prompts for AI assistants
+- **[Examples](core/agent_standard/examples/)** - Real-world examples
+- **[CLI Reference](core/agent_standard/cli/)** - Command-line tool documentation
+
+### **Integration Guides**
+
+- **[LangChain Integration](docs/integrations/langchain.md)** - Wrap LangChain agents
+- **[FastAPI Integration](docs/integrations/fastapi.md)** - Wrap FastAPI apps
+- **[Legacy Code Migration](docs/integrations/legacy.md)** - Wrap existing code
+
+---
+
+## 🏗️ **Architecture**
+
+The CPA Agent Platform consists of two main components:
+
+### **1. Agent Standard v1 (Universal Core)**
+
+The universal wrapper that provides ethics, oversight, and health monitoring for ANY agent.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Agent Standard v1                         │
+├─────────────────────────────────────────────────────────────┤
+│  • Ethics Engine (Runtime-Active)                           │
+│  • Desire Monitor (Health Tracking)                         │
+│  • Oversight Controller (Four-Eyes)                         │
+│  • Manifest Parser & Validator                              │
+│  • Universal Runtime (Cloud/Edge/Desktop)                   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### **2. CPA Desktop Automation (Tool Category)**
+
+Desktop automation tools that integrate seamlessly with Agent Standard v1.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                  CPA Desktop Automation                      │
+├─────────────────────────────────────────────────────────────┤
+│  • Desktop Automation (Click, Type, Screenshot)             │
+│  • Vision Layer (OCR, Element Detection)                    │
+│  • Cognitive Execution (LLM-Guided)                         │
+│  • Window Management                                        │
+└─────────────────────────────────────────────────────────────┘
+```
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed architecture documentation.
+
+---
+
+## 🎯 **Use Cases**
+
+### **1. Desktop Automation**
+
+Automate repetitive desktop tasks with ethics compliance.
+
+```python
+@agent_tool(ethics=["no_unauthorized_access"], desires=["trust"])
+async def automate_invoice_processing():
+    # Open accounting software
+    # Extract invoice data
+    # Process payment
+    pass
+```
+
+### **2. API Integration**
+
+Wrap existing APIs with Agent Standard compliance.
+
+```python
+@agent_tool(ethics=["no_spam", "privacy_first"], desires=["trust"])
+async def send_email(to: str, subject: str, body: str):
+    # Send email via SMTP
+    pass
+```
+
+### **3. LLM-Guided Automation**
+
+Use LLMs to guide complex automation workflows.
+
+```python
+@agent_tool(ethics=["no_harm"], desires=["trust", "helpfulness"])
+async def cognitive_execute(goal: str):
+    # LLM plans and executes steps
+    pass
+```
+
+### **4. Legacy Code Migration**
+
+Wrap existing code without modifications.
+
+```python
+# Existing function (ZERO changes!)
+def legacy_function(x: int) -> int:
+    return x * 2
+
+# Wrap at runtime
+agent = wrap_as_agent(legacy_function, manifest="manifest.json")
+```
+
+---
+
+## 🔒 **Ethics & Compliance**
+
+Ethics are **runtime-active**, not documentation.
+
+### **Hard Constraints** (BLOCK execution)
+
+```python
+@agent_tool(ethics=["no_spam", "no_unauthorized_access"])
+async def send_email(to: str):
+    # Ethics engine evaluates BEFORE execution
+    # Violation = BLOCKED + logged
+    pass
+```
+
+### **Soft Constraints** (WARN + log)
+
+```python
+@agent_tool(ethics=["inform_before_action"])  # Soft constraint
+async def delete_file(path: str):
+    # Warning logged, execution continues
+    pass
+```
+
+### **Four-Eyes Principle** (Mandatory)
+
+```json
+{
+  "authority": {
+    "instruction": {"type": "human", "id": "user"},
+    "oversight": {"type": "human", "id": "supervisor", "independent": true}
+  }
+}
+```
+
+**Instruction ≠ Oversight** (enforced by validator)
+
+---
+
+## 📊 **Health Monitoring**
+
+Agents continuously track **desire satisfaction** and report health state.
+
+```python
+# Desires defined in manifest
+"desires": {
+  "profile": [
+    {"id": "trust", "weight": 0.4},
+    {"id": "helpfulness", "weight": 0.3},
+    {"id": "coherence", "weight": 0.3}
+  ]
+}
+
+# Health states
+# - healthy    (tension < 0.55)
+# - stressed   (0.55 ≤ tension < 0.75)
+# - degraded   (0.75 ≤ tension < 0.90) → Auto-escalate
+# - critical   (tension ≥ 0.90)        → Auto-escalate
+```
+
+---
+
+## 🛠️ **Development**
+
+### **Prerequisites**
+
+- Python 3.11+
+- Poetry
+- Docker (optional)
+
+### **Setup**
+
+```bash
+# Clone repository
+git clone https://github.com/JonasDEMA/cpa_agent_platform.git
+cd cpa_agent_platform
+
+# Install dependencies
+poetry install
+
+# Run tests
+poetry run pytest
+
+# Run linter
+poetry run ruff check .
+```
+
+### **Project Structure**
+
+```
+cpa_agent_platform/
+├── core/
+│   └── agent_standard/          # Agent Standard v1 implementation
+│       ├── agent.py             # Core Agent class
+│       ├── decorators.py        # @agent_tool decorator
+│       ├── ethics.py            # Ethics engine
+│       ├── desires.py           # Desire monitor
+│       ├── oversight.py         # Oversight controller
+│       ├── manifest.py          # Manifest parser
+│       ├── cli/                 # CLI tool
+│       ├── examples/            # Examples
+│       └── prompts/             # AI prompts
+├── agents/
+│   └── desktop_rpa/             # CPA Desktop Automation
+│       ├── executors/           # Click, Type, Screenshot
+│       ├── cognitive/           # LLM-guided execution
+│       └── vision/              # OCR, element detection
+├── ARCHITECTURE.md              # Architecture documentation
+├── DEPLOYMENT.md                # Deployment guide
+└── README.md                    # This file
+```
+
+---
+
+## 🤝 **Contributing**
+
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+---
+
+## 📄 **License**
+
+This project is licensed under the MIT License - see [LICENSE](LICENSE) for details.
+
+---
+
+## 🔗 **Resources**
+
+- **GitHub**: https://github.com/JonasDEMA/cpa_agent_platform
+- **Documentation**: [core/agent_standard/README.md](core/agent_standard/README.md)
+- **Examples**: [core/agent_standard/examples/](core/agent_standard/examples/)
+- **AI Prompts**: [core/agent_standard/prompts/](core/agent_standard/prompts/)
+
+---
+
+## 🙏 **Acknowledgments**
+
+Built with ❤️ for the Agentic Economy.
+
+Special thanks to:
+- The Agent Standard v1 community
+- Contributors and early adopters
+- The open-source AI community
+
+---
+
+## 📞 **Support**
+
+- **Issues**: https://github.com/JonasDEMA/cpa_agent_platform/issues
+- **Discussions**: https://github.com/JonasDEMA/cpa_agent_platform/discussions
+- **Email**: support@lumina-os.com
+
+---
+
+**Start building ethics-first agents today! 🚀**
+
+---
+
+## 🎯 **Legacy CPA Scheduler/Planner**
+
+The original CPA Scheduler/Planner is now integrated as a **tool category** within the Agent Standard v1 framework.
+
+For legacy documentation, see:
+- **[Legacy Architecture](docs/ARCHITECTURE.md)** - Original CPA Scheduler/Planner architecture
+- **[Legacy Quick Start](docs/QUICKSTART_LEGACY.md)** - Original setup guide
+- **[LAM Protocol](docs/LAM_PROTOCOL.md)** - Lumina Agent Messages protocol
+
+The legacy components are still available but are now wrapped with Agent Standard v1 compliance for ethics, oversight, and health monitoring.
+
+### **Legacy Setup**
+
+For detailed setup instructions for the legacy CPA Scheduler/Planner, see [docs/QUICKSTART_LEGACY.md](docs/QUICKSTART_LEGACY.md).
+
+---
+
+**Ready to build ethics-first agents? Start with the [Quick Start Guide](core/agent_standard/QUICKSTART.md)!** 🚀
