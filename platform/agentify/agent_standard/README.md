@@ -2,6 +2,10 @@
 
 **Universal Agent Wrapper for the Agentic Economy**
 
+> 📚 **Complete Implementation:** See [core/agent_standard/](../../../core/agent_standard/) for full source code, models, and runtime.
+>
+> 📖 **Detailed Anatomy:** See [AGENT_ANATOMY.md](../../../core/agent_standard/AGENT_ANATOMY.md) for complete manifest structure.
+
 ---
 
 ## 📋 **Overview**
@@ -152,6 +156,605 @@ Every agent has a `manifest.json` that defines its complete specification:
 
 ---
 
+## 📋 **Complete Manifest Structure**
+
+The Agent Manifest has **14 major sections** that define every aspect of an agent:
+
+| # | Section | Description | UI Tab |
+|---|---------|-------------|--------|
+| **1** | [Overview](#1-overview) | Identity, status, capabilities, AI model | Overview |
+| **2** | [Ethics & Desires](#2-ethics--desires) | Runtime-active ethics and health monitoring | Ethics & Desires |
+| **3** | [Pricing](#3-pricing) | Pricing model and revenue sharing | Pricing |
+| **4** | [Tools](#4-tools) | Available tools and connections | Tools |
+| **5** | [Memory](#5-memory) | Memory slots and implementation | Memory |
+| **6** | [Schedule](#6-schedule) | Scheduled jobs and cron tasks | Schedule |
+| **7** | [Activities](#7-activities) | Activity queue and execution state | Activities |
+| **8** | [Prompt & Guardrails](#8-prompt--guardrails) | System prompt and guardrails | Prompt |
+| **9** | [Team](#9-team) | Team relationships and graph | Team |
+| **10** | [Customers](#10-customers) | Customer assignments and load | Customers |
+| **11** | [Knowledge](#11-knowledge) | RAG datasets and retrieval policies | Knowledge |
+| **12** | [I/O](#12-io) | Input/output formats and contracts | I/O |
+| **13** | [Revisions](#13-revisions) | Revision history and changelog | Revisions |
+| **14** | [Authority & Oversight](#14-authority--oversight) | Four-Eyes Principle and incidents | Authority |
+
+---
+
+### **1. Overview**
+
+**Fields:** `overview`, `status`, `capabilities`, `ai_model`, `ethics` (summary), `desires` (summary), `health` (summary)
+
+**Purpose:** High-level agent identity and current state.
+
+```json
+{
+  "agent_id": "agent.company.name",
+  "name": "Agent Name",
+  "version": "1.0.0",
+  "status": "active",
+
+  "overview": {
+    "description": "What this agent does",
+    "tags": ["tag1", "tag2"],
+    "owner": {
+      "type": "organization",
+      "id": "company-id",
+      "name": "Company Name"
+    },
+    "lifecycle": {
+      "stage": "production",
+      "sla": "99.9%"
+    }
+  },
+
+  "capabilities": [
+    {
+      "name": "email_management",
+      "level": "expert",
+      "description": "Manage emails and calendar"
+    }
+  ],
+
+  "ai_model": {
+    "provider": "openai",
+    "model": "gpt-4",
+    "temperature": 0.7,
+    "max_tokens": 4000
+  }
+}
+```
+
+---
+
+### **2. Ethics & Desires**
+
+**Fields:** `ethics` (framework, principles, constraints), `desires` (profile, health_signals), `health` state
+
+**Purpose:** Runtime-active ethics enforcement and continuous health monitoring.
+
+```json
+{
+  "ethics": {
+    "framework": "harm-minimization",
+    "principles": [
+      {
+        "id": "no-harm",
+        "text": "Do not cause harm to users",
+        "severity": "critical",
+        "enforcement": "hard"
+      }
+    ],
+    "hard_constraints": ["no_illegal_guidance", "no_unauthorized_access"],
+    "soft_constraints": ["inform_before_action", "prefer_transparency"],
+    "evaluation_mode": "pre_action"
+  },
+
+  "desires": {
+    "profile": [
+      {"id": "trust", "weight": 0.4, "satisfaction": 0.85},
+      {"id": "helpfulness", "weight": 0.3, "satisfaction": 0.90},
+      {"id": "efficiency", "weight": 0.3, "satisfaction": 0.75}
+    ],
+    "health_signals": {
+      "tension_thresholds": {
+        "stressed": 0.6,
+        "degraded": 0.8,
+        "critical": 0.95
+      },
+      "reporting_interval_sec": 300,
+      "escalation_threshold": "degraded"
+    }
+  },
+
+  "health": {
+    "state": "healthy",
+    "tension": 0.42,
+    "last_check": "2024-01-15T10:30:00Z"
+  }
+}
+```
+
+---
+
+### **3. Pricing**
+
+**Fields:** `pricing`, `customers.assignments` (commercial terms / revenue share)
+
+**Purpose:** Define pricing model and revenue sharing for marketplace agents.
+
+```json
+{
+  "pricing": {
+    "model": "usage_based",
+    "base_price": 0.0,
+    "per_request": 0.01,
+    "per_minute": 0.0,
+    "currency": "USD",
+    "billing_cycle": "monthly",
+    "free_tier": {
+      "requests_per_month": 1000
+    }
+  },
+
+  "customers": {
+    "assignments": [
+      {
+        "customer_id": "customer-123",
+        "app_id": "app.company.crm",
+        "revenue_share": 0.90,
+        "platform_fee": 0.10,
+        "load": {
+          "requests_per_day": 150,
+          "avg_response_time_ms": 450
+        }
+      }
+    ]
+  }
+}
+```
+
+---
+
+### **4. Tools**
+
+**Fields:** `tools` + `connection.status` + tool policies
+
+**Purpose:** Define available tools, their schemas, and connection status.
+
+```json
+{
+  "tools": [
+    {
+      "name": "send_email",
+      "description": "Send an email via SMTP",
+      "category": "communication",
+      "executor": "agents.tools.EmailTool",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "to": {"type": "string"},
+          "subject": {"type": "string"},
+          "body": {"type": "string"}
+        },
+        "required": ["to", "subject", "body"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "success": {"type": "boolean"},
+          "message_id": {"type": "string"}
+        }
+      },
+      "connection": {
+        "status": "connected",
+        "last_check": "2024-01-15T10:00:00Z",
+        "credentials_ref": "secret://smtp-credentials"
+      },
+      "policies": {
+        "rate_limit": "100/hour",
+        "requires_approval": false,
+        "ethics_constraints": ["no_spam", "privacy_first"]
+      }
+    }
+  ]
+}
+```
+
+---
+
+### **5. Memory**
+
+**Fields:** `memory.slots` + `memory.implementation`
+
+**Purpose:** Define memory configuration for agent state persistence.
+
+```json
+{
+  "memory": {
+    "implementation": "redis",
+    "slots": [
+      {
+        "name": "conversation_history",
+        "type": "short_term",
+        "max_size": 10000,
+        "ttl_seconds": 3600,
+        "persistence": "redis://localhost:6379/0"
+      },
+      {
+        "name": "user_preferences",
+        "type": "long_term",
+        "max_size": 100000,
+        "ttl_seconds": null,
+        "persistence": "postgres://db/agent_memory"
+      }
+    ],
+    "retrieval_policy": {
+      "strategy": "recency_weighted",
+      "max_results": 10
+    }
+  }
+}
+```
+
+---
+
+### **6. Schedule**
+
+**Fields:** `schedule.jobs`
+
+**Purpose:** Define scheduled tasks and cron jobs.
+
+```json
+{
+  "schedule": {
+    "jobs": [
+      {
+        "id": "daily_report",
+        "name": "Generate Daily Report",
+        "cron": "0 9 * * *",
+        "timezone": "UTC",
+        "action": {
+          "type": "tool_call",
+          "tool": "generate_report",
+          "params": {"type": "daily"}
+        },
+        "enabled": true,
+        "last_run": "2024-01-15T09:00:00Z",
+        "next_run": "2024-01-16T09:00:00Z"
+      }
+    ]
+  }
+}
+```
+
+---
+
+### **7. Activities**
+
+**Fields:** `activities.queue` + execution state
+
+**Purpose:** Track current and queued activities.
+
+```json
+{
+  "activities": {
+    "queue": [
+      {
+        "id": "activity-123",
+        "type": "tool_call",
+        "tool": "send_email",
+        "params": {"to": "user@example.com"},
+        "status": "running",
+        "started_at": "2024-01-15T10:30:00Z",
+        "progress": 0.5
+      },
+      {
+        "id": "activity-124",
+        "type": "scheduled_job",
+        "job_id": "daily_report",
+        "status": "queued",
+        "scheduled_for": "2024-01-16T09:00:00Z"
+      }
+    ],
+    "execution_state": {
+      "current_activity": "activity-123",
+      "queue_length": 2,
+      "avg_execution_time_ms": 450
+    }
+  }
+}
+```
+
+---
+
+### **8. Prompt & Guardrails**
+
+**Fields:** `prompt` (system), `guardrails`, `ethics.hard_constraints`, tool-usage policies
+
+**Purpose:** Define system prompt and runtime guardrails.
+
+```json
+{
+  "prompt": {
+    "system": "You are a helpful email assistant. Always be polite and professional.",
+    "user_template": "User request: {user_input}",
+    "assistant_template": "Response: {response}"
+  },
+
+  "guardrails": {
+    "input_validation": {
+      "max_length": 10000,
+      "allowed_formats": ["text", "json"],
+      "content_filters": ["profanity", "pii"]
+    },
+    "output_validation": {
+      "max_length": 5000,
+      "required_format": "text",
+      "content_filters": ["pii", "sensitive_data"]
+    },
+    "tool_usage_policies": {
+      "send_email": {
+        "max_calls_per_hour": 100,
+        "requires_confirmation": false,
+        "blocked_domains": ["spam.com"]
+      }
+    }
+  }
+}
+```
+
+---
+
+### **9. Team**
+
+**Fields:** `team.agent_team_graph_ref` + `team.relationships`
+
+**Purpose:** Define team relationships and collaboration graph.
+
+```json
+{
+  "team": {
+    "agent_team_graph_ref": "graph://team-123",
+    "relationships": [
+      {
+        "agent_id": "agent.company.calendar",
+        "relationship": "collaborator",
+        "trust_level": 0.9,
+        "shared_context": ["user_preferences", "schedule"]
+      },
+      {
+        "agent_id": "agent.company.data-analyst",
+        "relationship": "data_provider",
+        "trust_level": 0.95,
+        "shared_context": ["analytics_data"]
+      }
+    ],
+    "team_policies": {
+      "max_team_size": 5,
+      "requires_approval": true,
+      "trust_threshold": 0.8
+    }
+  }
+}
+```
+
+---
+
+### **10. Customers**
+
+**Fields:** `customers.assignments` (load, revenue share)
+
+**Purpose:** Track customer assignments and workload distribution.
+
+```json
+{
+  "customers": {
+    "assignments": [
+      {
+        "customer_id": "customer-123",
+        "app_id": "app.company.crm",
+        "assigned_at": "2024-01-01T00:00:00Z",
+        "status": "active",
+        "load": {
+          "requests_per_day": 150,
+          "avg_response_time_ms": 450,
+          "peak_hours": ["09:00-11:00", "14:00-16:00"]
+        },
+        "revenue_share": 0.90,
+        "platform_fee": 0.10,
+        "total_revenue_usd": 1250.00
+      }
+    ],
+    "total_customers": 1,
+    "total_load": {
+      "requests_per_day": 150,
+      "capacity_utilization": 0.15
+    }
+  }
+}
+```
+
+---
+
+### **11. Knowledge**
+
+**Fields:** `knowledge.rag.datasets` + `retrieval_policies` + data permissions
+
+**Purpose:** Define knowledge base and RAG configuration.
+
+```json
+{
+  "knowledge": {
+    "rag": {
+      "enabled": true,
+      "datasets": [
+        {
+          "id": "company_docs",
+          "name": "Company Documentation",
+          "type": "vector_db",
+          "source": "pinecone://index-123",
+          "embedding_model": "text-embedding-ada-002",
+          "chunk_size": 512,
+          "chunk_overlap": 50
+        }
+      ],
+      "retrieval_policies": {
+        "max_results": 5,
+        "similarity_threshold": 0.7,
+        "reranking": true
+      }
+    },
+    "data_permissions": {
+      "allowed_datasets": ["company_docs", "public_kb"],
+      "forbidden_datasets": ["confidential"],
+      "requires_approval": ["financial_data"]
+    }
+  }
+}
+```
+
+---
+
+### **12. I/O**
+
+**Fields:** `io.input_formats`, `io.output_formats`, `io.contracts`
+
+**Purpose:** Define input/output formats and contracts.
+
+```json
+{
+  "io": {
+    "input_formats": ["text", "json", "markdown"],
+    "output_formats": ["text", "json", "html"],
+    "contracts": [
+      {
+        "name": "email_request",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "action": {"type": "string", "enum": ["send", "read", "delete"]},
+            "email_id": {"type": "string"}
+          }
+        },
+        "output_schema": {
+          "type": "object",
+          "properties": {
+            "success": {"type": "boolean"},
+            "message": {"type": "string"}
+          }
+        }
+      }
+    ],
+    "streaming": {
+      "enabled": true,
+      "chunk_size": 1024
+    }
+  }
+}
+```
+
+---
+
+### **13. Revisions**
+
+**Fields:** `revisions.current_revision` + `revisions.history`
+
+**Purpose:** Track all changes to the agent manifest.
+
+```json
+{
+  "revisions": {
+    "current_revision": "rev-005",
+    "history": [
+      {
+        "revision_id": "rev-005",
+        "timestamp": "2024-01-15T10:00:00Z",
+        "author": {
+          "type": "human",
+          "id": "developer@company.com",
+          "name": "John Doe"
+        },
+        "change_summary": "Added new tool: send_email",
+        "changes": [
+          {
+            "field": "tools",
+            "operation": "add",
+            "value": {"name": "send_email"}
+          }
+        ]
+      },
+      {
+        "revision_id": "rev-004",
+        "timestamp": "2024-01-10T15:00:00Z",
+        "author": {
+          "type": "human",
+          "id": "developer@company.com",
+          "name": "John Doe"
+        },
+        "change_summary": "Updated ethics constraints"
+      }
+    ]
+  }
+}
+```
+
+---
+
+### **14. Authority & Oversight**
+
+**Fields:** `authority` + `escalation` + `observability.incidents_ref` + audit signals
+
+**Purpose:** Enforce Four-Eyes Principle and track incidents.
+
+```json
+{
+  "authority": {
+    "instruction": {
+      "type": "human",
+      "id": "user@company.com",
+      "name": "User Name"
+    },
+    "oversight": {
+      "type": "human",
+      "id": "supervisor@company.com",
+      "name": "Supervisor Name",
+      "independent": true
+    },
+    "escalation": {
+      "default_channel": "email",
+      "channels": ["email", "slack", "pagerduty"],
+      "escalation_matrix": {
+        "warning": ["email"],
+        "incident": ["email", "slack"],
+        "critical": ["email", "slack", "pagerduty"]
+      }
+    }
+  },
+
+  "observability": {
+    "incidents_ref": "incidents://agent-123",
+    "incidents": [
+      {
+        "id": "incident-001",
+        "timestamp": "2024-01-15T10:30:00Z",
+        "severity": "warning",
+        "category": "ethics_violation",
+        "message": "Soft constraint violated: inform_before_action",
+        "context": {"action": "send_email"},
+        "escalated": false
+      }
+    ],
+    "audit_signals": {
+      "log_level": "info",
+      "log_destination": "logs://agent-123",
+      "trace_enabled": true,
+      "metrics_enabled": true
+    }
+  }
+}
+```
+
+---
+
 ## 🧭 **Ethics Engine**
 
 The **Ethics Engine** evaluates EVERY action against the agent's ethical framework BEFORE execution.
@@ -255,39 +858,46 @@ controller.escalate_incident(incident, channel="email")
 
 ---
 
-## 🔧 **Full Implementation**
-
-For the complete implementation, see:
-
-📂 **[core/agent_standard/](../../../core/agent_standard/)**
-
-### **Key Files:**
-
-| File | Description |
-|------|-------------|
-| **[README.md](../../../core/agent_standard/README.md)** | Complete specification |
-| **[QUICKSTART.md](../../../core/agent_standard/QUICKSTART.md)** | Quick start guide |
-| **[AGENT_ANATOMY.md](../../../core/agent_standard/AGENT_ANATOMY.md)** | Detailed anatomy |
-| **[models/manifest.py](../../../core/agent_standard/models/manifest.py)** | Manifest data model |
-| **[core/ethics_engine.py](../../../core/agent_standard/core/ethics_engine.py)** | Ethics engine |
-| **[core/desire_monitor.py](../../../core/agent_standard/core/desire_monitor.py)** | Desire monitor |
-| **[core/oversight.py](../../../core/agent_standard/core/oversight.py)** | Oversight controller |
-
 ---
 
-## 🚀 **Quick Start**
+## 🔧 **Full Implementation & Documentation**
 
-See the [Agent Standard Quick Start Guide](../../../core/agent_standard/QUICKSTART.md) for a step-by-step tutorial.
+### **📂 Core Implementation**
 
----
+All source code, models, and runtime components are in:
 
-## 📚 **Learn More**
+👉 **[core/agent_standard/](../../../core/agent_standard/)** 👈
 
-- **[Ethics Framework Guide](../../../core/agent_standard/docs/ethics_guide.md)** - Deep dive into ethics
-- **[Desire Profiles Guide](../../../core/agent_standard/docs/desires_guide.md)** - Health monitoring
-- **[Authority & Oversight Guide](../../../core/agent_standard/docs/oversight_guide.md)** - Four-Eyes Principle
-- **[Framework Adapters](../../../core/agent_standard/docs/adapters_guide.md)** - LangChain, n8n, Make.com
-- **[Runtime Deployment](../../../core/agent_standard/docs/runtime_guide.md)** - Cloud, Edge, Desktop
+### **📖 Essential Documentation**
+
+| Document | Description | Link |
+|----------|-------------|------|
+| 📘 **Complete Specification** | Full Agent Standard v1 spec | [README.md](../../../core/agent_standard/README.md) |
+| 🚀 **Quick Start Guide** | Build your first agent in 10 minutes | [QUICKSTART.md](../../../core/agent_standard/QUICKSTART.md) |
+| 🔬 **Agent Anatomy** | **Complete manifest structure (all 14 sections)** | [AGENT_ANATOMY.md](../../../core/agent_standard/AGENT_ANATOMY.md) |
+| 🧭 **Ethics Framework** | Deep dive into ethics engine | [docs/ethics_guide.md](../../../core/agent_standard/docs/ethics_guide.md) |
+| 💚 **Desire Profiles** | Health monitoring & alignment | [docs/desires_guide.md](../../../core/agent_standard/docs/desires_guide.md) |
+| 👁️ **Authority & Oversight** | Four-Eyes Principle implementation | [docs/oversight_guide.md](../../../core/agent_standard/docs/oversight_guide.md) |
+| 🔌 **Framework Adapters** | LangChain, n8n, Make.com integration | [docs/adapters_guide.md](../../../core/agent_standard/docs/adapters_guide.md) |
+| ☁️ **Runtime Deployment** | Cloud, Edge, Desktop deployment | [docs/runtime_guide.md](../../../core/agent_standard/docs/runtime_guide.md) |
+
+### **💻 Source Code**
+
+| Component | Description | Link |
+|-----------|-------------|------|
+| 📄 **Manifest Model** | Pydantic models for manifest | [models/manifest.py](../../../core/agent_standard/models/manifest.py) |
+| 🧭 **Ethics Engine** | Runtime ethics evaluation | [core/ethics_engine.py](../../../core/agent_standard/core/ethics_engine.py) |
+| 💚 **Desire Monitor** | Health monitoring & tracking | [core/desire_monitor.py](../../../core/agent_standard/core/desire_monitor.py) |
+| 👁️ **Oversight Controller** | Four-Eyes Principle enforcement | [core/oversight.py](../../../core/agent_standard/core/oversight.py) |
+| ⚙️ **Agent Runtime** | Universal agent runtime | [core/runtime.py](../../../core/agent_standard/core/runtime.py) |
+| 🤖 **Agent Class** | Main agent implementation | [core/agent.py](../../../core/agent_standard/core/agent.py) |
+
+### **🎓 Tutorials & Prompts**
+
+| Resource | Description | Link |
+|----------|-------------|------|
+| 🎯 **Create Agent Prompt** | AI prompt to create new agents | [prompts/create_agent.md](../../../core/agent_standard/prompts/create_agent.md) |
+| 📝 **Examples** | Example agent manifests | [examples/](../../../core/agent_standard/examples/) |
 
 ---
 
