@@ -17,6 +17,7 @@ Built on the **Agent Standard v1** - the world's first universal agent wrapper w
 |----------|-------------|
 | **[README.md](README.md)** ⬅️ **You are here** | Main entry point, overview, quick start |
 | **[Agent Standard v1 Spec](core/agent_standard/README.md)** | Complete specification of the Agent Standard |
+| **[Agentify Platform](platform/agentify/README.md)** | Agentic economy platform (apps + agents + marketplace) |
 | **[Quick Start Guide](core/agent_standard/QUICKSTART.md)** | Get started in 5 minutes |
 | **[Architecture](ARCHITECTURE.md)** | System architecture, 14 agent areas, integration patterns |
 | **[Deployment Guide](DEPLOYMENT.md)** | Deploy to Cloud/Edge/Desktop |
@@ -25,6 +26,40 @@ Built on the **Agent Standard v1** - the world's first universal agent wrapper w
 | **[Examples](core/agent_standard/examples/)** | Real-world agent examples |
 | **[Contributing](CONTRIBUTING.md)** | How to contribute |
 | **[Changelog](CHANGELOG.md)** | Version history |
+| **[License](LICENSE.md)** | Dual License (MIT + Commercial) |
+
+---
+
+## 🏗️ **Platform Layers**
+
+The CPA Agent Platform consists of **two layers**:
+
+### **1. Agent Standard v1 (Foundation Layer)**
+
+The universal agent wrapper with ethics, desires, and health monitoring.
+
+- ✅ **Universal Wrapper** - Works with any agent
+- ✅ **Ethics Engine** - Runtime-active constraints
+- ✅ **Desire Monitor** - Continuous health tracking
+- ✅ **Oversight Controller** - Four-eyes principle
+- ✅ **Deployment Agnostic** - Cloud/Edge/Desktop
+
+**See:** [Agent Standard v1 Spec](core/agent_standard/README.md)
+
+---
+
+### **2. Agentify Platform (Platform Layer)**
+
+The agentic economy platform built on top of Agent Standard v1.
+
+- 📱 **Apps** - React apps with built-in orchestrators
+- 🤖 **Agents** - Autonomous agents that join teams
+- 🏪 **Marketplace** - Central discovery and acquisition
+- 🔄 **Data Sharing** - Secure cross-app data access
+- 👥 **Team Building** - LLM-guided team formation
+- 💰 **Revenue Sharing** - Automatic billing
+
+**See:** [Agentify Platform](platform/agentify/README.md)
 
 ---
 
