@@ -4,7 +4,7 @@
 
 **Version:** 1.0.0
 **Status:** ✅ Active
-**Based on:** Lumina Agent Messages (LAM)
+**Based on:** Agentify Message Standard
 
 ---
 
@@ -626,12 +626,12 @@ The `build_config` in the agent manifest supports:
 
 ## 📚 **Reference Implementation**
 
-See `scheduler/core/lam_protocol.py` for complete Python implementation:
+See `platform/agentify/base_orchestrator/base_orchestrator/agent_protocol.py` for complete Python implementation:
 
-- `BaseMessage` - Base message model
-- `RequestMessage`, `InformMessage`, etc. - Specific message types
-- `MessageFactory` - Factory for creating messages
+- `AgentMessage` - Base message model
+- `AgentProtocol` - Protocol implementation
 - `MessageType` - Enum of all message types
+- `send_message()`, `request()`, `inform()`, `discover()` - Helper methods
 
 ---
 

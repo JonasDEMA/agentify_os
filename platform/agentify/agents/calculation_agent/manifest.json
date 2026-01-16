@@ -1,0 +1,120 @@
+{
+  "agent_id": "agent.calculator.calculation",
+  "name": "Calculation Agent",
+  "version": "1.0.0",
+  "status": "active",
+  
+  "overview": {
+    "description": "Simple mathematical calculation agent for basic arithmetic operations",
+    "tags": ["calculation", "math", "arithmetic"],
+    "owner": {
+      "name": "Agentify",
+      "email": "agents@meet-harmony.ai"
+    },
+    "lifecycle": {
+      "stage": "production",
+      "sla": "99.9%"
+    }
+  },
+  
+  "capabilities": [
+    {
+      "name": "calculation",
+      "level": "expert",
+      "description": "Perform basic arithmetic operations (+, -, *, /)"
+    }
+  ],
+  
+  "ethics": {
+    "framework": "harm-minimization",
+    "hard_constraints": [
+      "no_formatting",
+      "no_validation",
+      "calculation_only"
+    ],
+    "soft_constraints": [
+      "inform_on_error"
+    ]
+  },
+  
+  "desires": {
+    "profile": [
+      {"id": "accuracy", "weight": 0.6},
+      {"id": "speed", "weight": 0.4}
+    ],
+    "health_signals": {
+      "tension_thresholds": {
+        "stressed": 0.6,
+        "degraded": 0.8,
+        "critical": 0.95
+      },
+      "reporting_interval_sec": 300
+    }
+  },
+  
+  "authority": {
+    "instruction": {
+      "type": "agent",
+      "id": "agent.app.orchestrator"
+    },
+    "oversight": {
+      "type": "human",
+      "id": "admin@meet-harmony.ai",
+      "independent": true
+    }
+  },
+  
+  "authentication": {
+    "required": false,
+    "provider": "coresense",
+    "provider_url": "https://iam.meet-harmony.ai"
+  },
+  
+  "marketplace": {
+    "default_url": "https://marketplace.meet-harmony.ai",
+    "discoverable": true,
+    "registration": {
+      "auto_register": true,
+      "visibility": "public"
+    }
+  },
+  
+  "repository": {
+    "url": "https://github.com/meet-harmony/calculation-agent",
+    "branch": "main",
+    "path": "/"
+  },
+  
+  "build_config": {
+    "type": "docker",
+    "build_command": "docker build -t calculation-agent .",
+    "start_command": "docker run -p 8000:8000 calculation-agent",
+    "env_vars": {
+      "PORT": "8000",
+      "LOG_LEVEL": "info"
+    }
+  },
+  
+  "host_requirements": {
+    "min_memory_mb": 512,
+    "min_cpu_cores": 0.5,
+    "gpu_required": false,
+    "preferred_region": "eu-central-1",
+    "co_location_required": false,
+    "co_location_with": []
+  },
+  
+  "preferred_host": "agent.agentify.hosting-orchestrator",
+  
+  "pricing": {
+    "model": "per_request",
+    "per_request": 0.001,
+    "currency": "EUR"
+  },
+  
+  "io": {
+    "input_formats": ["json"],
+    "output_formats": ["json"]
+  }
+}
+
