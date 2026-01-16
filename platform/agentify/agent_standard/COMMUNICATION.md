@@ -39,6 +39,14 @@ The Agent Communication Protocol defines how agents communicate with each other 
 - **`offer`** - Offer capabilities to other agents
 - **`assign`** - Assign a task to an agent
 
+### **Deployment Messages**
+
+- **`deploy`** - Request deployment of an agent
+- **`deploy_confirm`** - Confirm deployment success
+- **`deploy_failure`** - Report deployment failure
+- **`co_locate`** - Request co-location with another agent
+- **`scale`** - Request scaling of an agent
+
 ---
 
 ## 📦 **Message Structure**
@@ -390,6 +398,227 @@ If no response within `expected.timeout`:
     "progress": 0.5,  // 50%
     "message": "Processing data..."
   }
+}
+```
+
+---
+
+## 🏗️ **Co-Location and Deployment**
+
+### **Use Case: Agent Requests Co-Location**
+
+When an agent wants to work with another agent and needs them to run on the same hosting infrastructure:
+
+**Flow:**
+```
+Agent A → Marketplace → Hosting Agent
+```
+
+**1. Agent A discovers Agent B on Marketplace**
+
+```json
+{
+  "type": "discover",
+  "sender": "agent.app.orchestrator",
+  "to": ["agent.marketplace.orchestrator"],
+  "intent": "find_agents",
+  "payload": {
+    "capability": "calculation",
+    "min_rating": 8.0
+  }
+}
+```
+
+**2. Marketplace responds with Agent B**
+
+```json
+{
+  "type": "inform",
+  "sender": "agent.marketplace.orchestrator",
+  "to": ["agent.app.orchestrator"],
+  "intent": "agents_found",
+  "payload": {
+    "agents": [
+      {
+        "agent_id": "agent.calculator.calculation",
+        "name": "Calculation Agent",
+        "capabilities": ["calculation"],
+        "repository": {
+          "url": "https://github.com/company/calculation-agent",
+          "branch": "main"
+        },
+        "build_config": {
+          "type": "docker",
+          "build_command": "docker build -t calc-agent .",
+          "start_command": "docker run -p 8000:8000 calc-agent"
+        },
+        "host_requirements": {
+          "min_memory_mb": 512,
+          "min_cpu_cores": 0.5,
+          "co_location_required": false
+        }
+      }
+    ]
+  }
+}
+```
+
+**3. Agent A requests deployment with co-location**
+
+```json
+{
+  "type": "deploy",
+  "sender": "agent.app.orchestrator",
+  "to": ["agent.marketplace.orchestrator"],
+  "intent": "deploy_agent",
+  "payload": {
+    "agent_id": "agent.calculator.calculation",
+    "customer_id": "customer-123",
+    "co_location": {
+      "required": true,
+      "with_agent": "agent.app.orchestrator",
+      "reason": "low_latency_required"
+    },
+    "preferred_host": "agent.agentify.hosting-orchestrator"
+  }
+}
+```
+
+**4. Marketplace forwards to Hosting Agent**
+
+```json
+{
+  "type": "request",
+  "sender": "agent.marketplace.orchestrator",
+  "to": ["agent.agentify.hosting-orchestrator"],
+  "intent": "create_container",
+  "payload": {
+    "agent_id": "agent.calculator.calculation",
+    "customer_id": "customer-123",
+    "repository": {
+      "url": "https://github.com/company/calculation-agent",
+      "branch": "main"
+    },
+    "build_config": {
+      "type": "docker",
+      "build_command": "docker build -t calc-agent .",
+      "start_command": "docker run -p 8000:8000 calc-agent"
+    },
+    "host_requirements": {
+      "min_memory_mb": 512,
+      "min_cpu_cores": 0.5
+    },
+    "co_location": {
+      "required": true,
+      "with_agent": "agent.app.orchestrator",
+      "with_container_id": "orch-cust-123-xyz"
+    }
+  }
+}
+```
+
+**5. Hosting Agent builds and deploys**
+
+```json
+{
+  "type": "inform",
+  "sender": "agent.agentify.hosting-orchestrator",
+  "to": ["agent.marketplace.orchestrator"],
+  "intent": "container_created",
+  "payload": {
+    "container_id": "calc-cust-123-abc",
+    "agent_id": "agent.calculator.calculation",
+    "address": "http://calc-cust-123:8000",
+    "health_url": "http://calc-cust-123:8000/health",
+    "co_located_with": "orch-cust-123-xyz",
+    "host_node": "node-eu-central-1-a"
+  }
+}
+```
+
+**6. Marketplace informs Agent A**
+
+```json
+{
+  "type": "deploy_confirm",
+  "sender": "agent.marketplace.orchestrator",
+  "to": ["agent.app.orchestrator"],
+  "intent": "agent_deployed",
+  "payload": {
+    "agent_id": "agent.calculator.calculation",
+    "address": "http://calc-cust-123:8000",
+    "health_url": "http://calc-cust-123:8000/health",
+    "co_located": true
+  }
+}
+```
+
+---
+
+### **Build Config Types**
+
+The `build_config` in the agent manifest supports:
+
+**Docker:**
+```json
+{
+  "type": "docker",
+  "build_command": "docker build -t agent-name .",
+  "start_command": "docker run -p 8000:8000 agent-name",
+  "env_vars": {
+    "PORT": "8000"
+  }
+}
+```
+
+**NPM/Yarn/PNPM:**
+```json
+{
+  "type": "npm",
+  "build_command": "npm install && npm run build",
+  "start_command": "npm start",
+  "env_vars": {
+    "NODE_ENV": "production"
+  }
+}
+```
+
+**Python:**
+```json
+{
+  "type": "python",
+  "build_command": "pip install -r requirements.txt",
+  "start_command": "uvicorn main:app --host 0.0.0.0 --port 8000",
+  "env_vars": {
+    "PYTHONUNBUFFERED": "1"
+  }
+}
+```
+
+**Custom:**
+```json
+{
+  "type": "custom",
+  "build_command": "./build.sh",
+  "start_command": "./start.sh",
+  "env_vars": {}
+}
+```
+
+---
+
+### **Host Requirements**
+
+```json
+{
+  "min_memory_mb": 512,           // Minimum RAM
+  "min_cpu_cores": 0.5,           // Minimum CPU cores
+  "gpu_required": false,          // GPU needed?
+  "preferred_region": "eu-central-1",  // Preferred region
+  "co_location_required": false,  // Must run with other agents?
+  "co_location_with": [           // List of agent IDs
+    "agent.app.orchestrator"
+  ]
 }
 ```
 

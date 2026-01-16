@@ -162,6 +162,33 @@ Every agent has a `manifest.json` that defines its complete specification:
     }
   },
 
+  "repository": {
+    "url": "https://github.com/company/agent-name",
+    "branch": "main",
+    "path": "/"
+  },
+
+  "build_config": {
+    "type": "docker",
+    "build_command": "docker build -t agent-name .",
+    "start_command": "docker run -p 8000:8000 agent-name",
+    "env_vars": {
+      "PORT": "8000",
+      "LOG_LEVEL": "info"
+    }
+  },
+
+  "host_requirements": {
+    "min_memory_mb": 512,
+    "min_cpu_cores": 0.5,
+    "gpu_required": false,
+    "preferred_region": "eu-central-1",
+    "co_location_required": false,
+    "co_location_with": []
+  },
+
+  "preferred_host": "agent.agentify.hosting-orchestrator",
+
   "tools": [
     {
       "name": "send_email",
