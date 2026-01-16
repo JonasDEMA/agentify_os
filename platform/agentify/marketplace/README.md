@@ -2,6 +2,8 @@
 
 **Central hub for agent discovery, acquisition, and team building**
 
+**URL**: marketplace.meet-harmony.ai
+
 ---
 
 ## 🎯 **What is the Marketplace?**
@@ -13,6 +15,9 @@ The Agentify Marketplace is a **system default app** that enables:
 - ⭐ **Trust & Ratings** - Community ratings (1-10) and creator verification
 - 🤝 **Team Building** - LLM-guided team recommendations
 - 📊 **Analytics** - Usage tracking and performance metrics
+- 🔐 **Authentication** - CoreSense IAM integration (https://iam.meet-harmony.ai)
+
+**Default Marketplace**: All Agentify agents and apps use `marketplace.meet-harmony.ai` as their default discovery service.
 
 ---
 

@@ -5,6 +5,10 @@
 > 📚 **Complete Implementation:** See [core/agent_standard/](../../../core/agent_standard/) for full source code, models, and runtime.
 >
 > 📖 **Detailed Anatomy:** See [AGENT_ANATOMY.md](../../../core/agent_standard/AGENT_ANATOMY.md) for complete manifest structure.
+>
+> 🔐 **Authentication:** See [AUTHENTICATION.md](./AUTHENTICATION.md) for authentication and IAM requirements.
+>
+> 🏪 **Default Marketplace:** marketplace.meet-harmony.ai
 
 ---
 
@@ -19,6 +23,8 @@ The **Agent Standard v1** is a universal wrapper that makes any AI agent complia
 - ✅ **Universal Runtime** - Same agent definition works on Cloud, Edge, Desktop
 - ✅ **Incident Reporting** - Non-punitive reporting without consequences
 - ✅ **Recursive Oversight** - Oversight agents are themselves overseen
+- ✅ **Authentication & IAM** - Secure access via CoreSense IAM
+- ✅ **Marketplace Integration** - Discoverable via marketplace.meet-harmony.ai
 
 ---
 
@@ -137,7 +143,25 @@ Every agent has a `manifest.json` that defines its complete specification:
       "channels": ["email", "slack", "pagerduty"]
     }
   },
-  
+
+  "authentication": {
+    "required": true,
+    "provider": "coresense",
+    "provider_url": "https://iam.meet-harmony.ai",
+    "token_validation": "jwt",
+    "roles_required": ["user"],
+    "scopes_required": ["agent:execute"]
+  },
+
+  "marketplace": {
+    "default_url": "https://marketplace.meet-harmony.ai",
+    "discoverable": true,
+    "registration": {
+      "auto_register": true,
+      "visibility": "public"
+    }
+  },
+
   "tools": [
     {
       "name": "send_email",

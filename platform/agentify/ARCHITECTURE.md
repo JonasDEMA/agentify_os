@@ -56,6 +56,30 @@ Every Agentify app is a **React application** with:
 - **Routing**: React Router
 - **API Client**: Axios / Fetch
 
+#### **App Architecture Layers:**
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    Presentation Layer                    │
+│              (React Components + UI)                     │
+├─────────────────────────────────────────────────────────┤
+│                   Orchestrator Agent                     │
+│         (Team Building, Task Distribution)               │
+├─────────────────────────────────────────────────────────┤
+│                    Data Access Layer                     │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │
+│  │ Own Database │  │ Data Agent   │  │ Data Service │  │
+│  │ (Supabase)   │  │ (Delegated)  │  │ (External)   │  │
+│  └──────────────┘  └──────────────┘  └──────────────┘  │
+├─────────────────────────────────────────────────────────┤
+│                    Logging Layer                         │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │
+│  │ Local Logs   │  │ Log Agent    │  │ Log Service  │  │
+│  │ (Console)    │  │ (Delegated)  │  │ (Supabase)   │  │
+│  └──────────────┘  └──────────────┘  └──────────────┘  │
+└─────────────────────────────────────────────────────────┘
+```
+
 #### **App Modes:**
 
 **Standalone Mode:**
@@ -88,10 +112,231 @@ Every app includes an orchestrator agent that:
 - Communicates with the marketplace
 - Handles data sharing requests
 - Monitors team health
+- **Coordinates data access strategy**
+- **Manages logging strategy**
 
 ---
 
-### **2. Orchestrator Agent**
+### **2. Data Access Layer (DAL)**
+
+Every app must decide on a **data persistence strategy**:
+
+#### **Strategy 1: Own Database (Recommended for Lovable)**
+
+**Use Case:** App needs full control over data schema and queries
+
+**Default Stack:**
+- **Database**: Supabase (PostgreSQL)
+- **ORM**: Supabase Client
+- **Auth**: Supabase Auth
+- **Storage**: Supabase Storage
+
+**Implementation:**
+```typescript
+// src/services/database.ts
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.VITE_SUPABASE_URL!,
+  process.env.VITE_SUPABASE_ANON_KEY!
+);
+
+export const db = {
+  async getUsers() {
+    const { data, error } = await supabase.from('users').select('*');
+    if (error) throw error;
+    return data;
+  },
+  // ... more methods
+};
+```
+
+**Pros:**
+- ✅ Full control over schema
+- ✅ Fast queries (no network overhead)
+- ✅ Built-in auth & storage
+- ✅ Real-time subscriptions
+
+**Cons:**
+- ❌ App-specific data (not shared)
+- ❌ Requires database management
+
+---
+
+#### **Strategy 2: Data Agent (Delegated)**
+
+**Use Case:** App wants to delegate data management to a specialized agent
+
+**Implementation:**
+```typescript
+// src/services/dataAgent.ts
+import { orchestrator } from './orchestrator';
+
+export const dataAgent = {
+  async getUsers() {
+    const agent = await orchestrator.findAgent({ capability: 'data_storage' });
+    const result = await agent.execute({
+      action: 'query',
+      params: { table: 'users', operation: 'select' }
+    });
+    return result.data;
+  },
+  // ... more methods
+};
+```
+
+**Pros:**
+- ✅ Centralized data management
+- ✅ Data sharing across apps
+- ✅ No database setup needed
+
+**Cons:**
+- ❌ Network latency
+- ❌ Depends on agent availability
+
+---
+
+#### **Strategy 3: External Data Service**
+
+**Use Case:** App integrates with existing enterprise data services
+
+**Implementation:**
+```typescript
+// src/services/dataService.ts
+import axios from 'axios';
+
+const api = axios.create({
+  baseURL: process.env.VITE_DATA_SERVICE_URL,
+  headers: { 'Authorization': `Bearer ${process.env.VITE_API_KEY}` }
+});
+
+export const dataService = {
+  async getUsers() {
+    const { data } = await api.get('/users');
+    return data;
+  },
+  // ... more methods
+};
+```
+
+**Pros:**
+- ✅ Enterprise integration
+- ✅ Existing data governance
+- ✅ Compliance & security
+
+**Cons:**
+- ❌ External dependency
+- ❌ Requires API credentials
+
+---
+
+### **3. Logging Strategy**
+
+Every app must decide on a **logging strategy**:
+
+#### **Strategy 1: Local Logging (Development)**
+
+**Use Case:** Development and debugging
+
+**Implementation:**
+```typescript
+// src/services/logger.ts
+export const logger = {
+  info: (message: string, meta?: any) => console.log('[INFO]', message, meta),
+  error: (message: string, meta?: any) => console.error('[ERROR]', message, meta),
+  warn: (message: string, meta?: any) => console.warn('[WARN]', message, meta),
+};
+```
+
+**Pros:**
+- ✅ Simple & fast
+- ✅ No setup needed
+
+**Cons:**
+- ❌ Not persistent
+- ❌ No centralized monitoring
+
+---
+
+#### **Strategy 2: Logging Service (Recommended for Production)**
+
+**Use Case:** Production apps with monitoring requirements
+
+**Default Stack:**
+- **Service**: Supabase (logs table) or Sentry
+- **Format**: Structured JSON logs
+- **Retention**: Configurable
+
+**Implementation:**
+```typescript
+// src/services/logger.ts
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.VITE_SUPABASE_URL!,
+  process.env.VITE_SUPABASE_ANON_KEY!
+);
+
+export const logger = {
+  async info(message: string, meta?: any) {
+    await supabase.from('logs').insert({
+      level: 'info',
+      message,
+      meta,
+      timestamp: new Date().toISOString(),
+      app_id: 'app.company.myapp',
+    });
+    console.log('[INFO]', message, meta);
+  },
+  // ... more methods
+};
+```
+
+**Pros:**
+- ✅ Persistent logs
+- ✅ Centralized monitoring
+- ✅ Query & analytics
+
+**Cons:**
+- ❌ Requires setup
+- ❌ Storage costs
+
+---
+
+#### **Strategy 3: Logging Agent (Delegated)**
+
+**Use Case:** App delegates logging to a specialized agent
+
+**Implementation:**
+```typescript
+// src/services/logger.ts
+import { orchestrator } from './orchestrator';
+
+export const logger = {
+  async info(message: string, meta?: any) {
+    const agent = await orchestrator.findAgent({ capability: 'logging' });
+    await agent.execute({
+      action: 'log',
+      params: { level: 'info', message, meta }
+    });
+    console.log('[INFO]', message, meta);
+  },
+  // ... more methods
+};
+```
+
+**Pros:**
+- ✅ Centralized logging
+- ✅ No setup needed
+- ✅ Agent handles retention
+
+**Cons:**
+- ❌ Network latency
+- ❌ Depends on agent availability
+
+---
+
+### **4. Orchestrator Agent**
 
 The orchestrator is an **Agent Standard v1 compliant agent** with additional capabilities:
 
@@ -121,6 +366,18 @@ The orchestrator is an **Agent Standard v1 compliant agent** with additional cap
    - Route tasks to team members
    - Aggregate results
    - Log all activities (Agent Standard)
+
+6. **Data Access Coordination**
+   - Determine data access strategy (own DB vs. agent vs. service)
+   - Configure data layer based on app requirements
+   - Manage data agent discovery if delegated
+   - Handle data sharing requests
+
+7. **Logging Coordination**
+   - Determine logging strategy (local vs. service vs. agent)
+   - Configure logging layer
+   - Manage log agent discovery if delegated
+   - Ensure compliance with logging requirements
 
 #### **Orchestrator Manifest:**
 
@@ -159,6 +416,26 @@ The orchestrator is an **Agent Standard v1 compliant agent** with additional cap
       "name": "monitor_team",
       "description": "Monitor team health and performance",
       "category": "monitoring"
+    },
+    {
+      "name": "configure_data_layer",
+      "description": "Configure data access strategy (own DB, agent, or service)",
+      "category": "data"
+    },
+    {
+      "name": "discover_data_agent",
+      "description": "Find and connect to data storage agent",
+      "category": "data"
+    },
+    {
+      "name": "configure_logging",
+      "description": "Configure logging strategy (local, service, or agent)",
+      "category": "logging"
+    },
+    {
+      "name": "discover_logging_agent",
+      "description": "Find and connect to logging agent",
+      "category": "logging"
     }
   ]
 }
