@@ -1,0 +1,12 @@
+{
+  "type": "request",
+  "sender": "test-client",
+  "to": ["agent.calculator.formatting"],
+  "intent": "format",
+  "payload": {
+    "value": 1234.5678,
+    "locale": "de-DE",
+    "decimals": 2
+  }
+}
+
