@@ -249,7 +249,7 @@ Choose 3 business units for the pilot:
 ## 📞 **Contact**
 
 For questions or to schedule a workshop:
-- **Email:** support@lumina-os.com
+- **Email:** support@agentify.dev
 - **GitHub:** https://github.com/JonasDEMA/cpa_agent_platform
 
 ---

@@ -21,11 +21,11 @@ Der **CPA Scheduler/Planner** ist die zentrale Orchestrierungskomponente der Cog
 │ │ • Task Graph Builder (high-level Tasks)                 │ │
 │ │ • Job Queue (Redis)                                     │ │
 │ │ • Agent Registry & Discovery                            │ │
-│ │ • LAM Protocol Handler                                  │ │
+│ │ • Agent Communication Protocol Handler                                  │ │
 │ │ • LLM Wrapper (OpenAI/Ollama)                           │ │
 │ └─────────────────────────────────────────────────────────┘ │
 └─────────────────┬───────────────────────────────────────────┘
-                  │ (Task Delegation via LAM Protocol)
+                  │ (Task Delegation via Agent Communication Protocol)
                   │
         ┌─────────┴─────────┬─────────────┬──────────────┐
         │                   │             │              │
@@ -47,7 +47,7 @@ Der **CPA Scheduler/Planner** ist die zentrale Orchestrierungskomponente der Cog
 2. Scheduler: Intent Recognition → Task Graph Creation
 3. Scheduler: Agent Discovery ("Wer kann Desktop-Automation?")
 4. Agent: Registration/Offer ("Ich kann Desktop-Automation!")
-5. Scheduler: Task Assignment (via LAM Protocol)
+5. Scheduler: Task Assignment (via Agent Communication Protocol)
 6. Agent: Task Execution (feingranular, generisch)
 7. Agent: Status Updates → Scheduler
 8. Scheduler: Result Aggregation → User
@@ -62,7 +62,7 @@ Der **CPA Scheduler/Planner** ist die zentrale Orchestrierungskomponente der Cog
 
 ### Queue & Messaging
 - **Redis**: Job Queue, Session Storage, Pub/Sub
-- **LAM Protocol**: Standardisiertes Agent-zu-Agent Messaging
+- **Agent Communication Protocol**: Standardisiertes Agent-zu-Agent Messaging
 
 ### Database & Storage
 - **SQLite + sqlite-vss**: Lokale Persistenz & Vector Search (V1)
@@ -93,7 +93,7 @@ Der **CPA Scheduler/Planner** ist die zentrale Orchestrierungskomponente der Cog
 
 ## Komponenten-Übersicht
 
-### 1. LAM Protocol (`lam_protocol.py`)
+### 1. Agent Communication Protocol (`agent_protocol.py`)
 Standardisiertes Nachrichtenprotokoll für Agent-Kommunikation.
 
 **Message Types:**
@@ -192,7 +192,7 @@ Verwaltung und Discovery von spezialisierten Agenten.
 
 **Communication:**
 - **REST API**: Agent ↔ Scheduler Kommunikation
-- **LAM Protocol**: Standardisierte Nachrichten (request, inform, done, failure)
+- **Agent Communication Protocol**: Standardisierte Nachrichten (request, inform, done, failure)
 
 ### 6. Task Orchestrator (`orchestrator.py`)
 Hauptlogik für Task-Orchestrierung und Agent-Delegation.
@@ -201,7 +201,7 @@ Hauptlogik für Task-Orchestrierung und Agent-Delegation.
 1. Receive User Request (via API)
 2. Intent Router → Task Graph (high-level)
 3. Agent Discovery ("Wer kann DESKTOP_AUTOMATION?")
-4. Task Assignment (via LAM Protocol)
+4. Task Assignment (via Agent Communication Protocol)
 5. Monitor Execution (Status Updates von Agenten)
 6. Result Aggregation
 7. Send Response to User
@@ -250,7 +250,7 @@ Persistenz-Layer mit austauschbarem Backend.
 **Repositories:**
 - `JobRepository`: Job CRUD
 - `TaskRepository`: Task CRUD
-- `MessageRepository`: LAM Message History
+- `MessageRepository`: Agent Message History
 - `AuditRepository`: Audit Trail
 
 **Implementations:**
@@ -275,7 +275,7 @@ Short-term & Long-term Memory für Kontext-Management.
 ### Inbound Gate
 ```
 POST   /jobs                  # Create new job (User Request)
-POST   /lam/message           # Receive LAM message (Agent Communication)
+POST   /lam/message           # Receive agent message (Agent Communication)
 GET    /health                # Health check
 ```
 

@@ -29,7 +29,7 @@ class CPAMonitorQt(QMainWindow):
     
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("🤖 CPA Agent Monitor - LuminaOS")
+        self.setWindowTitle("🤖 CPA Agent Monitor - Agentify")
         self.setGeometry(100, 100, 1400, 800)
         
         # State

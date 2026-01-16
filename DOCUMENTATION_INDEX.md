@@ -161,7 +161,7 @@ Step-by-step tutorials:
 - **GitHub**: https://github.com/JonasDEMA/cpa_agent_platform
 - **Issues**: https://github.com/JonasDEMA/cpa_agent_platform/issues
 - **Discussions**: https://github.com/JonasDEMA/cpa_agent_platform/discussions
-- **Email**: support@lumina-os.com
+- **Email**: support@agentify.dev
 
 ---
 
@@ -172,7 +172,7 @@ Need help? Here's where to go:
 - **Quick Questions**: [GitHub Discussions](https://github.com/JonasDEMA/cpa_agent_platform/discussions)
 - **Bug Reports**: [GitHub Issues](https://github.com/JonasDEMA/cpa_agent_platform/issues)
 - **Feature Requests**: [GitHub Issues](https://github.com/JonasDEMA/cpa_agent_platform/issues)
-- **Email Support**: support@lumina-os.com
+- **Email Support**: support@agentify.dev
 
 ---
 

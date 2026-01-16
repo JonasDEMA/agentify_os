@@ -81,12 +81,12 @@ class GraphMetadata:
 
 ## 📋 Phase 2: Graph-Sharing-System
 
-### 2.1 Upload zu LuminaOS
+### 2.1 Upload zu Agentify
 - ✅ **Automatischer Upload** nach erfolgreichem Lernen
 - ✅ **Metadaten-Validierung** vor Upload
 - ✅ **Versionierung** - Mehrere Versionen desselben Graphs
 
-### 2.2 Download von LuminaOS
+### 2.2 Download von Agentify
 - ✅ **Fuzzy Search** - Finde ähnliche Graphs
   - OS-Version-Matching (Windows 10 ≈ Windows 11)
   - Software-Version-Matching (Outlook 2019 ≈ Outlook 2021)
@@ -277,7 +277,7 @@ def calculate_match_score(graph_metadata, current_context):
 ## 📝 Nächste Schritte
 
 1. ✅ Metadaten-Erfassung implementieren
-2. ✅ LuminaOS API für Graph-Sharing erweitern
+2. ✅ Agentify API für Graph-Sharing erweitern
 3. ✅ Fuzzy-Matching-Algorithmus entwickeln
 4. ✅ UI für Graph-Sharing (Opt-In/Opt-Out)
 5. ✅ Testing mit mehreren Agenten

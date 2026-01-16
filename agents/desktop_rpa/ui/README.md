@@ -201,5 +201,5 @@ def _on_executor_event(self, event: dict):
 
 ## License
 
-Part of LuminaOS - CPA Agent Platform
+Part of Agentify - CPA Agent Platform
 

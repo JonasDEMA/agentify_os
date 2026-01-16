@@ -1,4 +1,4 @@
-"""LAM (Lumina Agent Messages) Protocol.
+"""Agent Communication Protocol Protocol.
 
 A standardized protocol for structured communication between AI agents.
 """
@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field, field_validator
 
 
 class MessageType(str, Enum):
-    """LAM message types."""
+    """agent message types."""
 
     # Standard messages
     REQUEST = "request"  # Anfrage an Agent
@@ -33,9 +33,9 @@ class MessageType(str, Enum):
 
 
 class BaseMessage(BaseModel):
-    """Base LAM message model.
+    """Base agent message model.
 
-    All LAM messages inherit from this base class.
+    All agent messages inherit from this base class.
     """
 
     # Required fields
@@ -192,7 +192,7 @@ MESSAGE_TYPE_MAP: dict[MessageType, type[BaseMessage]] = {
 
 
 class MessageFactory:
-    """Factory for creating LAM messages."""
+    """Factory for creating agent messages."""
 
     @staticmethod
     def create(message_type: MessageType | str, **kwargs: Any) -> BaseMessage:

@@ -1,4 +1,4 @@
-"""Agent Communication for LuminaOS integration."""
+"""Agent Communication for Agentify integration."""
 
 from agents.desktop_rpa.agent_comm.agent_discovery import AgentDiscovery
 from agents.desktop_rpa.agent_comm.agent_registry import AgentRegistry

@@ -462,7 +462,7 @@ Special thanks to:
 
 - **Issues**: https://github.com/JonasDEMA/cpa_agent_platform/issues
 - **Discussions**: https://github.com/JonasDEMA/cpa_agent_platform/discussions
-- **Email**: support@lumina-os.com
+- **Email**: support@agentify.dev
 
 ---
 
@@ -477,7 +477,7 @@ The original CPA Scheduler/Planner is now integrated as a **tool category** with
 For legacy documentation, see:
 - **[Legacy Architecture](docs/ARCHITECTURE.md)** - Original CPA Scheduler/Planner architecture
 - **[Legacy Quick Start](docs/QUICKSTART_LEGACY.md)** - Original setup guide
-- **[LAM Protocol](docs/LAM_PROTOCOL.md)** - Lumina Agent Messages protocol
+- **[Agent Communication Protocol](docs/LAM_PROTOCOL.md)** - Lumina Agent Messages protocol
 
 The legacy components are still available but are now wrapped with Agent Standard v1 compliance for ethics, oversight, and health monitoring.
 

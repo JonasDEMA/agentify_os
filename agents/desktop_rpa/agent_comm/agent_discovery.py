@@ -1,7 +1,7 @@
-"""Agent Discovery - Find and communicate with LuminaOS agents via LAM Gateway.
+"""Agent Discovery - Find and communicate with Agentify agents via Agent Gateway.
 
 This module provides:
-- Discovery of available agents in LuminaOS
+- Discovery of available agents in Agentify
 - Querying agents by capability
 - Communication with selected agents via LAM protocol
 """
@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 class AgentDiscovery:
-    """Discovers and communicates with LuminaOS agents via LAM Gateway."""
+    """Discovers and communicates with Agentify agents via Agent Gateway."""
 
     def __init__(
         self,
@@ -36,16 +36,16 @@ class AgentDiscovery:
         """Initialize Agent Discovery.
 
         Args:
-            api_token: LuminaOS API token for X-API-Token header (defaults to luminaos_config)
-            gateway_url: LAM Gateway URL (defaults to luminaos_config)
-            sender_id: Sender identifier for LAM messages
+            api_token: Agentify API token for X-API-Token header (defaults to agentify_config)
+            gateway_url: Agent Gateway URL (defaults to agentify_config)
+            sender_id: Sender identifier for agent messages
             timeout: Request timeout in seconds
         """
         # Import here to avoid circular dependency
-        from agents.desktop_rpa.config.luminaos_config import luminaos_config
+        from agents.desktop_rpa.config.agentify_config import agentify_config
 
-        self.gateway_url = gateway_url or luminaos_config.gateway_url
-        self.api_token = api_token or luminaos_config.api_token
+        self.gateway_url = gateway_url or agentify_config.gateway_url
+        self.api_token = api_token or agentify_config.api_token
         self.sender_id = sender_id
         self.timeout = timeout
         self.headers = {
@@ -66,12 +66,12 @@ class AgentDiscovery:
         """Create a LAM-compliant message.
 
         Args:
-            message_type: LAM message type (discovery, request, inform, etc.)
+            message_type: agent message type (discovery, request, inform, etc.)
             payload: Message payload
             to: Optional list of recipient agent URIs
 
         Returns:
-            LAM message dictionary
+            agent message dictionary
         """
         message = {
             "message_id": str(uuid.uuid4()),
@@ -89,7 +89,7 @@ class AgentDiscovery:
     async def discover_agents(
         self, capabilities_needed: list[str] | None = None
     ) -> list[Agent]:
-        """Discover available agents via LAM Gateway.
+        """Discover available agents via Agent Gateway.
 
         Args:
             capabilities_needed: Optional list of capabilities (e.g., ["sms", "email"])
@@ -110,7 +110,7 @@ class AgentDiscovery:
                 + (f" for capabilities: {capabilities_needed}" if capabilities_needed else "")
             )
 
-            # Send to LAM Gateway
+            # Send to Agent Gateway
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 response = await client.post(
                     self.gateway_url,
@@ -251,7 +251,7 @@ class AgentDiscovery:
     async def send_request(
         self, agent: Agent, request: AgentRequest
     ) -> AgentResponse:
-        """Send a request to an agent via LAM Gateway.
+        """Send a request to an agent via Agent Gateway.
 
         Args:
             agent: Target agent
@@ -273,9 +273,9 @@ class AgentDiscovery:
             }
 
             logger.info(f"Sending request to agent '{agent.name}' (capability: {request.capability})")
-            logger.debug(f"LAM message: {lam_message}")
+            logger.debug(f"agent message: {lam_message}")
 
-            # Send via LAM Gateway
+            # Send via Agent Gateway
             async with httpx.AsyncClient(timeout=request.timeout) as client:
                 response = await client.post(
                     self.gateway_url,

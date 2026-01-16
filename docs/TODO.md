@@ -17,8 +17,8 @@
 - [x] `.gitignore` konfigurieren
 - [x] `README.md` mit Setup-Anleitung
 
-### 1.2 LAM Protocol Implementation ✅
-- [x] `scheduler/core/lam_protocol.py` erstellen
+### 1.2 Agent Communication Protocol Implementation ✅
+- [x] `scheduler/core/agent_protocol.py` erstellen
 - [x] Pydantic BaseMessage Model (id, ts, type, sender, to, intent, payload, context, correlation, expected, status, security)
 - [x] RequestMessage Model
 - [x] InformMessage Model
@@ -27,8 +27,8 @@
 - [x] DiscoverMessage, OfferMessage, AssignMessage Models
 - [x] Message Validation (Pydantic validators)
 - [x] Message Serialization (to_dict, from_dict, to_json, from_json)
-- [x] LAM Message Factory/Builder
-- [x] Unit Tests (`tests/core/test_lam_protocol.py`)
+- [x] Agent Message Factory/Builder
+- [x] Unit Tests (`tests/core/test_agent_protocol.py`)
   - [x] Test Message Creation
   - [x] Test Validation (required fields)
   - [x] Test Serialization/Deserialization
@@ -232,10 +232,10 @@
   - [ ] Test Get Agent
   - [ ] Test Unregister Agent
 
-### 2.5 LAM Message Handler
+### 2.5 Agent Message Handler
 - [ ] `scheduler/api/lam_handler.py` erstellen
 - [ ] `POST /lam/message` Endpoint
-  - [ ] Accept LAM Message (any type)
+  - [ ] Accept Agent Message (any type)
   - [ ] Validate Message (Pydantic)
   - [ ] Route to appropriate handler based on type
     - [ ] `inform` → Update Job Status
@@ -275,7 +275,7 @@
     - [ ] Fallback to different Agent
 - [ ] Correlation ID Tracking
   - [ ] Store conversationId in Job
-  - [ ] Include in all LAM Messages
+  - [ ] Include in all Agent Messages
 - [ ] Timeout Handling
   - [ ] Task-level timeout
   - [ ] Job-level timeout
@@ -868,12 +868,12 @@
 - [ ] API Usage Examples (`docs/API_EXAMPLES.md`)
   - [ ] Schedule Job
   - [ ] Get Job Status
-  - [ ] Send LAM Message
+  - [ ] Send Agent Message
   - [ ] Query Audit Log
 
 ### 10.2 Developer Documentation
 - [ ] Architecture Overview (already in `docs/ARCHITECTURE.md`)
-- [ ] LAM Protocol Guide (`docs/LAM_PROTOCOL.md`)
+- [ ] Agent Communication Protocol Guide (`docs/LAM_PROTOCOL.md`)
   - [ ] Message Types
   - [ ] Examples
   - [ ] Best Practices

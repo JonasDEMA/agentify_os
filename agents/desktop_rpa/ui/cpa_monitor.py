@@ -20,7 +20,7 @@ class CPAMonitor:
     def __init__(self):
         """Initialize the monitor UI."""
         self.root = tk.Tk()
-        self.root.title("🤖 CPA Agent Monitor - LuminaOS")
+        self.root.title("🤖 CPA Agent Monitor - Agentify")
 
         # Config file for window position/size
         self.config_file = Path("ui_config.json")
