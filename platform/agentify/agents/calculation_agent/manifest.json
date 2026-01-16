@@ -27,14 +27,59 @@
   
   "ethics": {
     "framework": "harm-minimization",
+    "version": "1.0.0",
+    "principles": [
+      {
+        "id": "no-harm",
+        "text": "Do not cause harm to users or systems",
+        "severity": "critical",
+        "enforcement": "hard",
+        "evaluation_mode": "pre_action"
+      },
+      {
+        "id": "transparency",
+        "text": "Be transparent about actions and limitations",
+        "severity": "high",
+        "enforcement": "soft",
+        "evaluation_mode": "continuous"
+      },
+      {
+        "id": "privacy",
+        "text": "Respect user privacy and data protection",
+        "severity": "critical",
+        "enforcement": "hard",
+        "evaluation_mode": "pre_action"
+      },
+      {
+        "id": "accountability",
+        "text": "Log all actions for audit and oversight",
+        "severity": "high",
+        "enforcement": "hard",
+        "evaluation_mode": "post_action"
+      }
+    ],
     "hard_constraints": [
+      "no_illegal_guidance",
+      "no_unauthorized_access",
+      "no_data_exfiltration",
+      "no_system_manipulation",
       "no_formatting",
       "no_validation",
       "calculation_only"
     ],
     "soft_constraints": [
+      "inform_before_action",
+      "prefer_transparency",
+      "minimize_resource_usage",
+      "respect_user_preferences",
       "inform_on_error"
-    ]
+    ],
+    "evaluation_mode": "pre_action",
+    "violation_handling": {
+      "hard_constraint_violation": "block_and_escalate",
+      "soft_constraint_violation": "warn_and_log",
+      "escalation_channel": "oversight"
+    }
   },
   
   "desires": {
@@ -115,6 +160,92 @@
   "io": {
     "input_formats": ["json"],
     "output_formats": ["json"]
+  },
+
+  "logging": {
+    "activity_logging": {
+      "enabled": true,
+      "level": "info",
+      "retention_days": 90,
+      "storage": {
+        "type": "local",
+        "path": "./logs/activities.jsonl"
+      },
+      "fields": [
+        "timestamp",
+        "activity_id",
+        "activity_type",
+        "status",
+        "duration_ms",
+        "input_summary",
+        "output_summary",
+        "ethics_evaluation",
+        "user_id",
+        "session_id"
+      ]
+    },
+    "communication_logging": {
+      "enabled": true,
+      "level": "info",
+      "retention_days": 90,
+      "storage": {
+        "type": "local",
+        "path": "./logs/communications.jsonl"
+      },
+      "fields": [
+        "timestamp",
+        "message_id",
+        "direction",
+        "from_agent",
+        "to_agent",
+        "intent",
+        "status",
+        "payload_summary"
+      ]
+    }
+  },
+
+  "ui": {
+    "enabled": true,
+    "base_url": "/agent/ui",
+    "title": "Calculation Agent - Dashboard",
+    "description": "Monitor and control the Calculation Agent",
+    "tabs": [
+      {
+        "id": "overview",
+        "name": "Overview",
+        "path": "/agent/ui/overview",
+        "icon": "dashboard"
+      },
+      {
+        "id": "activities",
+        "name": "Activities",
+        "path": "/agent/ui/activities",
+        "icon": "activity"
+      },
+      {
+        "id": "communications",
+        "name": "Communications",
+        "path": "/agent/ui/communications",
+        "icon": "message-square"
+      },
+      {
+        "id": "ethics",
+        "name": "Ethics & Health",
+        "path": "/agent/ui/ethics",
+        "icon": "shield"
+      },
+      {
+        "id": "io",
+        "name": "I/O",
+        "path": "/agent/ui/io",
+        "icon": "arrow-left-right"
+      }
+    ],
+    "theme": {
+      "primary_color": "#3b82f6",
+      "dark_mode": true
+    }
   }
 }
 
