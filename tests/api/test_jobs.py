@@ -10,7 +10,7 @@ from fastapi.testclient import TestClient
 from scheduler.api.jobs import get_job_queue
 from scheduler.core.task_graph import ActionType, TaskGraph, ToDo
 from scheduler.main import app
-from scheduler.queue.job_queue import Job, JobStatus
+from scheduler.job_queue.job_queue import Job, JobStatus
 
 
 @pytest.fixture

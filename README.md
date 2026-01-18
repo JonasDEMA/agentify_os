@@ -16,6 +16,7 @@ Built on the **Agent Standard v1** - the world's first universal agent wrapper w
 | Document | Description |
 |----------|-------------|
 | **[README.md](README.md)** ⬅️ **You are here** | Main entry point, overview, quick start |
+| **[🧮 Calculator POC](QUICKSTART_CALCULATOR_POC.md)** 🆕 | **Try the end-to-end demo in 5 minutes!** |
 | **[Agent Standard v1 Spec](core/agent_standard/README.md)** | Complete specification of the Agent Standard |
 | **[Agentify Platform](platform/agentify/README.md)** | Agentic economy platform (apps + agents + marketplace) |
 | **[Quick Start Guide](core/agent_standard/QUICKSTART.md)** | Get started in 5 minutes |
@@ -60,6 +61,30 @@ The agentic economy platform built on top of Agent Standard v1.
 - 💰 **Revenue Sharing** - Automatic billing
 
 **See:** [Agentify Platform](platform/agentify/README.md)
+
+---
+
+## 🧮 **Try the Calculator POC (5 Minutes)**
+
+Experience the complete CPA platform with a working end-to-end demo:
+
+```bash
+# Start the POC
+./start-calculator-poc.sh
+
+# Open browser to http://localhost:5173
+# Enter: 10 + 5
+# See the magic: Web UI → Scheduler → Orchestrator → Agents (LAM Protocol)
+```
+
+**What you'll see:**
+- 🌐 Beautiful React UI
+- 🔄 Job queue management (Redis)
+- 🤖 Agent communication (LAM Protocol)
+- 📊 Real-time status updates
+- 🌍 Multi-locale formatting
+
+**[👉 Full Calculator POC Guide](QUICKSTART_CALCULATOR_POC.md)**
 
 ---
 

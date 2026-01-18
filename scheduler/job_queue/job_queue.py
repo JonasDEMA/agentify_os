@@ -4,15 +4,26 @@ Manages job queuing, status tracking, and retry logic.
 """
 
 import json
+import sys
 from datetime import UTC, datetime
 from enum import Enum
+from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
 from redis.asyncio import Redis
 
-from scheduler.core.task_graph import TaskGraph
+# Add scheduler directory to path to support both local and Docker execution
+scheduler_dir = Path(__file__).parent.parent
+if str(scheduler_dir) not in sys.path:
+    sys.path.insert(0, str(scheduler_dir))
+
+# Try importing with scheduler prefix (local), fall back to direct import (Docker)
+try:
+    from scheduler.core.task_graph import TaskGraph
+except ImportError:
+    from core.task_graph import TaskGraph
 
 
 class JobStatus(str, Enum):
@@ -38,6 +49,7 @@ class Job(BaseModel):
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC), description="Creation timestamp")
     started_at: datetime | None = Field(None, description="Start timestamp")
     completed_at: datetime | None = Field(None, description="Completion timestamp")
+    result: dict[str, Any] | None = Field(None, description="Job result data")
     error: str | None = Field(None, description="Error message if failed")
     retry_count: int = Field(default=0, description="Number of retries")
     max_retries: int = Field(default=3, description="Maximum number of retries")
@@ -234,6 +246,7 @@ class JobQueue:
         job_id: str,
         status: JobStatus,
         error: str | None = None,
+        result: dict[str, Any] | None = None,
     ) -> None:
         """Update job status.
 
@@ -241,6 +254,7 @@ class JobQueue:
             job_id: Job ID
             status: New status
             error: Error message (optional)
+            result: Job result data (optional)
 
         Raises:
             RuntimeError: If not connected to Redis
@@ -256,6 +270,8 @@ class JobQueue:
         job.status = status
         if error:
             job.error = error
+        if result:
+            job.result = result
 
         if status == JobStatus.RUNNING and not job.started_at:
             job.started_at = datetime.now(UTC)

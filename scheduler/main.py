@@ -1,8 +1,10 @@
 """FastAPI application entry point for CPA Scheduler."""
 
 import logging
+import sys
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Any
 
 import structlog
@@ -11,9 +13,20 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from scheduler.api import jobs
-from scheduler.config.settings import settings
-from scheduler.queue.job_queue import JobQueue
+# Add current directory to path to support both local and Docker execution
+current_dir = Path(__file__).parent
+if str(current_dir) not in sys.path:
+    sys.path.insert(0, str(current_dir))
+
+# Try importing with scheduler prefix (local), fall back to direct import (Docker)
+try:
+    from scheduler.api import calculate, jobs
+    from scheduler.config.settings import settings
+    from scheduler.job_queue.job_queue import JobQueue
+except ImportError:
+    from api import calculate, jobs
+    from config.settings import settings
+    from job_queue.job_queue import JobQueue
 
 # Configure structlog
 structlog.configure(
@@ -106,11 +119,13 @@ app.add_middleware(
     allow_headers=[settings.cors_allow_headers],
 )
 
-# Set dependency for jobs router
-jobs.get_job_queue = get_job_queue
+# Override dependency functions in routers
+app.dependency_overrides[jobs.get_job_queue] = get_job_queue
+app.dependency_overrides[calculate.get_job_queue] = get_job_queue
 
 # Include routers
 app.include_router(jobs.router)
+app.include_router(calculate.router)
 
 
 # Exception handlers
