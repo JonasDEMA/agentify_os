@@ -7,20 +7,12 @@ from uuid import uuid4
 
 import httpx
 
-# Add scheduler directory to path to support both local and Docker execution
-scheduler_dir = Path(__file__).parent.parent
-if str(scheduler_dir) not in sys.path:
-    sys.path.insert(0, str(scheduler_dir))
+# Add parent directory to path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-# Try importing with scheduler prefix (local), fall back to direct import (Docker)
-try:
-    from scheduler.core.agent_registry import AgentRegistry
-    from scheduler.core.lam_protocol import InformMessage, MessageType, RequestMessage
-    from scheduler.job_queue.job_queue import Job, JobQueue, JobStatus
-except ImportError:
-    from core.agent_registry import AgentRegistry
-    from core.lam_protocol import InformMessage, MessageType, RequestMessage
-    from job_queue.job_queue import Job, JobQueue, JobStatus
+from scheduler.core.agent_registry import AgentRegistry
+from scheduler.core.lam_protocol import InformMessage, MessageType, RequestMessage
+from scheduler.queue.job_queue import Job, JobQueue, JobStatus
 
 logger = logging.getLogger(__name__)
 
@@ -55,16 +47,22 @@ class CalculatorOrchestrator:
             # Update job status to running
             await self.job_queue.update_status(job.id, JobStatus.RUNNING)
 
-            # Extract parameters from job result (set by API)
-            params = job.result or {}
-            num1 = params.get("num1")
-            num2 = params.get("num2")
-            operator = params.get("operator")
-            locale = params.get("locale", "en-US")
-            decimals = params.get("decimals", 2)
-
-            if num1 is None or num2 is None or operator is None:
-                raise ValueError("Missing required parameters: num1, num2, operator")
+            # Extract parameters from task graph selector
+            task_id = list(job.task_graph.tasks.keys())[0] if job.task_graph.tasks else None
+            if not task_id:
+                raise ValueError("No tasks in job")
+            
+            task = job.task_graph.tasks[task_id]
+            # Parse selector which contains: calculator:operator:num1:num2:locale:decimals
+            parts = task.selector.split(":")
+            if len(parts) < 4:
+                raise ValueError(f"Invalid calculator task selector: {task.selector}")
+            
+            operator = parts[1]
+            num1 = float(parts[2])
+            num2 = float(parts[3])
+            locale = parts[4] if len(parts) > 4 else "en-US"
+            decimals = int(parts[5]) if len(parts) > 5 else 2
 
             conversation_id = str(uuid4())
 
@@ -82,11 +80,24 @@ class CalculatorOrchestrator:
 
             # Update job with final result
             result = {
-                **params,
+                "num1": num1,
+                "num2": num2,
+                "operator": operator,
+                "locale": locale,
+                "decimals": decimals,
                 "raw_result": calc_result,
                 "formatted_result": formatted_result,
             }
-            await self.job_queue.update_status(job.id, JobStatus.DONE, result=result)
+            # Store result in Redis
+            import json
+            job_data = await self.job_queue.get_job(job.id)
+            if job_data:
+                job_key = self.job_queue._get_job_key(job.id)
+                job_dict = job_data.model_dump()
+                job_dict["result"] = result
+                await self.job_queue.redis.set(job_key, json.dumps(job_dict))
+            
+            await self.job_queue.update_status(job.id, JobStatus.DONE)
 
             logger.info(
                 f"Calculation job completed: {job.id} -> {formatted_result}"
@@ -94,8 +105,7 @@ class CalculatorOrchestrator:
 
         except Exception as e:
             logger.error(f"Calculation job failed: {job.id} - {e}", exc_info=True)
-            job.error = str(e)
-            await self.job_queue.update_status(job.id, JobStatus.FAILED)
+            await self.job_queue.update_status(job.id, JobStatus.FAILED, error=str(e))
 
     async def _call_calculation_agent(
         self, num1: float, num2: float, operator: str, conversation_id: str

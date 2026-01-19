@@ -5,7 +5,7 @@ from fastapi.responses import FileResponse
 import os
 
 from scheduler.audit.audit_log import AuditLogService, AuditEntry
-from scheduler.repository.sqlite_repository import SQLiteAuditRepository, TestingSessionLocal
+from scheduler.repository.sqlite_repository import SQLiteAuditRepository
 from scheduler.config.settings import settings
 
 router = APIRouter()

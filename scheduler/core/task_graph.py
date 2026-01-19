@@ -21,6 +21,7 @@ class ActionType(str, Enum):
     PLAYWRIGHT = "playwright"  # Playwright script
     UIA = "uia"  # UI Automation
     SEND_MAIL = "send_mail"  # Send email
+    TOOL = "tool"  # Generic tool action
 
 
 class TaskStatus(str, Enum):

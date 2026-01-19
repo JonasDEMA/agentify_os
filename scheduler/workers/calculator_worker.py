@@ -7,20 +7,12 @@ import signal
 import sys
 from pathlib import Path
 
-# Add scheduler directory to path to support both local and Docker execution
-scheduler_dir = Path(__file__).parent.parent
-if str(scheduler_dir) not in sys.path:
-    sys.path.insert(0, str(scheduler_dir))
+# Add parent directory to path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-# Try importing with scheduler prefix (local), fall back to direct import (Docker)
-try:
-    from scheduler.core.agent_registry import AgentRegistry
-    from scheduler.orchestrator.calculator_orchestrator import CalculatorOrchestrator
-    from scheduler.job_queue.job_queue import JobQueue, JobStatus
-except ImportError:
-    from core.agent_registry import AgentRegistry
-    from orchestrator.calculator_orchestrator import CalculatorOrchestrator
-    from job_queue.job_queue import JobQueue, JobStatus
+from scheduler.core.agent_registry import AgentRegistry
+from scheduler.orchestrator.calculator_orchestrator import CalculatorOrchestrator
+from scheduler.queue.job_queue import JobQueue, JobStatus
 
 # Configure logging
 logging.basicConfig(
@@ -56,15 +48,16 @@ async def main():
     if not agents_config:
         # Try to find the config file
         possible_paths = [
+            "/app/scheduler/config/agents.yaml",  # Docker path with mount
             "scheduler/config/agents.yaml",  # Local execution
-            "config/agents.yaml",  # Docker execution
+            "config/agents.yaml",  # Fallback
         ]
         for path in possible_paths:
             if Path(path).exists():
                 agents_config = path
                 break
         if not agents_config:
-            agents_config = "config/agents.yaml"  # Default to Docker path
+            agents_config = "/app/scheduler/config/agents.yaml"  # Default to Docker path
 
     logger.info("Starting calculator worker...")
     logger.info(f"Redis URL: {redis_url}")

@@ -15,28 +15,30 @@ services:
   # Scheduler API
   scheduler:
     build:
-      context: ./scheduler
+      context: .
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
     environment:
       - REDIS_URL=redis://redis:6379
       - ENVIRONMENT=development
+      - DATABASE_URL=sqlite:///./data/scheduler.db
     depends_on:
       redis:
         condition: service_healthy
     volumes:
-      - ./scheduler:/app
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+      - ./scheduler:/app/scheduler
+      - ./data:/app/data
+    command: python -m scheduler.main
 
   # Calculator Worker
   calculator-worker:
     build:
-      context: ./scheduler
+      context: .
       dockerfile: Dockerfile
     environment:
       - REDIS_URL=redis://redis:6379
-      - AGENTS_CONFIG=config/agents.yaml
+      - AGENTS_CONFIG=/app/scheduler/config/agents.yaml
       - PYTHONPATH=/app
     depends_on:
       redis:
@@ -46,8 +48,9 @@ services:
       formatting-agent:
         condition: service_started
     volumes:
-      - ./scheduler:/app
-    command: python workers/calculator_worker.py
+      - ./scheduler:/app/scheduler
+      - ./data:/app/data
+    command: python -m scheduler.workers.calculator_worker
 
   # Calculation Agent
   calculation-agent:
