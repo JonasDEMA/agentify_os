@@ -10,13 +10,13 @@
 
 ## 📋 **Table of Contents**
 
-1. [Understanding the Two Layers](#understanding-the-two-layers)
-2. [Quick Start - Create Your First Agent](#quick-start)
-3. [The Agent Standard v1](#agent-standard-v1)
-4. [Runtime Libraries](#runtime-libraries)
-5. [Templates & Examples](#templates--examples)
-6. [AI Prompt for Development](#ai-prompt-for-development)
-7. [Deployment & Registration](#deployment--registration)
+1. [Understanding the Two Layers](#-understanding-the-two-layers)
+2. [Quick Start - Create Your First Agent](#-quick-start---create-your-first-agent)
+3. [The Agent Standard v1](#-agent-standard-v1)
+4. [Runtime Libraries](#️-runtime-libraries)
+5. [Templates & Examples](#-templates--examples)
+6. [AI Prompt for Development](#-ai-prompt-for-development)
+7. [Deployment & Registration](#-deployment--registration)
 
 ---
 
@@ -243,13 +243,25 @@ Every agent MUST follow the Agent Standard v1, which defines **14 core areas**:
 ### **Python Library**
 
 **Installation:**
+
 ```bash
-pip install agentify-sdk
+# Option 1: Install from source (current method)
+git clone https://github.com/JonasDEMA/agentify_os.git
+cd agentify_os
+pip install -e .
+
+# Option 2: Install from GitHub
+pip install git+https://github.com/JonasDEMA/agentify_os.git
+
+# Option 3: Install from PyPI (coming soon)
+# pip install agentify-sdk
 ```
+
+**📖 See:** [INSTALLATION.md](../../INSTALLATION.md) for detailed installation instructions
 
 **Usage:**
 ```python
-from agentify import Agent
+from core.agent_standard.core.agent import Agent
 
 # Load agent
 agent = Agent.from_json_file("my_agent.json")
