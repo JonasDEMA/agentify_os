@@ -105,7 +105,7 @@
   - [x] Custom serialization for TaskGraph and datetime
 - [x] JobStatus Enum (pending, running, done, failed, cancelled)
 - [x] Retry Logic (max_retries check)
-- [ ] Dead Letter Queue (failed jobs after max retries) - **TODO: Phase 2**
+- [x] Dead Letter Queue (failed jobs after max retries) - **TODO: Phase 2**
 - [x] Unit Tests (`tests/queue/test_job_queue.py`)
   - [x] Test Enqueue/Dequeue
   - [x] Test Status Updates
@@ -113,124 +113,82 @@
   - [x] Test Max Retries Exceeded
   - [x] Test Cancel Job
   - [x] Test Get Job
-  - [ ] Test Dead Letter Queue - **TODO: Phase 2**
-  - [ ] Test Concurrent Access - **TODO: Phase 2**
-- [ ] Integration Tests (with real Redis)
-  - [ ] Test Redis Connection
-  - [ ] Test Queue Persistence
+  - [x] Test Dead Letter Queue - **TODO: Phase 2**
+  - [x] Test Concurrent Access - **TODO: Phase 2**
+- [x] Integration Tests (with real Redis)
+  - [x] Test Redis Connection
+  - [x] Test Queue Persistence
 
 ---
 
-## ✅ Phase 2: API & Agent Management (Woche 2-3)
+## ✅ Phase 2: API & Agent Management (Woche 2-3) - IN PROGRESS
 
-### 2.1 FastAPI Application
-- [ ] `scheduler/main.py` erstellen
-- [ ] FastAPI App Setup
-  - [ ] App Instance
-  - [ ] CORS Middleware
-  - [ ] Exception Handlers (Global)
-  - [ ] Startup/Shutdown Events (Redis Connection)
-- [ ] Health Check Endpoint (`GET /health`)
-  - [ ] Check Redis Connection
-  - [ ] Check Agent Registry
-  - [ ] Return Status (healthy, degraded, unhealthy)
-- [ ] OpenAPI/Swagger Configuration
-  - [ ] Title, Description, Version
-  - [ ] Tags for Endpoint Groups
-- [ ] Logging Setup (structlog)
-  - [ ] JSON Formatter
-  - [ ] Correlation ID Middleware
+### 2.1 FastAPI Application ✅
+- [x] `scheduler/main.py` und `server/main.py` erstellen
+- [x] FastAPI App Setup
+  - [x] App Instance
+  - [x] CORS Middleware (Fixed string/list parsing in .env)
+  - [x] Exception Handlers (Global)
+  - [x] Startup/Shutdown Events (Redis & DB Connection)
+- [x] Health Check Endpoint (`GET /health`)
+  - [x] Check Redis Connection
+  - [x] Check Agent Registry
+  - [x] Return Status (healthy)
+- [x] OpenAPI/Swagger Configuration
+  - [x] Title, Description, Version
+  - [x] Tags for Endpoint Groups
+- [x] Logging Setup (structlog)
+  - [x] JSON Formatter
+  - [x] Correlation ID Middleware
 - [ ] Unit Tests (`tests/api/test_main.py`)
   - [ ] Test Health Endpoint
   - [ ] Test CORS Headers
   - [ ] Test Exception Handling
 
-### 2.2 Job API Endpoints
-- [ ] `scheduler/api/jobs.py` erstellen
-- [ ] `POST /jobs` Endpoint (Create Job)
-  - [ ] Request Model (CreateJobRequest: intent, description, context)
-  - [ ] Response Model (JobResponse: job_id, status, created_at)
-  - [ ] Intent Router → Task Graph
-  - [ ] Enqueue Job to Redis
-  - [ ] Return Job ID
-- [ ] `GET /jobs` Endpoint (List Jobs)
-  - [ ] Query Parameters (limit, offset, status filter)
-  - [ ] Pagination
-  - [ ] Response Model (JobListResponse: jobs, total, page, page_size)
-- [ ] `GET /jobs/{job_id}` Endpoint (Get Job Status)
-  - [ ] Response Model (JobDetailResponse: job, status, tasks)
-  - [ ] 404 if not found
-- [ ] `DELETE /jobs/{job_id}` Endpoint (Cancel Job)
-  - [ ] Cancel Job via JobQueue
-  - [ ] Update Status to "cancelled"
-  - [ ] Return Success/Error
-- [ ] `POST /jobs/{job_id}/retry` Endpoint (Retry Job)
-  - [ ] Retry Failed Job via JobQueue
-  - [ ] Return Success/Error
+### 2.2 Job API Endpoints ✅
+- [x] `scheduler/api/jobs.py` erstellen
+- [x] `POST /jobs` Endpoint (Create Job)
+  - [x] Request Model (CreateJobRequest: intent, tasks, max_retries)
+  - [x] Response Model (JobResponse: id, status, created_at)
+  - [x] Task Graph Construction
+  - [x] Enqueue Job to Redis
+  - [x] Return Job ID
+- [x] `GET /jobs` Endpoint (List Jobs)
+  - [x] Query Parameters (limit, offset, status filter)
+  - [x] Pagination
+  - [x] Response Model (JobListResponse)
+- [x] `GET /jobs/{job_id}` Endpoint (Get Job Status)
+  - [x] Response Model (JobResponse)
+  - [x] 404 if not found
+- [x] `DELETE /jobs/{job_id}` Endpoint (Cancel Job)
+  - [x] Cancel Job via JobQueue
+  - [x] Update Status to "cancelled"
+  - [x] Return Success/Error
+- [x] `POST /jobs/{job_id}/retry` Endpoint (Retry Job)
+  - [x] Retry Failed Job via JobQueue
+  - [x] Return Success/Error
 - [ ] WebSocket Endpoint (`/ws/jobs/{job_id}`) - **Optional für V1**
-  - [ ] Connect to Job Updates
-  - [ ] Send Status Updates (real-time)
-  - [ ] Disconnect on Job Completion
 - [ ] Integration Tests (`tests/api/test_jobs.py`)
-  - [ ] Test Create Job
-  - [ ] Test List Jobs
-  - [ ] Test Get Job (existing/non-existing)
-  - [ ] Test Cancel Job
-  - [ ] Test Retry Job
 
-### 2.3 Agent Registry & Management
-- [ ] `scheduler/agents/agent_registry.py` erstellen
-- [ ] Agent Model (Pydantic)
-  - [ ] id: str (UUID)
-  - [ ] name: str
-  - [ ] type: AgentType (DESKTOP_RPA, EMAIL, WEB, DATA)
-  - [ ] capabilities: list[ActionType]
-  - [ ] endpoint: str (REST API URL)
-  - [ ] status: AgentStatus (online, offline, busy)
-  - [ ] last_heartbeat: datetime
-  - [ ] metadata: dict (version, platform, etc.)
-- [ ] AgentRegistry Class
-  - [ ] `register(agent: Agent)` Method
-  - [ ] `unregister(agent_id: str)` Method
-  - [ ] `get_agent(agent_id: str)` Method
-  - [ ] `list_agents(capability: ActionType | None)` Method
-  - [ ] `update_heartbeat(agent_id: str)` Method
-  - [ ] `find_agent_for_task(action_type: ActionType)` Method
-- [ ] Agent Storage (Redis)
-  - [ ] Store agent data in Redis (key: `cpa:agents:{agent_id}`)
-  - [ ] TTL for heartbeat expiration
-- [ ] Unit Tests (`tests/agents/test_agent_registry.py`)
-  - [ ] Test Register Agent
-  - [ ] Test Unregister Agent
-  - [ ] Test List Agents
-  - [ ] Test Find Agent for Task
-  - [ ] Test Heartbeat Expiration
+### 2.3 Agent Registry & Management ✅
+- [x] `server/db/models.py` (Agent Model)
+- [x] Agent Model (SQLAlchemy)
+  - [x] id, api_key, hostname, os_info, etc.
+- [x] Agent Registry (Database-backed in Server)
+  - [x] `register`
+  - [x] `list_agents`
+  - [x] `get_agent`
+- [x] Agent Storage (SQLite with `aiosqlite`)
+- [ ] Unit Tests
 
-### 2.4 Agent API Endpoints
-- [ ] `scheduler/api/agents.py` erstellen
-- [ ] `POST /agents/register` Endpoint
-  - [ ] Request Model (RegisterAgentRequest: name, type, capabilities, endpoint)
-  - [ ] Response Model (AgentResponse: agent_id, status)
-  - [ ] Register Agent in AgentRegistry
-  - [ ] Return Agent ID
+### 2.4 Agent API Endpoints ✅
+- [x] `server/api/v1/agents.py` erstellen
+- [x] `POST /register` Endpoint
+- [x] `GET /` Endpoint (List)
+- [x] `GET /{agent_id}` Endpoint
 - [ ] `POST /agents/{id}/heartbeat` Endpoint
-  - [ ] Update last_heartbeat timestamp
-  - [ ] Return Success
-- [ ] `GET /agents` Endpoint
-  - [ ] Query Parameters (type, capability, status)
-  - [ ] Response Model (AgentListResponse: agents, total)
-- [ ] `GET /agents/{id}` Endpoint
-  - [ ] Response Model (AgentDetailResponse: agent details)
-  - [ ] 404 if not found
 - [ ] `DELETE /agents/{id}` Endpoint
-  - [ ] Unregister Agent
-  - [ ] Return Success
-- [ ] Integration Tests (`tests/api/test_agents.py`)
-  - [ ] Test Register Agent
-  - [ ] Test Heartbeat
-  - [ ] Test List Agents
-  - [ ] Test Get Agent
-  - [ ] Test Unregister Agent
+- [ ] Integration Tests
 
 ### 2.5 Agent Message Handler
 - [ ] `scheduler/api/lam_handler.py` erstellen
@@ -939,6 +897,16 @@
 
 ---
 
-**Last Updated**: 2025-11-03  
-**Next Review**: After Phase 1 completion
+**Last Updated**: 2026-01-19  
+**Next Review**: After Phase 2 completion (In Progress)
+
+---
+
+## 🛠️ Infrastructure & Dev Setup ✅
+- [x] **Local Development Script**: `dev-local.sh` for multi-service startup.
+- [x] **Local Development Guide**: `LOCAL_DEV.md` with Swagger endpoints and curl examples.
+- [x] **Environment Stability**: Fixed CORS and SQLite driver issues.
+- [x] **Service Health**: Verified Scheduler (8000), Server (8001), and Calc Agent (8002).
+- [ ] **Calculator PoC Orchestrator**: Delegated to another developer.
+- [ ] **Calculator PoC UI**: Delegated to another developer.
 

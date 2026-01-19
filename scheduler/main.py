@@ -107,7 +107,7 @@ app.add_middleware(
 )
 
 # Set dependency for jobs router
-jobs.get_job_queue = get_job_queue
+app.dependency_overrides[jobs.get_job_queue] = get_job_queue
 
 # Include routers
 app.include_router(jobs.router)
