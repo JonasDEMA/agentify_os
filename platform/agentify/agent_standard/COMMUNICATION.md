@@ -635,12 +635,101 @@ See `platform/agentify/base_orchestrator/base_orchestrator/agent_protocol.py` fo
 
 ---
 
+## 🌐 **Agentify Marketplace Integration**
+
+### **Overview**
+
+The Agentify Marketplace is a central platform for AI Agents and Apps. Agents can communicate with the Marketplace through a natural language API.
+
+### **API Endpoint**
+
+```
+POST https://uigsswdxmjqfccuxguxb.supabase.co/functions/v1/orchestrator-agent/chat
+```
+
+### **Authentication**
+
+```http
+X-API-Key: <your_agfy_token>
+```
+
+### **Request Format**
+
+Send a natural language request as JSON:
+
+```json
+{
+  "message": "Your request here"
+}
+```
+
+### **Response Format**
+
+```json
+{
+  "response": "Natural language summary",
+  "data": [...],
+  "tools_used": ["search_agents", ...]
+}
+```
+
+### **Example Requests**
+
+**Search for agents:**
+```json
+{ "message": "Find agents for code generation" }
+{ "message": "Show me free text analysis agents" }
+{ "message": "What agents are available for Healthcare?" }
+```
+
+**Get agent details:**
+```json
+{ "message": "Give me details about agent.codegen.fast" }
+{ "message": "Tell me more about the CodeHelper Agent" }
+```
+
+**Register an agent:**
+```json
+{ "message": "Register a new agent named MyBot with ID agent.myorg.mybot. It can do text analysis." }
+```
+
+**Marketplace statistics:**
+```json
+{ "message": "How many agents are in the marketplace?" }
+```
+
+### **Available Tools**
+
+The orchestrator automatically detects the right action and calls the following tools:
+
+- **`search_agents`** - Search agents by capability, name, industry
+- **`get_agent`** - Get details about a specific agent
+- **`search_apps`** - Search apps in the marketplace
+- **`register_agent`** - Register a new agent
+- **`get_marketplace_stats`** - Get marketplace statistics
+
+### **API Key Scopes**
+
+- **`read:agents`** - For searching and retrieving agent details
+- **`write:agents`** - For registering new agents
+
+### **Important Notes**
+
+- ✅ All requests are in natural language
+- ✅ The orchestrator automatically detects the right action
+- ✅ No manual tool selection required
+- ✅ Structured data is automatically returned
+
+---
+
 ## 🔗 **Related Documentation**
 
-- **Agent Standard**: `README.md` - Agent Standard v1
-- **Authentication**: `AUTHENTICATION.md` - Authentication & IAM
-- **App Standard**: `../app_standard/README.md` - App Standard v1
-- **Marketplace**: `../marketplace/README.md` - Marketplace
+- **Agent Standard**: [https://github.com/JonasDEMA/agentify_os/tree/main/platform/agentify/agent_standard](https://github.com/JonasDEMA/agentify_os/tree/main/platform/agentify/agent_standard) - Agent Standard v1
+- **Authentication**: [AUTHENTICATION.md](./AUTHENTICATION.md) - Authentication & IAM
+- **App Standard**: [https://github.com/JonasDEMA/agentify_os/blob/main/platform/agentify/app_standard/README.md](https://github.com/JonasDEMA/agentify_os/blob/main/platform/agentify/app_standard/README.md) - App Standard v1
+- **Marketplace Docs**: [https://agentify-omega.vercel.app/docs](https://agentify-omega.vercel.app/docs)
+- **GitHub Repository**: [https://github.com/JonasDEMA/agentify_os](https://github.com/JonasDEMA/agentify_os)
+- **Project Documentation**: [https://github.com/JonasDEMA/agentify_os/tree/main/docs](https://github.com/JonasDEMA/agentify_os/tree/main/docs)
 
 ---
 

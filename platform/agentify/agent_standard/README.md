@@ -2,9 +2,15 @@
 
 **Universal Agent Wrapper for the Agentic Economy**
 
+> 🚀 **Quick Start:** [core/agent_standard/QUICKSTART_COMPLETE.md](../../../core/agent_standard/QUICKSTART_COMPLETE.md) - Create your first agent in 5 minutes!
+>
+> 📝 **Complete Example:** [core/agent_standard/examples/complete_agent_example.json](../../../core/agent_standard/examples/complete_agent_example.json) - All 14 sections
+>
 > 📚 **Complete Implementation:** See [core/agent_standard/](../../../core/agent_standard/) for full source code, models, and runtime.
 >
-> 📖 **Detailed Anatomy:** See [AGENT_ANATOMY.md](../../../core/agent_standard/AGENT_ANATOMY.md) for complete manifest structure.
+> 📖 **Agent Anatomy:** See [AGENT_ANATOMY.md](./AGENT_ANATOMY.md) for complete manifest structure reference.
+>
+> 📊 **Implementation Status:** See [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) for current progress.
 >
 > 🔐 **Authentication:** See [AUTHENTICATION.md](./AUTHENTICATION.md) for authentication and IAM requirements.
 >

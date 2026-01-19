@@ -79,14 +79,99 @@ class FrameworkAdapter(BaseModel):
 
 class Tool(BaseModel):
     """A tool the agent can use."""
-    
+
     name: str = Field(..., description="Tool name")
     description: str = Field(..., description="What this tool does")
+    category: str | None = Field(default=None, description="Tool category")
+    executor: str | None = Field(default=None, description="Python path to executor class")
     input_schema: dict[str, Any] = Field(..., description="Input schema (JSON Schema)")
     output_schema: dict[str, Any] = Field(..., description="Output schema (JSON Schema)")
     connection: dict[str, Any] = Field(
         default_factory=dict,
         description="Connection status and configuration",
+    )
+    policies: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Tool usage policies (rate limits, approval requirements, etc.)",
+    )
+
+
+class Activity(BaseModel):
+    """A single activity in the execution queue."""
+
+    id: str = Field(..., description="Activity ID")
+    type: str = Field(..., description="Activity type (e.g., 'tool_call', 'scheduled_job')")
+    tool: str | None = Field(default=None, description="Tool name if type is 'tool_call'")
+    job_id: str | None = Field(default=None, description="Job ID if type is 'scheduled_job'")
+    params: dict[str, Any] = Field(default_factory=dict, description="Activity parameters")
+    status: Literal["queued", "running", "completed", "failed"] = Field(
+        default="queued",
+        description="Activity status",
+    )
+    started_at: datetime | None = Field(default=None, description="When activity started")
+    completed_at: datetime | None = Field(default=None, description="When activity completed")
+    progress: float = Field(default=0.0, ge=0.0, le=1.0, description="Progress (0.0 to 1.0)")
+    scheduled_for: datetime | None = Field(default=None, description="When activity is scheduled for")
+
+
+class ExecutionState(BaseModel):
+    """Current execution state."""
+
+    current_activity: str | None = Field(default=None, description="Current activity ID")
+    queue_length: int = Field(default=0, ge=0, description="Number of queued activities")
+    avg_execution_time_ms: float = Field(default=0.0, ge=0.0, description="Average execution time in ms")
+
+
+class Activities(BaseModel):
+    """Activity queue and execution state."""
+
+    queue: list[Activity] = Field(default_factory=list, description="Activity queue")
+    execution_state: ExecutionState = Field(
+        default_factory=ExecutionState,
+        description="Current execution state",
+    )
+
+
+class Prompt(BaseModel):
+    """System prompt configuration."""
+
+    system: str = Field(..., description="System prompt")
+    user_template: str | None = Field(default=None, description="User message template")
+    assistant_template: str | None = Field(default=None, description="Assistant message template")
+    temperature: float | None = Field(default=None, ge=0.0, le=2.0, description="LLM temperature override")
+    max_tokens: int | None = Field(default=None, ge=1, description="Max tokens override")
+
+
+class InputValidation(BaseModel):
+    """Input validation configuration."""
+
+    max_length: int = Field(default=10000, ge=1, description="Maximum input length")
+    allowed_formats: list[str] = Field(default_factory=list, description="Allowed input formats")
+    content_filters: list[str] = Field(default_factory=list, description="Content filters to apply")
+
+
+class OutputValidation(BaseModel):
+    """Output validation configuration."""
+
+    max_length: int = Field(default=5000, ge=1, description="Maximum output length")
+    required_format: str | None = Field(default=None, description="Required output format")
+    content_filters: list[str] = Field(default_factory=list, description="Content filters to apply")
+
+
+class Guardrails(BaseModel):
+    """Guardrails configuration."""
+
+    input_validation: InputValidation = Field(
+        default_factory=InputValidation,
+        description="Input validation rules",
+    )
+    output_validation: OutputValidation = Field(
+        default_factory=OutputValidation,
+        description="Output validation rules",
+    )
+    tool_usage_policies: dict[str, dict[str, Any]] = Field(
+        default_factory=dict,
+        description="Per-tool usage policies",
     )
 
 
@@ -173,22 +258,37 @@ class AgentManifest(BaseModel):
         default_factory=dict,
         description="Scheduled jobs",
     )
-    
+
+    activities: Activities = Field(
+        default_factory=Activities,
+        description="Activity queue and execution state",
+    )
+
+    prompt: Prompt | None = Field(
+        default=None,
+        description="System prompt configuration",
+    )
+
+    guardrails: Guardrails = Field(
+        default_factory=Guardrails,
+        description="Guardrails configuration",
+    )
+
     team: dict[str, Any] = Field(
         default_factory=dict,
         description="Team relationships",
     )
-    
+
     customers: dict[str, Any] = Field(
         default_factory=dict,
         description="Customer assignments",
     )
-    
+
     pricing: dict[str, Any] = Field(
         default_factory=dict,
         description="Pricing configuration",
     )
-    
+
     observability: dict[str, Any] = Field(
         default_factory=dict,
         description="Observability configuration (logs, traces, incidents)",
