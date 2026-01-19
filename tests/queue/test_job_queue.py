@@ -79,7 +79,7 @@ class TestJobQueue:
         redis_mock.get = AsyncMock(return_value=None)
         redis_mock.set = AsyncMock(return_value=True)
         redis_mock.delete = AsyncMock(return_value=1)
-        redis_mock.close = AsyncMock()
+        redis_mock.aclose = AsyncMock()
         return redis_mock
 
     @pytest.mark.asyncio

@@ -9,7 +9,7 @@ from enum import Enum
 from typing import Any
 from uuid import uuid4
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class MessageType(str, Enum):
@@ -96,10 +96,7 @@ class BaseMessage(BaseModel):
         data = json.loads(json_str)
         return cls.from_dict(data)
 
-    class Config:
-        """Pydantic config."""
-
-        use_enum_values = True
+    model_config = ConfigDict(use_enum_values=True)
 
 
 class RequestMessage(BaseMessage):

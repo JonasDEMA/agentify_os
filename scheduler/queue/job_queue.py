@@ -99,7 +99,7 @@ class JobQueue:
     async def close(self) -> None:
         """Close Redis connection."""
         if self.redis:
-            await self.redis.close()
+            await self.redis.aclose()
 
     def _get_job_key(self, job_id: str) -> str:
         """Get Redis key for job data.

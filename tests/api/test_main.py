@@ -16,7 +16,7 @@ def mock_redis() -> MagicMock:
     """Create mock Redis client."""
     mock = MagicMock()
     mock.ping = AsyncMock(return_value=True)
-    mock.close = AsyncMock()
+    mock.aclose = AsyncMock()
     return mock
 
 

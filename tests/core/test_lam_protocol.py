@@ -7,7 +7,7 @@ from uuid import UUID
 import pytest
 from pydantic import ValidationError
 
-from scheduler.core.agent_protocol import (
+from scheduler.core.lam_protocol import (
     AgreeMessage,
     AssignMessage,
     BaseMessage,
