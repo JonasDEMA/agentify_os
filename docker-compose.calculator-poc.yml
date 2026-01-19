@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  # Redis for job queue
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Scheduler API
+  scheduler:
+    build:
+      context: ./scheduler
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - ENVIRONMENT=development
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./scheduler:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  # Calculator Worker
+  calculator-worker:
+    build:
+      context: ./scheduler
+      dockerfile: Dockerfile
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - AGENTS_CONFIG=config/agents.yaml
+      - PYTHONPATH=/app
+    depends_on:
+      redis:
+        condition: service_healthy
+      calculation-agent:
+        condition: service_started
+      formatting-agent:
+        condition: service_started
+    volumes:
+      - ./scheduler:/app
+    command: python workers/calculator_worker.py
+
+  # Calculation Agent
+  calculation-agent:
+    build:
+      context: .
+      dockerfile: agents/calculation/Dockerfile
+    ports:
+      - "8001:8000"
+    environment:
+      - PORT=8000
+
+  # Formatting Agent
+  formatting-agent:
+    build:
+      context: .
+      dockerfile: agents/formatting/Dockerfile
+    ports:
+      - "8002:8000"
+    environment:
+      - PORT=8000
+
+  # Web UI
+  web-ui:
+    build:
+      context: ./web-ui
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    volumes:
+      - ./web-ui:/app
+      - /app/node_modules
+    command: npm run dev -- --host 0.0.0.0
+
+networks:
+  default:
+    name: calculator-poc
+
