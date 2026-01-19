@@ -24,6 +24,7 @@ class AgentInfo(BaseModel):
     # Network
     ip_address: str = Field(..., description="Local IP address")
     mac_address: str = Field(..., description="MAC address")
+    port: int | None = Field(None, description="Agent's listening port")
     
     # Software
     python_version: str = Field(..., description="Python version (e.g., '3.12.0')")
@@ -74,4 +75,19 @@ class ScreenshotUpload(BaseModel):
     task_goal: str | None = Field(None, description="Current task goal")
     filename: str = Field(..., description="Screenshot filename")
     file_size_bytes: int = Field(..., description="File size in bytes")
+
+
+class AgentHeartbeatRequest(BaseModel):
+    """Agent heartbeat request."""
+    
+    agent_id: str = Field(..., description="Agent ID")
+    status: str = Field("active", description="Current agent status")
+    current_task: str | None = Field(None, description="Current task goal, if any")
+
+
+class AgentHeartbeatResponse(BaseModel):
+    """Agent heartbeat response."""
+    
+    status: str = Field(..., description="Confirmation status")
+    next_check_in: int = Field(default=30, description="Recommended seconds until next heartbeat")
 

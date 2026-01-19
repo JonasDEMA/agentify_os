@@ -1,5 +1,6 @@
 """FastAPI application entry point for CPA Scheduler."""
 
+import asyncio
 import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
@@ -11,9 +12,11 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from scheduler.api import jobs, lam_handler
+from scheduler.api import jobs, lam_handler, audit
 from scheduler.config.settings import settings
+from scheduler.orchestrator.orchestrator import Orchestrator
 from scheduler.queue.job_queue import JobQueue
+from scheduler.telemetry.telemetry import TelemetryService
 
 # Configure structlog
 structlog.configure(
@@ -33,6 +36,8 @@ logger = structlog.get_logger()
 
 # Global state
 job_queue: JobQueue | None = None
+orchestrator: Orchestrator | None = None
+telemetry: TelemetryService | None = None
 
 
 def get_job_queue() -> JobQueue:
@@ -67,11 +72,17 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     )
 
     # Initialize Redis connection
-    global job_queue
+    global job_queue, orchestrator, telemetry
+    telemetry = TelemetryService()
     job_queue = JobQueue(redis_url=settings.redis_url)
     try:
         await job_queue.connect()
         logger.info("redis_connected", redis_url=settings.redis_url)
+
+        # Initialize and start Orchestrator
+        orchestrator = Orchestrator(job_queue=job_queue, telemetry=telemetry)
+        asyncio.create_task(orchestrator.start())
+        logger.info("orchestrator_started")
     except Exception as e:
         logger.error("redis_connection_failed", error=str(e), redis_url=settings.redis_url)
         # Don't fail startup, but log the error
@@ -81,6 +92,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
     # Shutdown
     logger.info("application_shutdown")
+    if orchestrator:
+        await orchestrator.stop()
+        logger.info("orchestrator_stopped")
     if job_queue:
         await job_queue.close()
         logger.info("redis_disconnected")
@@ -112,6 +126,7 @@ app.dependency_overrides[jobs.get_job_queue] = get_job_queue
 # Include routers
 app.include_router(jobs.router)
 app.include_router(lam_handler.router)
+app.include_router(audit.router, prefix="/api/v1/audit", tags=["Audit"])
 
 
 # Exception handlers
@@ -219,4 +234,9 @@ async def root() -> dict[str, str]:
         "version": settings.app_version,
         "docs": "/docs",
     }
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
 

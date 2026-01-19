@@ -23,6 +23,15 @@ class ActionType(str, Enum):
     SEND_MAIL = "send_mail"  # Send email
 
 
+class TaskStatus(str, Enum):
+    """Task status enum."""
+
+    PENDING = "pending"
+    RUNNING = "running"
+    DONE = "done"
+    FAILED = "failed"
+
+
 class ToDo(BaseModel):
     """Task definition model.
 

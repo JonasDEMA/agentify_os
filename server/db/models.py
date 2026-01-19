@@ -29,6 +29,7 @@ class Agent(Base):
     
     ip_address = Column(String, nullable=False)
     mac_address = Column(String, nullable=False)
+    port = Column(Integer, nullable=True)  # Port the agent is listening on
     
     python_version = Column(String, nullable=False)
     agent_version = Column(String, nullable=False)

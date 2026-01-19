@@ -58,6 +58,9 @@ class Settings(BaseSettings):
     jwt_algorithm: str = Field(default="HS256", alias="JWT_ALGORITHM")
     jwt_expiration_minutes: int = Field(default=60, alias="JWT_EXPIRATION_MINUTES")
 
+    # Agent Registry (Server)
+    agent_registry_url: str = Field(default="http://localhost:8001/api/v1/agents", alias="AGENT_REGISTRY_URL")
+
     # CORS
     cors_origins: str = Field(
         default="http://localhost:3000,http://localhost:8080", alias="CORS_ORIGINS"

@@ -10,6 +10,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from agents.desktop_rpa.server_comm.models import (
     AgentRegistrationRequest,
     AgentRegistrationResponse,
+    AgentHeartbeatRequest,
+    AgentHeartbeatResponse,
 )
 from server.core.config import settings
 from server.db.database import get_db
@@ -61,6 +63,7 @@ async def register_agent(
         dpi_scaling=request.agent_info.dpi_scaling,
         ip_address=request.agent_info.ip_address,
         mac_address=request.agent_info.mac_address,
+        port=request.agent_info.port,
         python_version=request.agent_info.python_version,
         agent_version=request.agent_info.agent_version,
         has_vision=request.agent_info.has_vision,
@@ -112,6 +115,7 @@ async def list_agents(
             "os_name": agent.os_name,
             "os_version": agent.os_version,
             "ip_address": agent.ip_address,
+            "port": agent.port,
             "registered_at": agent.registered_at,
             "last_seen_at": agent.last_seen_at,
             "is_active": agent.is_active,
@@ -154,6 +158,7 @@ async def get_agent(
         "dpi_scaling": agent.dpi_scaling,
         "ip_address": agent.ip_address,
         "mac_address": agent.mac_address,
+        "port": agent.port,
         "python_version": agent.python_version,
         "agent_version": agent.agent_version,
         "has_vision": agent.has_vision,
@@ -165,4 +170,68 @@ async def get_agent(
         "is_active": agent.is_active,
         "current_task": agent.current_task,
     }
+
+
+@router.post("/{agent_id}/heartbeat", response_model=AgentHeartbeatResponse)
+async def agent_heartbeat(
+    agent_id: str,
+    request: AgentHeartbeatRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    """Update agent heartbeat and status.
+    
+    Args:
+        agent_id: Agent ID
+        request: Heartbeat request
+        db: Database session
+        
+    Returns:
+        Heartbeat response
+    """
+    if agent_id != request.agent_id:
+        raise HTTPException(status_code=400, detail="Agent ID mismatch")
+        
+    result = await db.execute(select(Agent).where(Agent.id == agent_id))
+    agent = result.scalar_one_or_none()
+    
+    if not agent:
+        raise HTTPException(status_code=404, detail="Agent not found")
+    
+    # Update agent status
+    agent.is_active = request.status == "active"
+    agent.current_task = request.current_task
+    agent.last_seen_at = datetime.now()
+    
+    await db.commit()
+    
+    return AgentHeartbeatResponse(
+        status="ok",
+        next_check_in=30
+    )
+
+
+@router.delete("/{agent_id}")
+async def delete_agent(
+    agent_id: str,
+    db: AsyncSession = Depends(get_db),
+):
+    """Delete an agent registration.
+    
+    Args:
+        agent_id: Agent ID
+        db: Database session
+        
+    Returns:
+        Success message
+    """
+    result = await db.execute(select(Agent).where(Agent.id == agent_id))
+    agent = result.scalar_one_or_none()
+    
+    if not agent:
+        raise HTTPException(status_code=404, detail="Agent not found")
+    
+    await db.delete(agent)
+    await db.commit()
+    
+    return {"status": "ok", "message": f"Agent {agent_id} deleted"}
 

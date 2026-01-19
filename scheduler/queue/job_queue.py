@@ -35,6 +35,7 @@ class Job(BaseModel):
     intent: str = Field(..., description="Intent name")
     task_graph: TaskGraph = Field(..., description="Task graph to execute")
     status: JobStatus = Field(default=JobStatus.PENDING, description="Job status")
+    task_status: dict[str, str] = Field(default_factory=dict, description="Status of individual tasks")
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC), description="Creation timestamp")
     started_at: datetime | None = Field(None, description="Start timestamp")
     completed_at: datetime | None = Field(None, description="Completion timestamp")
@@ -64,6 +65,8 @@ class Job(BaseModel):
                 for task_id, task in self.task_graph.tasks.items()
             }
         }
+        # Include task_status in dump
+        data["task_status"] = self.task_status
         # Serialize datetime objects
         if data.get("created_at"):
             data["created_at"] = data["created_at"].isoformat()
@@ -261,6 +264,37 @@ class JobQueue:
             job.started_at = datetime.now(UTC)
         elif status in (JobStatus.DONE, JobStatus.FAILED, JobStatus.CANCELLED):
             job.completed_at = datetime.now(UTC)
+
+        # Save updated job
+        job_key = self._get_job_key(job_id)
+        job_data = json.dumps(job.model_dump())
+        await self.redis.set(job_key, job_data)
+
+    async def update_task_status(
+        self,
+        job_id: str,
+        task_id: str,
+        status: str,
+    ) -> None:
+        """Update status of a specific task in a job.
+
+        Args:
+            job_id: Job ID
+            task_id: Task ID
+            status: New task status
+
+        Raises:
+            RuntimeError: If not connected to Redis
+        """
+        if not self.redis:
+            msg = "Not connected to Redis"
+            raise RuntimeError(msg)
+
+        job = await self.get_job(job_id)
+        if not job:
+            return
+
+        job.task_status[task_id] = status
 
         # Save updated job
         job_key = self._get_job_key(job_id)
