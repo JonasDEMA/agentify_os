@@ -190,22 +190,17 @@
 - [ ] `DELETE /agents/{id}` Endpoint
 - [ ] Integration Tests
 
-### 2.5 Agent Message Handler
-- [ ] `scheduler/api/lam_handler.py` erstellen
-- [ ] `POST /lam/message` Endpoint
-  - [ ] Accept Agent Message (any type)
-  - [ ] Validate Message (Pydantic)
-  - [ ] Route to appropriate handler based on type
-    - [ ] `inform` → Update Job Status
-    - [ ] `done` → Mark Task Complete
-    - [ ] `failure` → Mark Task Failed
-    - [ ] `offer` → Register Agent Capability
-  - [ ] Return Acknowledgement
-- [ ] Integration Tests (`tests/api/test_lam_handler.py`)
-  - [ ] Test Inform Message
-  - [ ] Test Done Message
-  - [ ] Test Failure Message
-  - [ ] Test Offer Message
+### 2.5 Agent Message Handler ✅
+- [x] `scheduler/api/lam_handler.py` erstellt
+- [x] `POST /lam/message` Endpoint
+  - [x] Accept Agent Message (any type)
+  - [x] Validate Message (Pydantic)
+  - [x] Route to appropriate handler based on type
+    - [x] `inform` → Log Job Info
+    - [x] `done` → Mark Job Complete
+    - [x] `failure` → Mark Job Failed
+  - [x] Return Acknowledgement
+- [x] Integration Tests (`tests/api/test_lam_handler.py`)
 
 ### 2.6 Task Orchestrator
 - [ ] `scheduler/orchestrator/orchestrator.py` erstellen
@@ -363,19 +358,19 @@
 
 **See**: `docs/COGNITIVE_RPA_REQUIREMENTS.md` for detailed requirements and architecture
 
-### 5.1 LLM Wrapper (Foundation) ⏳ **NEXT**
-- [ ] `agents/desktop_rpa/cognitive/llm_wrapper.py` erstellen
-- [ ] LLMWrapper Class
-  - [ ] `ask_for_next_action(goal, state, screenshot, context)` Method
-  - [ ] `ask_for_strategy(goal, context)` Method
-  - [ ] ChatGPT API Integration (GPT-4o/GPT-4 Vision)
-  - [ ] Screenshot → Base64 encoding
-  - [ ] Prompt engineering for Desktop RPA
-  - [ ] Response parsing and validation
-  - [ ] Error handling and retries
-- [ ] LLMRequest and LLMResponse Models (Pydantic)
-- [ ] Configuration (API key, model, temperature, etc.)
-- [ ] Unit Tests (`tests/cognitive/test_llm_wrapper.py`)
+### 5.1 LLM Wrapper (Foundation) ✅
+- [x] `agents/desktop_rpa/cognitive/llm_wrapper.py` erstellt
+- [x] LLMWrapper Class
+  - [x] `ask_for_next_action(goal, state, screenshot, context)` Method
+  - [x] `ask_for_strategy(goal, context)` Method
+  - [x] ChatGPT API Integration (GPT-4o/GPT-4 Vision)
+  - [x] Screenshot → Base64 encoding
+  - [x] Prompt engineering for Desktop RPA
+  - [x] Response parsing and validation
+  - [x] Error handling and retries
+- [x] LLMRequest and LLMResponse Models (Pydantic)
+- [x] Configuration (API key, model, temperature, etc.)
+- [ ] Proper Unit Tests (Current tests are API-dependent scripts)
   - [ ] Test with mock LLM
   - [ ] Test screenshot encoding
   - [ ] Test prompt generation

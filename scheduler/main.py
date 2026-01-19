@@ -11,7 +11,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from scheduler.api import jobs
+from scheduler.api import jobs, lam_handler
 from scheduler.config.settings import settings
 from scheduler.queue.job_queue import JobQueue
 
@@ -111,6 +111,7 @@ app.dependency_overrides[jobs.get_job_queue] = get_job_queue
 
 # Include routers
 app.include_router(jobs.router)
+app.include_router(lam_handler.router)
 
 
 # Exception handlers
