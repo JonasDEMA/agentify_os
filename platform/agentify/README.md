@@ -2,6 +2,14 @@
 
 **The Platform Layer for the CPA Agent Platform**
 
+> 🚀 **START HERE:** [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md) - Complete guide to building agents & apps on Agentify
+>
+> 📖 **Quick Start:** [core/agent_standard/QUICKSTART_COMPLETE.md](../../core/agent_standard/QUICKSTART_COMPLETE.md) - Create your first agent in 5 minutes
+>
+> 📝 **Templates:** [core/agent_standard/templates/](../../core/agent_standard/templates/) - Ready-to-use JSON templates
+>
+> 🤖 **AI Prompt:** See [DEVELOPER_GUIDE.md#ai-prompt-for-development](DEVELOPER_GUIDE.md#ai-prompt-for-development) for AI-assisted development
+
 Agentify is the **platform layer** built on top of the **Agent Standard v1** foundation. It enables the creation of an **agentic economy** where apps and agents collaborate, share data, and form dynamic teams to solve complex problems.
 
 ---

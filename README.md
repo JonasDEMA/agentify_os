@@ -2,8 +2,13 @@
 
 **Universal, Ethics-First Agent Runtime for Cloud, Edge & Desktop**
 
-> **📚 This is the main entry point for the CPA Agent Platform documentation.**
-> Start here to understand the platform, then explore the linked resources below.
+> 🚀 **DEVELOPERS START HERE:** [platform/agentify/DEVELOPER_GUIDE.md](platform/agentify/DEVELOPER_GUIDE.md)
+>
+> 📖 **Quick Start:** [core/agent_standard/QUICKSTART_COMPLETE.md](core/agent_standard/QUICKSTART_COMPLETE.md) - Create your first agent in 5 minutes
+>
+> 📝 **Templates:** [core/agent_standard/templates/](core/agent_standard/templates/) - Ready-to-use JSON templates
+>
+> 🤖 **AI Prompt:** See [Developer Guide](platform/agentify/DEVELOPER_GUIDE.md#ai-prompt-for-development) for AI-assisted development
 
 The **CPA Agent Platform** is a production-ready framework for building, deploying, and managing AI agents with **guaranteed ethics compliance**, **universal deployment**, and **3 lines of code** to get started.
 
@@ -13,17 +18,32 @@ Built on the **Agent Standard v1** - the world's first universal agent wrapper w
 
 ## 🗺️ **Documentation Navigation**
 
+### **🚀 For Developers (Start Here!)**
+
 | Document | Description |
 |----------|-------------|
-| **[README.md](README.md)** ⬅️ **You are here** | Main entry point, overview, quick start |
-| **[Agent Standard v1 Spec](core/agent_standard/README.md)** | Complete specification of the Agent Standard |
-| **[Agentify Platform](platform/agentify/README.md)** | Agentic economy platform (apps + agents + marketplace) |
-| **[Quick Start Guide](core/agent_standard/QUICKSTART.md)** | Get started in 5 minutes |
-| **[Architecture](ARCHITECTURE.md)** | System architecture, 14 agent areas, integration patterns |
+| **[🚀 Developer Guide](platform/agentify/DEVELOPER_GUIDE.md)** ⬅️ **START HERE** | Complete guide to building agents & apps |
+| **[📖 Quick Start](core/agent_standard/QUICKSTART_COMPLETE.md)** | Create your first agent in 5 minutes |
+| **[📝 Templates](core/agent_standard/templates/)** | Ready-to-use JSON templates |
+| **[📚 Examples](core/agent_standard/examples/)** | Real-world agent examples |
+| **[🔍 Agent Anatomy](platform/agentify/agent_standard/AGENT_ANATOMY.md)** | Quick reference for all 14 sections |
+
+### **📖 Reference Documentation**
+
+| Document | Description |
+|----------|-------------|
+| **[README.md](README.md)** ⬅️ **You are here** | Main entry point, overview |
+| **[Agent Standard v1 Spec](core/agent_standard/README.md)** | Complete specification |
+| **[Agentify Platform](platform/agentify/README.md)** | Agentic economy platform |
+| **[Architecture](ARCHITECTURE.md)** | System architecture |
+| **[Implementation Status](platform/agentify/agent_standard/IMPLEMENTATION_STATUS.md)** | Current progress |
+
+### **🔧 Advanced**
+
+| Document | Description |
+|----------|-------------|
 | **[Deployment Guide](DEPLOYMENT.md)** | Deploy to Cloud/Edge/Desktop |
 | **[Documentation Index](DOCUMENTATION_INDEX.md)** | Complete documentation index |
-| **[AI Prompts](core/agent_standard/prompts/)** | Pre-built prompts for AI assistants |
-| **[Examples](core/agent_standard/examples/)** | Real-world agent examples |
 | **[Contributing](CONTRIBUTING.md)** | How to contribute |
 | **[Changelog](CHANGELOG.md)** | Version history |
 | **[License](LICENSE.md)** | Dual License (MIT + Commercial) |
