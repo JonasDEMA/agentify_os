@@ -140,10 +140,10 @@
 - [x] Logging Setup (structlog)
   - [x] JSON Formatter
   - [x] Correlation ID Middleware
-- [ ] Unit Tests (`tests/api/test_main.py`)
-  - [ ] Test Health Endpoint
-  - [ ] Test CORS Headers
-  - [ ] Test Exception Handling
+- [x] Unit Tests (`tests/api/test_main.py`)
+  - [x] Test Health Endpoint
+  - [x] Test CORS Headers
+  - [x] Test Exception Handling
 
 ### 2.2 Job API Endpoints ✅
 - [x] `scheduler/api/jobs.py` erstellen
@@ -168,7 +168,7 @@
   - [x] Retry Failed Job via JobQueue
   - [x] Return Success/Error
 - [ ] WebSocket Endpoint (`/ws/jobs/{job_id}`) - **Optional für V1**
-- [ ] Integration Tests (`tests/api/test_jobs.py`)
+- [x] Integration Tests (`tests/api/test_jobs.py`)
 
 ### 2.3 Agent Registry & Management ✅
 - [x] `server/db/models.py` (Agent Model)
