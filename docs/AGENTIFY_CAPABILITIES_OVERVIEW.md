@@ -8,7 +8,19 @@
 
 ## Executive Summary
 
-Agentify is a **marketplace-driven platform for autonomous agent orchestration** that enables dynamic composition of agent teams for complex workflows. The platform combines a universal agent standard with runtime libraries for ethics enforcement, oversight, and health monitoring.
+Agentify is a **marketplace-driven platform for autonomous agent orchestration** that enables dynamic composition of agent teams for complex workflows.
+
+**Core Concept: Meta-Standard for Agent Interoperability**
+
+Agentify provides a **meta-standard** that sits above underlying implementations - it does NOT prescribe how agents are built internally, but provides:
+- **Unified Description Layer**: JSON-based agent manifests (Agent Standard v1)
+- **Interoperability Protocol**: Agents from different frameworks can work together
+- **Control & Governance**: Ethics enforcement, oversight, and compliance checking
+- **Reusability**: Agents described once, deployed anywhere (cloud, edge, desktop)
+
+**Think of it as:** "USB for AI Agents" - different implementations (Python, JavaScript, n8n, Make.com, Lovable) can plug into the same ecosystem.
+
+The platform combines this universal agent standard with runtime libraries for ethics enforcement, oversight, and health monitoring.
 
 **Key Value Proposition:**
 - **Dynamic Agent Teams**: Compose specialized agent teams on-demand from multiple marketplaces
@@ -45,25 +57,37 @@ Agentify is a **marketplace-driven platform for autonomous agent orchestration**
 
 ## 📊 Core Capabilities
 
-### 1. **Agent Standard v1 - Universal Agent Format**
+### 1. **Agent Standard v1 - Universal Meta-Standard for Agent Interoperability**
 
-**Description:** JSON-based specification for describing autonomous agents
+**Description:** JSON-based meta-standard that enables agents from different frameworks to work together
+
+**Meta-Standard Concept:**
+Agentify does NOT prescribe how you build your agents internally. Instead, it provides:
+- **Description Layer**: JSON manifest that describes WHAT your agent does (not HOW)
+- **Interoperability**: Agents built with Python, JavaScript, n8n, Make.com, Lovable can all work together
+- **Unified Control**: Ethics, oversight, and compliance checking regardless of implementation
+- **Reusability**: Same agent description works across cloud, edge, and desktop environments
+
+**Analogy:** Like USB - different devices (keyboard, mouse, camera) use different internal technologies, but all plug into the same port.
 
 **Key Features:**
 - ✅ **14 Core Sections**: Overview, Ethics, Pricing, Tools, Memory, Schedule, Activities, Prompts, Team, Customers, Knowledge, I/O, Revisions, Authority
-- ✅ **Implementation-Agnostic**: Same JSON works with any runtime (Python, JavaScript, n8n, Make.com)
+- ✅ **Implementation-Agnostic**: Same JSON works with any runtime (Python, JavaScript, n8n, Make.com, Lovable, custom)
+- ✅ **Framework Freedom**: Build agents however you want - the manifest makes them interoperable
 - ✅ **Validation**: Automatic compliance checking and manifest validation
 - ✅ **Versioning**: Built-in revision tracking and compatibility management
 
 **Use Cases:**
-- Define agents once, deploy anywhere
+- Define agents once, deploy anywhere (cloud, edge, desktop)
 - Share agent definitions across teams and organizations
 - Marketplace-ready agent packaging
+- Mix-and-match agents from different vendors/frameworks
 
 **Technical Details:**
 - Format: JSON with Pydantic validation
 - Package: `agentify-sdk` (available on PyPI)
 - Documentation: Complete JSON schemas and templates
+- Underlying Implementation: Your choice (Python, JS, n8n, Make.com, etc.)
 
 ---
 

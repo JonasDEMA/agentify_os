@@ -52,20 +52,33 @@ The Agentify Platform follows a **modular, marketplace-driven architecture**:
 
 ---
 
-## 🧠 **Understanding the Two Layers**
+## 🧠 **Understanding the Meta-Standard Architecture**
 
-Agentify uses a **two-layer architecture**:
+Agentify is a **meta-standard** - it does NOT prescribe how you build your agents. Instead, it provides a universal description layer that makes agents from different frameworks interoperable.
 
-### **Layer 1: JSON Manifest (Description)** 📝
+**Think of it as "USB for AI Agents":**
+- Different devices (keyboard, mouse, camera) use different internal technologies
+- But they all plug into the same USB port
+- Similarly: Different agents (Python, n8n, Make.com, Lovable) use different implementations
+- But they all use the same JSON manifest to describe themselves
+
+---
+
+### **Layer 1: JSON Manifest (Description Layer)** 📝
 
 **What it is:**
-- A JSON file that **describes** your agent
-- The **single source of truth**
-- Implementation-agnostic (works with any framework)
+- A JSON file that **describes** your agent (not HOW it's built, but WHAT it does)
+- The **single source of truth** for agent capabilities
+- **Implementation-agnostic** - works with ANY framework
+
+**Key Principle: Separation of Description and Implementation**
+- **Description (JSON)**: What the agent does, its ethics, tools, I/O contracts
+- **Implementation (Your Choice)**: Python, JavaScript, n8n, Make.com, Lovable, custom code
 
 **What it contains:**
 - Agent identity, capabilities, ethics, tools, etc.
 - All 14 core sections of Agent Standard v1
+- NO implementation details - just the "contract"
 
 **Who creates it:**
 - You (manually)
@@ -87,16 +100,29 @@ Agentify uses a **two-layer architecture**:
 }
 ```
 
+**This manifest works with:**
+- ✅ Python implementation
+- ✅ JavaScript implementation
+- ✅ n8n workflow
+- ✅ Make.com scenario
+- ✅ Lovable app
+- ✅ Your custom framework
+
 ---
 
-### **Layer 2: Runtime Library (Execution)** ⚙️
+### **Layer 2: Runtime Library (Execution Layer)** ⚙️
 
 **What it is:**
-- A Python/JavaScript library that **executes** the agent
+- **Optional** libraries that help you implement agents
 - Reads the JSON manifest
 - Implements ethics engine, oversight, health monitoring, etc.
 
-**What it does:**
+**Important: You don't HAVE to use our runtime libraries!**
+- Build your agent however you want (Python, JS, n8n, Make.com, etc.)
+- Just provide a JSON manifest that describes it
+- The manifest makes it interoperable with other agents
+
+**What the runtime libraries do (if you use them):**
 - Loads the JSON manifest
 - Validates ethics before actions
 - Monitors agent health

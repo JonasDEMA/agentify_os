@@ -10,7 +10,19 @@
 
 Agentify is a **marketplace-driven platform for autonomous agent orchestration** that enables organizations to dynamically compose specialized agent teams for complex workflows.
 
-**Think of it as:** "App Store for AI Agents" + "Kubernetes for Agent Orchestration" + "Ethics & Compliance Layer"
+**Core Concept: Meta-Standard for Agent Interoperability**
+
+Agentify is a **meta-standard** - it does NOT prescribe how you build agents internally. Instead:
+- **You build agents however you want** (Python, JavaScript, n8n, Make.com, Lovable, custom frameworks)
+- **Agentify provides the "USB port"** - a universal JSON-based description layer
+- **All agents become interoperable** - they can discover, communicate, and work together
+- **Unified control & governance** - ethics, oversight, compliance regardless of implementation
+
+**Think of it as:**
+- "USB for AI Agents" (interoperability standard)
+- "App Store for AI Agents" (marketplace)
+- "Kubernetes for Agent Orchestration" (deployment)
+- "Ethics & Compliance Layer" (governance)
 
 ---
 
@@ -45,8 +57,8 @@ Agentify is a **marketplace-driven platform for autonomous agent orchestration**
 
 ## 10 Core Capabilities
 
-### 1. Agent Standard v1
-Universal JSON-based agent specification with 14 core sections (Ethics, Tools, I/O, etc.)
+### 1. Agent Standard v1 - Meta-Standard
+Universal JSON-based meta-standard for agent interoperability. Build agents with ANY framework (Python, JS, n8n, Make.com, Lovable), describe them with JSON, make them interoperable.
 
 ### 2. Ethics Engine
 Runtime-active ethical constraint evaluation before every action

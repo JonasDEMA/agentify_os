@@ -4,9 +4,34 @@
 
 ---
 
+## 🎯 **Meta-Standard Concept**
+
+**Agentify is a meta-standard for agent interoperability** - it does NOT prescribe how agents are built internally.
+
+**Think of it as "USB for AI Agents":**
+- Different devices (keyboard, mouse, camera) have different internal implementations
+- But they all plug into the same USB port using a standard protocol
+- Similarly: Agents built with Python, JavaScript, n8n, Make.com, Lovable have different implementations
+- But they all use the same JSON manifest to describe themselves and become interoperable
+
+**What Agentify provides:**
+- ✅ **Universal Description Layer**: JSON-based agent manifests (Agent Standard v1)
+- ✅ **Interoperability Protocol**: Agents from different frameworks can discover and work together
+- ✅ **Control & Governance**: Ethics enforcement, oversight, compliance checking
+- ✅ **Reusability**: Agents described once, deployed anywhere (cloud, edge, desktop)
+
+**What Agentify does NOT prescribe:**
+- ❌ How you build your agent internally (use any framework/language)
+- ❌ Which tools or libraries you use
+- ❌ Your implementation architecture
+
+---
+
 ## 📐 **Architecture Overview**
 
 The Agentify Platform follows a **modular, marketplace-driven architecture** where apps dynamically compose teams of agents from one or more marketplaces, handle billing, and deploy to hosting providers.
+
+**Key Principle:** Agents are described via JSON manifests, but implemented however you want.
 
 ---
 
