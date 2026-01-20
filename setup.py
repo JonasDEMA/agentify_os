@@ -23,7 +23,7 @@ setup(
         "Documentation": "https://github.com/JonasDEMA/agentify_os/tree/main/core/agent_standard",
         "Source Code": "https://github.com/JonasDEMA/agentify_os",
     },
-    packages=find_packages(where=".", include=["core*", "platform*"]),
+    packages=find_packages(where=".", include=["core", "core.*", "platform", "platform.*"]),
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",

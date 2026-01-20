@@ -10,13 +10,43 @@
 
 ## 📋 **Table of Contents**
 
-1. [Understanding the Two Layers](#-understanding-the-two-layers)
-2. [Quick Start - Create Your First Agent](#-quick-start---create-your-first-agent)
-3. [The Agent Standard v1](#-agent-standard-v1)
-4. [Runtime Libraries](#️-runtime-libraries)
-5. [Templates & Examples](#-templates--examples)
-6. [AI Prompt for Development](#-ai-prompt-for-development)
-7. [Deployment & Registration](#-deployment--registration)
+1. [Platform Architecture](#-platform-architecture)
+2. [Understanding the Two Layers](#-understanding-the-two-layers)
+3. [Quick Start - Create Your First Agent](#-quick-start---create-your-first-agent)
+4. [The Agent Standard v1](#-agent-standard-v1)
+5. [Runtime Libraries](#️-runtime-libraries)
+6. [Templates & Examples](#-templates--examples)
+7. [AI Prompt for Development](#-ai-prompt-for-development)
+8. [Deployment & Registration](#-deployment--registration)
+
+---
+
+## 🏗️ **Platform Architecture**
+
+**How Apps, Orchestrators, Marketplaces, and Hosting work together**
+
+The Agentify Platform follows a **modular, marketplace-driven architecture**:
+
+```
+🎯 App (Orchestrator Agent)
+    ↓
+🏪 Marketplace(s) → Billing & Agent Provisioning
+    ↓
+🚀 Hosting Agent → Container Deployment (Railway, etc.)
+    ↓
+⚙️ Runtime → Agents communicate directly
+    ↓
+🔄 Dynamic Expansion → Request new capabilities from marketplace
+```
+
+**📖 Full Architecture Documentation:** [PLATFORM_ARCHITECTURE.md](PLATFORM_ARCHITECTURE.md)
+
+**Key Concepts:**
+- **Apps contain Orchestrator Agents** that coordinate workflows
+- **Marketplaces provide agent teams** with billing and licensing
+- **Hosting Agents deploy containers** (Railway, AWS, GCP, etc.)
+- **Agents communicate directly** peer-to-peer within containers
+- **Dynamic capability expansion** - agents request new capabilities on-demand
 
 ---
 

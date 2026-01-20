@@ -4,6 +4,8 @@
 
 > 🚀 **START HERE:** [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md) - Complete guide to building agents & apps on Agentify
 >
+> 🏗️ **Architecture:** [PLATFORM_ARCHITECTURE.md](PLATFORM_ARCHITECTURE.md) - How Apps, Orchestrators, Marketplaces & Hosting work together
+>
 > 📖 **Quick Start:** [core/agent_standard/QUICKSTART_COMPLETE.md](../../core/agent_standard/QUICKSTART_COMPLETE.md) - Create your first agent in 5 minutes
 >
 > 📝 **Templates:** [core/agent_standard/templates/](../../core/agent_standard/templates/) - Ready-to-use JSON templates
