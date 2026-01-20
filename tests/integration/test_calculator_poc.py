@@ -42,8 +42,9 @@ async def test_calculator_end_to_end():
             status = data["status"]
 
             if status == "done":
-                assert data["result"] == "15.00"
-                print(f"✅ Test passed! Result: {data['result']}")
+                # Check the formatted result within the result object
+                assert data["result"]["formatted_result"] == "15.00"
+                print(f"✅ Test passed! Result: {data['result']['formatted_result']}")
                 return
 
             if status == "failed":
@@ -90,9 +91,10 @@ async def test_calculator_different_operators():
                 data = response.json()
 
                 if data["status"] == "done":
-                    assert data["result"] == test_case["expected"]
+                    # Check the formatted result within the result object
+                    assert data["result"]["formatted_result"] == test_case["expected"]
                     print(
-                        f"✅ {test_case['num1']} {test_case['operator']} {test_case['num2']} = {data['result']}"
+                        f"✅ {test_case['num1']} {test_case['operator']} {test_case['num2']} = {data['result']['formatted_result']}"
                     )
                     break
 
@@ -136,8 +138,9 @@ async def test_calculator_different_locales():
                 data = response.json()
 
                 if data["status"] == "done":
-                    assert data["result"] == test_case["expected_pattern"]
-                    print(f"✅ Locale {test_case['locale']}: {data['result']}")
+                    # Check the formatted result within the result object
+                    assert data["result"]["formatted_result"] == test_case["expected_pattern"]
+                    print(f"✅ Locale {test_case['locale']}: {data['result']['formatted_result']}")
                     break
 
                 if data["status"] == "failed":

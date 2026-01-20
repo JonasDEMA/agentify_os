@@ -23,6 +23,8 @@ services:
       - REDIS_URL=redis://redis:6379
       - ENVIRONMENT=development
       - DATABASE_URL=sqlite:///./data/scheduler.db
+      - DISABLE_ORCHESTRATOR=true  # Disable built-in orchestrator for calculator POC
+      - CORS_ORIGINS=http://localhost:5173,http://localhost:3000,http://localhost:8080
     depends_on:
       redis:
         condition: service_healthy

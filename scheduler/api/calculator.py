@@ -33,7 +33,7 @@ class JobStatusResponse(BaseModel):
     result: Optional[dict] = None
     error: Optional[str] = None
 
-@router.post("/calculate", response_model=CalculateResponse)
+@router.post("/calculate", response_model=CalculateResponse, status_code=202)
 async def create_calculation(
     request: CalculateRequest,
     job_queue: Annotated[JobQueue, Depends(get_job_queue)]
@@ -77,9 +77,21 @@ async def get_calculation_status(
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
     
+    # Extract result from Redis if available
+    result = None
+    if job.status == JobStatus.DONE:
+        # Get the full job data from Redis which includes the result
+        import json
+        job_key = job_queue._get_job_key(job_id)
+        job_data_bytes = await job_queue.redis.get(job_key)
+        if job_data_bytes:
+            job_data = job_data_bytes.decode() if isinstance(job_data_bytes, bytes) else job_data_bytes
+            job_dict = json.loads(job_data)
+            result = job_dict.get("result")
+    
     return JobStatusResponse(
         job_id=job.id,
         status=job.status.value,
-        result=job.result,
+        result=result,
         error=job.error
     )

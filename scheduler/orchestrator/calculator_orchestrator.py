@@ -1,7 +1,9 @@
 """Calculator Orchestrator - Coordinates calculation and formatting agents."""
 
+import json
 import logging
 import sys
+from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
 
@@ -88,16 +90,17 @@ class CalculatorOrchestrator:
                 "raw_result": calc_result,
                 "formatted_result": formatted_result,
             }
-            # Store result in Redis
-            import json
+            
+            # Update job with result and mark as done atomically
+            # Must do this in one operation since update_status overwrites the job
             job_data = await self.job_queue.get_job(job.id)
             if job_data:
                 job_key = self.job_queue._get_job_key(job.id)
                 job_dict = job_data.model_dump()
                 job_dict["result"] = result
+                job_dict["status"] = JobStatus.DONE.value
+                job_dict["completed_at"] = datetime.now(UTC).isoformat()
                 await self.job_queue.redis.set(job_key, json.dumps(job_dict))
-            
-            await self.job_queue.update_status(job.id, JobStatus.DONE)
 
             logger.info(
                 f"Calculation job completed: {job.id} -> {formatted_result}"

@@ -38,7 +38,11 @@ export default function Calculator() {
       const jobStatus = await pollJobStatus(response.job_id);
 
       if (jobStatus.status === 'done' && jobStatus.result) {
-        setResult(jobStatus.result);
+        // Extract formatted_result from the result object
+        const formattedResult = typeof jobStatus.result === 'string' 
+          ? jobStatus.result 
+          : jobStatus.result.formatted_result || JSON.stringify(jobStatus.result);
+        setResult(formattedResult);
       } else if (jobStatus.status === 'failed') {
         setError(jobStatus.error || 'Calculation failed');
       } else {

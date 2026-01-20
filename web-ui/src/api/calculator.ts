@@ -20,7 +20,15 @@ export interface CalculateResponse {
 export interface JobStatusResponse {
   job_id: string;
   status: string;
-  result?: string;
+  result?: string | {
+    num1: number;
+    num2: number;
+    operator: string;
+    locale: string;
+    decimals: number;
+    raw_result: number;
+    formatted_result: string;
+  };
   error?: string;
 }
 

@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from typing import Any
@@ -79,10 +80,14 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         await job_queue.connect()
         logger.info("redis_connected", redis_url=settings.redis_url)
 
-        # Initialize and start Orchestrator
-        orchestrator = Orchestrator(job_queue=job_queue, telemetry=telemetry)
-        asyncio.create_task(orchestrator.start())
-        logger.info("orchestrator_started")
+        # Initialize and start Orchestrator (unless disabled for calculator POC)
+        disable_orch = os.getenv("DISABLE_ORCHESTRATOR", "").lower() in ("true", "1", "yes")
+        if not disable_orch:
+            orchestrator = Orchestrator(job_queue=job_queue, telemetry=telemetry)
+            asyncio.create_task(orchestrator.start())
+            logger.info("orchestrator_started")
+        else:
+            logger.info("orchestrator_disabled")
     except Exception as e:
         logger.error("redis_connection_failed", error=str(e), redis_url=settings.redis_url)
         # Don't fail startup, but log the error
