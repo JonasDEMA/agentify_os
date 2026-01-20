@@ -90,18 +90,18 @@ graph TB
     A1 -.->|"5. Request New Capability"| MP1
     A3 -.->|"5. Request New Capability"| MP2
 
-    style APP fill:#e1f5ff,stroke:#0066cc,stroke-width:3px
-    style MARKET fill:#fff4e1,stroke:#ff9900,stroke-width:3px
-    style HOST fill:#e8f5e9,stroke:#4caf50,stroke-width:3px
-    style RUNTIME fill:#f3e5f5,stroke:#9c27b0,stroke-width:3px
-    style ORCH fill:#bbdefb,stroke:#1976d2,stroke-width:2px
-    style HOSTA fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
-    style MP1 fill:#ffe0b2,stroke:#f57c00,stroke-width:2px
-    style MP2 fill:#ffe0b2,stroke:#f57c00,stroke-width:2px
-    style MP3 fill:#ffe0b2,stroke:#f57c00,stroke-width:2px
-    style CONT1 fill:#e1bee7,stroke:#7b1fa2,stroke-width:2px
-    style CONT2 fill:#e1bee7,stroke:#7b1fa2,stroke-width:2px
-    style CONT3 fill:#e1bee7,stroke:#7b1fa2,stroke-width:2px
+    style APP fill:#1e88e5,stroke:#0d47a1,stroke-width:4px,color:#fff
+    style MARKET fill:#fb8c00,stroke:#e65100,stroke-width:4px,color:#fff
+    style HOST fill:#43a047,stroke:#1b5e20,stroke-width:4px,color:#fff
+    style RUNTIME fill:#8e24aa,stroke:#4a148c,stroke-width:4px,color:#fff
+    style ORCH fill:#2196f3,stroke:#0d47a1,stroke-width:3px,color:#fff
+    style HOSTA fill:#66bb6a,stroke:#2e7d32,stroke-width:3px,color:#fff
+    style MP1 fill:#ffa726,stroke:#e65100,stroke-width:3px,color:#fff
+    style MP2 fill:#ffa726,stroke:#e65100,stroke-width:3px,color:#fff
+    style MP3 fill:#ffa726,stroke:#e65100,stroke-width:3px,color:#fff
+    style CONT1 fill:#ab47bc,stroke:#6a1b9a,stroke-width:3px,color:#fff
+    style CONT2 fill:#ab47bc,stroke:#6a1b9a,stroke-width:3px,color:#fff
+    style CONT3 fill:#ab47bc,stroke:#6a1b9a,stroke-width:3px,color:#fff
 ```
 
 ---
