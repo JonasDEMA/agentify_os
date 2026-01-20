@@ -28,15 +28,15 @@
 The Agentify Platform follows a **modular, marketplace-driven architecture**:
 
 ```
-🎯 App (Orchestrator Agent)
+🎯 App Layer (Blue)
     ↓
-🏪 Marketplace(s) → Billing & Agent Provisioning
+🏪 Marketplace Layer (Orange) - 3 Marketplaces in parallel
     ↓
-🚀 Hosting Agent → Container Deployment (Railway, etc.)
+🚀 Hosting Layer (Green) - Container Management
     ↓
-⚙️ Runtime → Agents communicate directly
+⚙️ Runtime Environment (Purple) - 3 Containers with Agents
     ↓
-🔄 Dynamic Expansion → Request new capabilities from marketplace
+🔄 Direct Communication + Dynamic Expansion
 ```
 
 **📖 Full Architecture Documentation:** [PLATFORM_ARCHITECTURE.md](PLATFORM_ARCHITECTURE.md)

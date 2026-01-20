@@ -22,22 +22,38 @@ The Agentify Platform follows a **modular, marketplace-driven architecture** whe
 
 ## 📊 **Architecture Diagram**
 
+### **Compact View**
+
+```
+🎯 App Layer (Blue)
+    ↓
+🏪 Marketplace Layer (Orange) - 3 Marketplaces in parallel
+    ↓
+🚀 Hosting Layer (Green) - Container Management
+    ↓
+⚙️ Runtime Environment (Purple) - 3 Containers with Agents
+    ↓
+🔄 Direct Communication + Dynamic Expansion
+```
+
+### **Detailed View**
+
 ```mermaid
 graph TB
     subgraph APP["🎯 App Layer"]
         ORCH["🎭 Orchestrator Agent<br/>Coordinates workflow<br/>Manages team composition"]
     end
-    
+
     subgraph MARKET["🏪 Marketplace Layer"]
         MP1["Marketplace 1<br/>Agent Discovery<br/>Billing & Licensing"]
         MP2["Marketplace 2<br/>Agent Discovery<br/>Billing & Licensing"]
         MP3["Marketplace N<br/>Agent Discovery<br/>Billing & Licensing"]
     end
-    
+
     subgraph HOST["☁️ Hosting Layer"]
         HOSTA["🚀 Hosting Agent<br/>Container Management<br/>Railway/Cloud Deploy"]
     end
-    
+
     subgraph RUNTIME["⚙️ Runtime Environment"]
         subgraph CONT1["📦 Container 1"]
             A1["Agent A"]
@@ -52,28 +68,28 @@ graph TB
             A6["Agent F"]
         end
     end
-    
+
     ORCH -->|"1. Request Team"| MP1
     ORCH -->|"1. Request Team"| MP2
     ORCH -->|"1. Request Team"| MP3
-    
+
     MP1 -->|"2. Billing & Provision"| ORCH
     MP2 -->|"2. Billing & Provision"| ORCH
     MP3 -->|"2. Billing & Provision"| ORCH
-    
+
     ORCH -->|"3. Deploy Team"| HOSTA
-    
+
     HOSTA -->|"4. Create Containers"| CONT1
     HOSTA -->|"4. Create Containers"| CONT2
     HOSTA -->|"4. Create Containers"| CONT3
-    
+
     A1 <-->|"Direct Communication"| A2
     A3 <-->|"Direct Communication"| A4
     A5 <-->|"Direct Communication"| A6
-    
+
     A1 -.->|"5. Request New Capability"| MP1
     A3 -.->|"5. Request New Capability"| MP2
-    
+
     style APP fill:#e1f5ff,stroke:#0066cc,stroke-width:3px
     style MARKET fill:#fff4e1,stroke:#ff9900,stroke-width:3px
     style HOST fill:#e8f5e9,stroke:#4caf50,stroke-width:3px
