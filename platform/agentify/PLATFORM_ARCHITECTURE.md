@@ -319,10 +319,19 @@ Orchestrator
 
 ## 📚 **Related Documentation**
 
+**Developer Resources:**
 - [Developer Guide](DEVELOPER_GUIDE.md) - How to build apps and agents
+- [Agent Standard](../../core/agent_standard/README.md) - Universal agent format
+- [Agent Anatomy](../../core/agent_standard/AGENT_ANATOMY.md) - Complete reference for all 14 core areas
+- [Quick Start](../../core/agent_standard/QUICKSTART_COMPLETE.md) - Create your first agent in 5 minutes
+
+**Business & Research:**
+- [Capabilities Overview](../../docs/AGENTIFY_CAPABILITIES_OVERVIEW.md) - Detailed platform capabilities
+- [Executive Summary](../../docs/AGENTIFY_EXECUTIVE_SUMMARY.md) - Compact overview for stakeholders
+
+**Advanced Topics:**
 - [Marketplace Requirements](marketplace/MARKETPLACE_REQUIREMENTS.md) - Build your own marketplace
-- [Hosting Requirements](hosting/HOSTING_AGENT_REQUIREMENTS.md) - Deploy to any cloud
-- [Agent Standard](agent_standard/README.md) - Universal agent format
+- [Hosting Requirements](hosting/HOSTING_AGENT_REQUIREMENTS.md) - Deploy to cloud or edge
 
 ---
 

@@ -207,13 +207,27 @@ Agents run **identically** across environments:
 
 ---
 
+## 📚 Related Documentation
+
+**Developer Resources:**
+- [Developer Guide](../../platform/agentify/DEVELOPER_GUIDE.md) - Complete guide to building agents & apps
+- [Platform Architecture](../../platform/agentify/PLATFORM_ARCHITECTURE.md) - How Apps, Orchestrators, Marketplaces & Hosting work together
+- [Agent Anatomy](AGENT_ANATOMY.md) - Complete reference for all 14 core areas
+- [Quick Start](QUICKSTART_COMPLETE.md) - Create your first agent in 5 minutes
+
+**Business & Research:**
+- [Capabilities Overview](../../docs/AGENTIFY_CAPABILITIES_OVERVIEW.md) - Detailed platform capabilities
+- [Executive Summary](../../docs/AGENTIFY_EXECUTIVE_SUMMARY.md) - Compact overview for stakeholders
+
+---
+
 ## 📞 Support
 
 For questions or issues, see the main documentation or create an issue.
 
 ---
 
-**Created**: 2026-01-14  
-**Authors**: HarmonyOS Team  
+**Created**: 2026-01-14
+**Authors**: HarmonyOS Team
 **License**: Proprietary
 

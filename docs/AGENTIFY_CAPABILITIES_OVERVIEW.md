@@ -16,6 +16,7 @@ Agentify is a **marketplace-driven platform for autonomous agent orchestration**
 - **Framework Agnostic**: Works with any implementation (Python, JavaScript, n8n, Make.com, etc.)
 - **Multi-Marketplace**: Best-of-breed agent selection from competing marketplaces
 - **Automatic Billing**: Usage-based billing and revenue sharing
+- **Cloud & Edge Deployment**: Deploy to cloud (Railway, AWS, GCP, Azure) OR edge (IoT, on-premise) via hosting agents
 
 ---
 
@@ -181,26 +182,32 @@ Agentify is a **marketplace-driven platform for autonomous agent orchestration**
 
 ---
 
-### 7. **Hosting & Deployment - Cloud-Native Container Management**
+### 7. **Hosting & Deployment - Cloud & Edge Container Management**
 
-**Description:** Deploy agents to any cloud provider with automatic scaling
+**Description:** Deploy agents to cloud OR edge environments via specialized hosting agents
 
 **Key Features:**
 - ✅ **Multi-Cloud**: Railway, AWS, GCP, Azure support
-- ✅ **Container Orchestration**: Docker-based isolation
-- ✅ **Auto-Scaling**: Dynamic resource allocation
+- ✅ **Edge Deployment**: IoT devices, local servers, on-premise infrastructure
+- ✅ **Hosting Agents**: Specialized agents handle deployment to cloud or edge
+- ✅ **Container Orchestration**: Docker-based isolation (cloud and edge)
+- ✅ **Auto-Scaling**: Dynamic resource allocation (cloud) or fixed resources (edge)
 - ✅ **Health Monitoring**: Automatic restart and recovery
+- ✅ **Hybrid Scenarios**: Mix cloud and edge deployments in same workflow
 
 **Use Cases:**
-- Production deployments
-- Edge computing
-- Hybrid cloud scenarios
-- High-availability systems
+- Production cloud deployments
+- Edge computing (IoT, industrial, smart grid)
+- Hybrid cloud-edge scenarios
+- On-premise deployments with cloud backup
+- Low-latency edge processing with cloud analytics
 
 **Technical Details:**
-- Containers: Docker with Railway/Kubernetes
-- Scaling: Horizontal and vertical auto-scaling
-- Monitoring: Health checks and metrics
+- Containers: Docker with Railway/Kubernetes (cloud) or Docker/Podman (edge)
+- Hosting Agents: Responsible for deployment target selection and management
+- Scaling: Horizontal/vertical auto-scaling (cloud), fixed resources (edge)
+- Monitoring: Health checks and metrics (both cloud and edge)
+- Edge Support: ARM/x86 architectures, resource-constrained environments
 
 ---
 
@@ -282,6 +289,7 @@ Agentify is a **marketplace-driven platform for autonomous agent orchestration**
 - **Marketplace Agents**: Load forecasting, demand response, battery management
 - **Ethics Engine**: Ensures fair energy distribution and regulatory compliance
 - **Dynamic Expansion**: Add weather agents, price optimization agents on-demand
+- **Edge Deployment**: Deploy agents at substations for low-latency control
 
 **2. Energy Trading & Market Participation**
 - **Orchestrator Agent**: Manages trading strategies
@@ -294,6 +302,7 @@ Agentify is a **marketplace-driven platform for autonomous agent orchestration**
 - **Marketplace Agents**: HVAC optimization, occupancy prediction, renewable integration
 - **Desire Monitor**: Track system health and performance
 - **I/O Contracts**: Integration with BMS systems
+- **Edge Deployment**: On-premise deployment for data privacy and low latency
 
 **4. Renewable Energy Forecasting**
 - **Orchestrator Agent**: Manages forecasting pipeline
@@ -305,7 +314,7 @@ Agentify is a **marketplace-driven platform for autonomous agent orchestration**
 - **Orchestrator Agent**: Coordinates charging network
 - **Marketplace Agents**: Load balancing, pricing, user preferences
 - **Ethics Engine**: Fair access and pricing policies
-- **Multi-Cloud Deployment**: Edge computing at charging stations
+- **Hybrid Cloud-Edge**: Edge agents at charging stations, cloud orchestration and analytics
 
 ---
 
@@ -359,10 +368,12 @@ team = client.provision(agent_ids=['agent.energy.forecast', 'agent.energy.optimi
 - https://github.com/JonasDEMA/agentify_os
 
 **Documentation:**
-- Developer Guide: `platform/agentify/DEVELOPER_GUIDE.md`
-- Platform Architecture: `platform/agentify/PLATFORM_ARCHITECTURE.md`
-- Agent Standard: `core/agent_standard/README.md`
-- Quick Start: `core/agent_standard/QUICKSTART_COMPLETE.md`
+- **[Developer Guide](../platform/agentify/DEVELOPER_GUIDE.md)** - Complete guide to building agents & apps on Agentify
+- **[Platform Architecture](../platform/agentify/PLATFORM_ARCHITECTURE.md)** - How Apps, Orchestrators, Marketplaces & Hosting work together
+- **[Agent Standard](../core/agent_standard/README.md)** - Universal agent format specification
+- **[Agent Anatomy](../core/agent_standard/AGENT_ANATOMY.md)** - Complete reference for all 14 core areas
+- **[Quick Start](../core/agent_standard/QUICKSTART_COMPLETE.md)** - Create your first agent in 5 minutes
+- **[Executive Summary](AGENTIFY_EXECUTIVE_SUMMARY.md)** - Compact overview for quick reference (this folder)
 
 **Package:**
 - PyPI: https://pypi.org/project/agentify-sdk/

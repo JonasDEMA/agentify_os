@@ -6,6 +6,8 @@
 >
 > Whether you're using Lovable, n8n, Make.com, Python, JavaScript, or any other tool - start here!
 
+> 📊 **For Business/Research Overview:** See [Capabilities Overview](../../docs/AGENTIFY_CAPABILITIES_OVERVIEW.md) and [Executive Summary](../../docs/AGENTIFY_EXECUTIVE_SUMMARY.md)
+
 ---
 
 ## 📋 **Table of Contents**

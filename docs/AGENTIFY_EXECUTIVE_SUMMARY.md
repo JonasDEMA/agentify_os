@@ -23,7 +23,7 @@ Agentify is a **marketplace-driven platform for autonomous agent orchestration**
 | **Framework Agnostic** | Works with any implementation (Python, JavaScript, n8n, Make.com) |
 | **Multi-Marketplace** | Best-of-breed agent selection from competing vendors |
 | **Automatic Billing** | Usage-based billing and revenue sharing |
-| **Cloud-Native** | Deploy to Railway, AWS, GCP, Azure with auto-scaling |
+| **Cloud & Edge Deployment** | Deploy to cloud (Railway, AWS, GCP, Azure) OR edge (IoT, on-premise) via hosting agents |
 
 ---
 
@@ -154,15 +154,17 @@ Collaborate on energy sector agent standards and best practices
 
 ## Resources
 
-**GitHub:** https://github.com/JonasDEMA/agentify_os  
-**PyPI:** https://pypi.org/project/agentify-sdk/  
+**GitHub:** https://github.com/JonasDEMA/agentify_os
+**PyPI:** https://pypi.org/project/agentify-sdk/
 **Documentation:** See repository for complete technical details
 
 **Key Documents:**
-- Developer Guide: `platform/agentify/DEVELOPER_GUIDE.md`
-- Platform Architecture: `platform/agentify/PLATFORM_ARCHITECTURE.md`
-- Agent Standard: `core/agent_standard/README.md`
-- Complete Capabilities: `docs/AGENTIFY_CAPABILITIES_OVERVIEW.md`
+- **[Developer Guide](../platform/agentify/DEVELOPER_GUIDE.md)** - Complete guide to building agents & apps
+- **[Platform Architecture](../platform/agentify/PLATFORM_ARCHITECTURE.md)** - How Apps, Orchestrators, Marketplaces & Hosting work together
+- **[Agent Standard](../core/agent_standard/README.md)** - Universal agent format specification
+- **[Agent Anatomy](../core/agent_standard/AGENT_ANATOMY.md)** - Complete reference for all 14 core areas
+- **[Quick Start](../core/agent_standard/QUICKSTART_COMPLETE.md)** - Create your first agent in 5 minutes
+- **[Complete Capabilities Overview](AGENTIFY_CAPABILITIES_OVERVIEW.md)** - Detailed capabilities documentation (this folder)
 
 ---
 
