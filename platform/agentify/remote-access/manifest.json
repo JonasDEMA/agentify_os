@@ -1,0 +1,213 @@
+{
+  "agent_id": "agent.agentify.remote-access",
+  "name": "Remote Access Agent",
+  "version": "1.0.0",
+  "status": "active",
+  
+  "revisions": {
+    "current_revision": "rev-001",
+    "history": [
+      {
+        "revision_id": "rev-001",
+        "timestamp": "2026-01-21T00:00:00Z",
+        "author": {
+          "type": "human",
+          "id": "developer@meet-harmony.ai",
+          "name": "Developer"
+        },
+        "change_summary": "Initial Remote Access Agent implementation with SSH/VNC capabilities"
+      }
+    ]
+  },
+  
+  "overview": {
+    "description": "Provides secure remote access to edge devices via SSH and VNC tunnels using Tailscale",
+    "tags": ["infrastructure", "remote-access", "ssh", "vnc", "security"],
+    "owner": {
+      "type": "organization",
+      "id": "agentify",
+      "name": "Agentify Platform"
+    },
+    "lifecycle": {
+      "stage": "production",
+      "sla": "high-availability"
+    }
+  },
+  
+  "capabilities": [
+    {
+      "name": "remote_ssh",
+      "level": "expert",
+      "description": "Create and manage SSH tunnels to edge devices"
+    },
+    {
+      "name": "remote_vnc",
+      "level": "expert",
+      "description": "Create and manage VNC tunnels for GUI access"
+    },
+    {
+      "name": "tunnel_management",
+      "level": "high",
+      "description": "Manage active remote access sessions"
+    },
+    {
+      "name": "access_control",
+      "level": "high",
+      "description": "Role-based access control for remote sessions"
+    },
+    {
+      "name": "audit_logging",
+      "level": "high",
+      "description": "Comprehensive audit logging for all access"
+    }
+  ],
+  
+  "ethics": {
+    "framework": "harm-minimization",
+    "principles": [
+      {
+        "id": "no-unauthorized-access",
+        "text": "Never grant access without proper authentication and authorization",
+        "severity": "critical",
+        "enforcement": "hard"
+      },
+      {
+        "id": "audit-all-access",
+        "text": "Log all remote access attempts and sessions",
+        "severity": "critical",
+        "enforcement": "hard"
+      },
+      {
+        "id": "session-timeout",
+        "text": "Enforce session timeouts to prevent abandoned sessions",
+        "severity": "high",
+        "enforcement": "hard"
+      }
+    ],
+    "hard_constraints": [
+      "no_unauthorized_access",
+      "mandatory_audit_logging",
+      "enforce_session_timeout",
+      "require_authentication",
+      "customer_isolation"
+    ],
+    "soft_constraints": [
+      "prefer_mfa",
+      "notify_on_access"
+    ],
+    "evaluation_mode": "pre_action"
+  },
+  
+  "desires": {
+    "profile": [
+      {
+        "id": "security",
+        "weight": 0.5,
+        "description": "Maintain highest security standards"
+      },
+      {
+        "id": "reliability",
+        "weight": 0.3,
+        "description": "Ensure reliable remote access"
+      },
+      {
+        "id": "auditability",
+        "weight": 0.2,
+        "description": "Comprehensive audit trail"
+      }
+    ],
+    "health_signals": {
+      "tension_thresholds": {
+        "stressed": 0.6,
+        "degraded": 0.8,
+        "critical": 0.95
+      },
+      "reporting_interval_sec": 300,
+      "escalation_threshold": "degraded"
+    }
+  },
+  
+  "authority": {
+    "instruction": {
+      "type": "agent",
+      "id": "agent.marketplace.orchestrator",
+      "name": "Marketplace Orchestrator"
+    },
+    "oversight": {
+      "type": "human",
+      "id": "security@meet-harmony.ai",
+      "independent": true,
+      "name": "Security Team"
+    },
+    "escalation": {
+      "channels": ["security-team", "admin", "system"],
+      "severity_levels": ["warning", "incident", "critical"],
+      "default_channel": "security-team"
+    }
+  },
+  
+  "io": {
+    "input_formats": ["json", "agent-message"],
+    "output_formats": ["json", "agent-message"],
+    "protocols": ["http", "agent-communication-protocol"]
+  },
+  
+  "tools": [
+    {
+      "name": "create_ssh_session",
+      "description": "Create SSH tunnel to edge device",
+      "category": "remote-access",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "device_id": {"type": "string", "description": "Target device ID"},
+          "user_id": {"type": "string", "description": "User requesting access"},
+          "duration_minutes": {"type": "number", "description": "Session duration in minutes", "default": 60},
+          "purpose": {"type": "string", "description": "Reason for access"}
+        },
+        "required": ["device_id", "user_id", "purpose"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "session_id": {"type": "string"},
+          "ssh_command": {"type": "string"},
+          "expires_at": {"type": "string"}
+        }
+      }
+    },
+    {
+      "name": "create_vnc_session",
+      "description": "Create VNC tunnel for GUI access",
+      "category": "remote-access",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "device_id": {"type": "string"},
+          "user_id": {"type": "string"},
+          "duration_minutes": {"type": "number", "default": 60},
+          "purpose": {"type": "string"}
+        },
+        "required": ["device_id", "user_id", "purpose"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "session_id": {"type": "string"},
+          "vnc_url": {"type": "string"},
+          "expires_at": {"type": "string"}
+        }
+      }
+    }
+  ],
+  
+  "authentication": {
+    "required": true,
+    "provider": "coresense",
+    "provider_url": "https://iam.meet-harmony.ai",
+    "roles_required": ["remote-access-user"],
+    "scopes_required": ["device:access"],
+    "mfa_recommended": true
+  }
+}
+
