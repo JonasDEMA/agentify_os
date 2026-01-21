@@ -1,16 +1,33 @@
-# Agentify Platform - Executive Summary
+# Agentify OS - Executive Summary
 
-**For: OFFIS e.V. - Institut für Informatik**  
-**Prepared by: Jonas Moßler**  
+**For: OFFIS e.V. - Institut für Informatik**
+**Prepared by: Jonas Moßler**
 **Date: January 2026**
+
+> 💡 **For a simpler, more visual explanation, see [Agentify Concept](AGENTIFY_CONCEPT.md)**
 
 ---
 
-## What is Agentify?
+## What is Agentify OS?
 
-Agentify is a **marketplace-driven platform for autonomous agent orchestration** that enables organizations to dynamically compose specialized agent teams for complex workflows.
+**Agentify OS is the operating system for AI superorganisms** - the technical and economic coordination layer for complex AI systems.
 
-**Core Concept: Meta-Standard for Agent Interoperability**
+### **The Biological Principle**
+
+Agentify follows systems biology:
+
+```
+Agent          = Cell
+System Agents  = Organs
+Operating System = Organism
+Platform       = Superorganism
+```
+
+**The crucial insight:** Each component is itself a complete agent according to the same standard. This creates a **recursive system architecture** where complexity scales through repetition of the same clear principle.
+
+---
+
+## Core Concept: Meta-Standard for Agent Interoperability
 
 Agentify is a **meta-standard** - it does NOT prescribe how you build agents internally. Instead:
 - **You build agents however you want** (Python, JavaScript, n8n, Make.com, Lovable, custom frameworks)
@@ -20,6 +37,7 @@ Agentify is a **meta-standard** - it does NOT prescribe how you build agents int
 
 **Think of it as:**
 - "USB for AI Agents" (interoperability standard)
+- "Systems Biology for AI" (recursive architecture)
 - "App Store for AI Agents" (marketplace)
 - "Kubernetes for Agent Orchestration" (deployment)
 - "Ethics & Compliance Layer" (governance)

@@ -1,14 +1,27 @@
-# Agentify Platform - Capabilities Overview
+# Agentify OS - Capabilities Overview
 
-**For: OFFIS e.V. - Institut für Informatik**  
-**Date: January 2026**  
+**For: OFFIS e.V. - Institut für Informatik**
+**Date: January 2026**
 **Version: 1.0**
+
+> 💡 **For a simpler, more visual explanation, see [Agentify Concept](AGENTIFY_CONCEPT.md)**
 
 ---
 
 ## Executive Summary
 
-Agentify is a **marketplace-driven platform for autonomous agent orchestration** that enables dynamic composition of agent teams for complex workflows.
+**Agentify OS is the operating system for AI superorganisms** - the technical and economic coordination layer for complex AI systems.
+
+### **The Biological Principle**
+
+Agentify follows systems biology:
+
+```
+Agent          = Cell
+System Agents  = Organs
+Operating System = Organism
+Platform       = Superorganism
+```
 
 **Core Concept: Meta-Standard for Agent Interoperability**
 
@@ -17,8 +30,9 @@ Agentify provides a **meta-standard** that sits above underlying implementations
 - **Interoperability Protocol**: Agents from different frameworks can work together
 - **Control & Governance**: Ethics enforcement, oversight, and compliance checking
 - **Reusability**: Agents described once, deployed anywhere (cloud, edge, desktop)
+- **Recursive Architecture**: Same standard applies from cell to superorganism
 
-**Think of it as:** "USB for AI Agents" - different implementations (Python, JavaScript, n8n, Make.com, Lovable) can plug into the same ecosystem.
+**Think of it as:** "USB for AI Agents" + "Systems Biology for AI" - different implementations (Python, JavaScript, n8n, Make.com, Lovable) can plug into the same ecosystem and form superorganisms.
 
 The platform combines this universal agent standard with runtime libraries for ethics enforcement, oversight, and health monitoring.
 
