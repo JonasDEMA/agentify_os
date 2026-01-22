@@ -1,0 +1,19 @@
+agents:
+  - name: "calculation-agent"
+    endpoint: "http://calculation-agent:8000"
+    capabilities:
+      - "calculate"
+      - "math"
+    metadata:
+      version: "1.0.0"
+      description: "Performs mathematical calculations"
+
+  - name: "formatting-agent"
+    endpoint: "http://formatting-agent:8000"
+    capabilities:
+      - "format"
+      - "number_formatting"
+    metadata:
+      version: "1.0.0"
+      description: "Formats numbers for display"
+

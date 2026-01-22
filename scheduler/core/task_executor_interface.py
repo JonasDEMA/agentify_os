@@ -5,7 +5,11 @@ Abstract base class for task executors.
 
 from abc import ABC, abstractmethod
 
-from scheduler.core.task_graph import ExecutionResult, ToDo
+# Try importing with scheduler prefix (local), fall back to relative import (Docker)
+try:
+    from scheduler.core.task_graph import ExecutionResult, ToDo
+except ImportError:
+    from .task_graph import ExecutionResult, ToDo
 
 
 class BaseExecutor(ABC):

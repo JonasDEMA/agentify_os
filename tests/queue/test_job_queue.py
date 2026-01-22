@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from scheduler.core.task_graph import ActionType, TaskGraph, ToDo
-from scheduler.queue.job_queue import Job, JobQueue, JobStatus
+from scheduler.job_queue.job_queue import Job, JobQueue, JobStatus
 
 
 class TestJob:

@@ -3,14 +3,26 @@
 REST API for job management (create, list, get, cancel, retry).
 """
 
+import sys
+from pathlib import Path
 from typing import Annotated
 
 import structlog
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
 
-from scheduler.core.task_graph import ActionType, TaskGraph, ToDo
-from scheduler.queue.job_queue import Job, JobQueue, JobStatus
+# Add parent directory to path to support both local and Docker execution
+parent_dir = Path(__file__).parent.parent
+if str(parent_dir) not in sys.path:
+    sys.path.insert(0, str(parent_dir))
+
+# Try importing with scheduler prefix (local), fall back to direct import (Docker)
+try:
+    from scheduler.core.task_graph import ActionType, TaskGraph, ToDo
+    from scheduler.job_queue.job_queue import Job, JobQueue, JobStatus
+except ImportError:
+    from core.task_graph import ActionType, TaskGraph, ToDo
+    from job_queue.job_queue import Job, JobQueue, JobStatus
 
 logger = structlog.get_logger()
 
