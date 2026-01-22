@@ -188,6 +188,12 @@ Consider:
                 "prompt": prompt,
                 "model": "gpt-4o-mini",
                 "temperature": 0.3
+            },
+            context={
+                "purpose": "ethics_evaluation",
+                "target_agent": agent_id,
+                "target_action": action,
+                "framework": framework
             }
         )
         

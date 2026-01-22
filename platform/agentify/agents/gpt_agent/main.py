@@ -1,4 +1,30 @@
-"""GPT Agent - Generic LLM wrapper."""
+"""GPT Agent - Generic LLM wrapper.
+
+SECURITY & ETHICS ARCHITECTURE:
+-------------------------------
+This agent is a TOOL, not a decision-maker.
+
+WHY NO PRE-ETHICS CHECK:
+  - Ethics Agent uses this LLM agent to evaluate ethics (would be circular)
+  - Calling agents (e.g., Ethics Agent) are responsible for ethical evaluation
+  - This agent logs all calls for audit trails
+  - OpenAI's safety layer provides base protection
+  - Future: Multiple LLM providers will compete on safety
+
+RESPONSIBILITY MODEL:
+  - Requester is responsible for ethical use
+  - This agent provides transparent execution logs
+  - Audit trail includes: who, what, when, why
+  - Oversight authority can review all generations
+
+LOGGING FOR SECURITY (Doc 07, Section 6):
+  - Who requested generation? → Logged via message.sender
+  - For what purpose? → Logged via message.context.purpose
+  - Was ethics check performed? → Logged if context includes ethics_evaluation
+  - Token usage → Logged for cost/abuse monitoring
+
+See: 07_Agentic_Economy_Security_Ethics_Architecture.docx
+"""
 import sys
 import os
 import json
@@ -45,10 +71,23 @@ async def health():
 async def agent_message(message: AgentMessage):
     """Handle Agent Communication Protocol messages."""
     
+    # Enhanced logging for security and audit trails
     print(f"\n📨 Received message:")
     print(f"   Type: {message.type}")
     print(f"   Sender: {message.sender}")
     print(f"   Intent: {message.intent}")
+    print(f"   Message ID: {message.id}")
+    print(f"   Timestamp: {message.ts}")
+    
+    # Log request context for audit trail
+    context_info = {
+        "requester": message.sender,
+        "intent": message.intent,
+        "message_id": message.id,
+        "timestamp": str(message.ts),
+        "correlation": message.correlation
+    }
+    print(f"   Context: {context_info}")
     
     # Route based on intent
     if message.intent == "chat_completion":
@@ -78,9 +117,13 @@ async def handle_chat_completion(message: AgentMessage) -> AgentMessage:
     temperature = payload.get("temperature", 0.7)
     max_tokens = payload.get("max_tokens", 1000)
     
+    # Enhanced audit logging
     print(f"\n💬 Chat completion:")
     print(f"   Model: {model}")
     print(f"   Messages: {len(messages)}")
+    print(f"   Requester: {message.sender}")
+    print(f"   Purpose: {message.context.get('purpose', 'not specified')}")
+    print(f"   Message ID: {message.id}")
     
     try:
         api_key = os.getenv("OPENAI_API_KEY")
@@ -106,7 +149,10 @@ async def handle_chat_completion(message: AgentMessage) -> AgentMessage:
             "model": response.model
         }
         
+        # Log completion for audit trail
         print(f"✅ Completed: {result['usage']['total_tokens']} tokens")
+        print(f"   Requester: {message.sender}")
+        print(f"   Request ID: {message.id}")
         
         return AgentMessage(
             type=MessageType.INFORM,
@@ -135,9 +181,13 @@ async def handle_structured_completion(message: AgentMessage) -> AgentMessage:
     model = payload.get("model", "gpt-4o-mini")
     temperature = payload.get("temperature", 0.3)
     
+    # Enhanced audit logging
     print(f"\n📋 Structured completion:")
     print(f"   Model: {model}")
     print(f"   Prompt length: {len(prompt)}")
+    print(f"   Requester: {message.sender}")
+    print(f"   Purpose: {message.context.get('purpose', 'not specified')}")
+    print(f"   Message ID: {message.id}")
     
     try:
         api_key = os.getenv("OPENAI_API_KEY")
@@ -164,7 +214,10 @@ async def handle_structured_completion(message: AgentMessage) -> AgentMessage:
             }
         }
         
+        # Log completion for audit trail
         print(f"✅ Completed: {result['usage']['total_tokens']} tokens")
+        print(f"   Requester: {message.sender}")
+        print(f"   Request ID: {message.id}")
         
         return AgentMessage(
             type=MessageType.INFORM,
