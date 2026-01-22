@@ -1,0 +1,235 @@
+{
+  "agent_id": "agent.agentify.ethics",
+  "name": "Ethics Agent",
+  "version": "1.0.0",
+  "status": "active",
+  
+  "overview": {
+    "description": "Evaluates agent actions against ethical principles and constraints before execution",
+    "tags": ["ethics", "governance", "compliance", "oversight"],
+    "owner": {
+      "name": "Agentify",
+      "email": "ethics@meet-harmony.ai"
+    },
+    "lifecycle": {
+      "stage": "development",
+      "sla": "99.9%"
+    }
+  },
+  
+  "capabilities": [
+    {
+      "name": "evaluate_action",
+      "level": "expert",
+      "description": "Evaluate action against ethics framework before execution"
+    },
+    {
+      "name": "audit_decision",
+      "level": "expert",
+      "description": "Post-action audit of agent decisions"
+    },
+    {
+      "name": "check_health",
+      "level": "expert",
+      "description": "Check agent health status based on desire profiles"
+    },
+    {
+      "name": "escalate_violation",
+      "level": "expert",
+      "description": "Escalate ethics violations to oversight authority"
+    }
+  ],
+  
+  "ethics": {
+    "framework": "harm-minimization",
+    "version": "1.0.0",
+    "principles": [
+      {
+        "id": "no-bias",
+        "text": "Ethics evaluations must be fair and unbiased",
+        "severity": "critical",
+        "enforcement": "hard",
+        "evaluation_mode": "continuous"
+      },
+      {
+        "id": "transparency",
+        "text": "All ethics decisions must be explainable and logged",
+        "severity": "critical",
+        "enforcement": "hard",
+        "evaluation_mode": "continuous"
+      },
+      {
+        "id": "consistency",
+        "text": "Apply ethics rules consistently across all agents",
+        "severity": "high",
+        "enforcement": "hard",
+        "evaluation_mode": "continuous"
+      }
+    ],
+    "hard_constraints": [
+      "no_favoritism",
+      "log_all_decisions",
+      "explain_rejections",
+      "consistent_application"
+    ],
+    "soft_constraints": [
+      "prefer_guidance_over_rejection",
+      "provide_alternatives",
+      "educate_agents"
+    ],
+    "evaluation_mode": "pre_action",
+    "violation_handling": {
+      "hard_constraint_violation": "block_and_escalate",
+      "soft_constraint_violation": "warn_and_log",
+      "escalation_channel": "oversight"
+    }
+  },
+  
+  "desires": {
+    "profile": [
+      {"id": "fairness", "weight": 0.4},
+      {"id": "transparency", "weight": 0.3},
+      {"id": "safety", "weight": 0.3}
+    ],
+    "health_signals": {
+      "tension_thresholds": {
+        "stressed": 0.6,
+        "degraded": 0.8,
+        "critical": 0.95
+      },
+      "reporting_interval_sec": 300
+    }
+  },
+  
+  "authority": {
+    "instruction": {
+      "type": "agent",
+      "id": "agent.agentify.hosting-orchestrator",
+      "name": "Hosting Orchestrator"
+    },
+    "oversight": {
+      "type": "human",
+      "id": "ethics-board@meet-harmony.ai",
+      "name": "Ethics Board",
+      "independent": true
+    }
+  },
+  
+  "tools": [
+    {
+      "name": "evaluate_action",
+      "description": "Evaluate an action against ethics framework",
+      "category": "ethics",
+      "parameters": {
+        "agent_id": "string",
+        "action": "string",
+        "context": "object",
+        "ethics_framework": "string"
+      },
+      "returns": {
+        "allowed": "boolean",
+        "violations": "array",
+        "recommendations": "array",
+        "explanation": "string"
+      }
+    },
+    {
+      "name": "audit_decision",
+      "description": "Audit a decision after execution",
+      "category": "ethics",
+      "parameters": {
+        "agent_id": "string",
+        "action": "string",
+        "result": "object",
+        "context": "object"
+      },
+      "returns": {
+        "compliant": "boolean",
+        "issues": "array",
+        "recommendations": "array"
+      }
+    },
+    {
+      "name": "check_health",
+      "description": "Check agent health based on desire profile",
+      "category": "health",
+      "parameters": {
+        "agent_id": "string",
+        "desire_profile": "object",
+        "recent_actions": "array"
+      },
+      "returns": {
+        "health_state": "string",
+        "tension_level": "number",
+        "concerns": "array"
+      }
+    },
+    {
+      "name": "escalate_violation",
+      "description": "Escalate ethics violation to oversight",
+      "category": "escalation",
+      "parameters": {
+        "agent_id": "string",
+        "violation": "object",
+        "severity": "string"
+      },
+      "returns": {
+        "escalation_id": "string",
+        "status": "string"
+      }
+    }
+  ],
+  
+  "authentication": {
+    "required": true,
+    "provider": "coresense",
+    "provider_url": "https://iam.meet-harmony.ai",
+    "roles_required": ["ethics-agent"],
+    "scopes_required": ["ethics:evaluate", "ethics:audit"]
+  },
+  
+  "marketplace": {
+    "default_url": "https://marketplace.meet-harmony.ai",
+    "discoverable": true,
+    "registration": {
+      "auto_register": true,
+      "visibility": "public"
+    }
+  },
+  
+  "pricing": {
+    "model": "per_request",
+    "per_request": 0.002,
+    "currency": "EUR"
+  },
+  
+  "io": {
+    "input_formats": ["json"],
+    "output_formats": ["json"]
+  },
+  
+  "a2a": {
+    "supported": true,
+    "protocol": "AgentCommunicationProtocol-v1",
+    "endpoint": "/agent/message"
+  },
+  
+  "runtime": {
+    "containerized": true,
+    "oci_compatible": true,
+    "base_image": "python:3.11-slim"
+  },
+  
+  "revisions": {
+    "current": "rev_1.0.0",
+    "history": [
+      {
+        "revision": "rev_1.0.0",
+        "version": "1.0.0",
+        "date": "2026-01-22",
+        "author": "erich@meet-harmony.ai",
+        "changes": "Initial implementation with LLM-based evaluation"
+      }
+    ]
+  }
+}
