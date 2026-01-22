@@ -17,7 +17,7 @@ class AgentCapability:
 
 @dataclass
 class Agent:
-    """Represents an agent in the LuminaOS ecosystem."""
+    """Represents an agent in the Agentify ecosystem."""
 
     id: str
     name: str

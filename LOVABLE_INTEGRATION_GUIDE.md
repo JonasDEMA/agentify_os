@@ -28,7 +28,7 @@ Diese Anleitung beschreibt **Schritt für Schritt**, wie du die CPA Server API i
 
 - [ ] **2. Neues Projekt erstellen**
   - "New Project" → "Deploy from GitHub repo"
-  - Repository auswählen: `LuminaOS/01_CPA`
+  - Repository auswählen: `Agentify/01_CPA`
 
 - [ ] **3. Environment Variables setzen**
   ```env

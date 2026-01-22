@@ -109,7 +109,7 @@ docker-compose --profile observability up -d
 
 ### **Inbound Gate**
 - `POST /schedule` - Schedule a new task
-- `POST /lam/message` - Receive LAM message
+- `POST /lam/message` - Receive agent message
 - `GET /health` - Health check
 
 ### **Job Management**
@@ -221,7 +221,7 @@ See [docs/TODO.md](TODO.md) for detailed task list.
 
 - [Architecture](ARCHITECTURE.md) - System architecture and design
 - [TODO](TODO.md) - Development roadmap and tasks
-- [LAM Protocol](LAM_PROTOCOL.md) - LAM message specification (coming soon)
+- [Agent Communication Protocol](LAM_PROTOCOL.md) - agent message specification (coming soon)
 
 ---
 

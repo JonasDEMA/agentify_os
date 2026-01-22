@@ -1,0 +1,23 @@
+{
+  "name": "formatting-agent",
+  "version": "1.0.0",
+  "description": "Number formatting agent for Calculator PoC",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "keywords": [
+    "agent",
+    "formatting",
+    "localization",
+    "agentify"
+  ],
+  "author": "Agentify",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
+

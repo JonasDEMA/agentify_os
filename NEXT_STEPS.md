@@ -1,7 +1,7 @@
 # 🚀 Nächste Schritte - CPA Scheduler
 
 **Status**: ✅ Projekt-Setup abgeschlossen  
-**Nächste Phase**: Phase 1.2 - LAM Protocol Implementation  
+**Nächste Phase**: Phase 1.2 - Agent Communication Protocol Implementation  
 **Datum**: 2025-11-03
 
 ---
@@ -24,9 +24,9 @@
 
 ## 🎯 Sofort zu erledigen (Phase 1.2)
 
-### 1. LAM Protocol Implementation
+### 1. Agent Communication Protocol Implementation
 
-**Datei**: `scheduler/core/lam_protocol.py`
+**Datei**: `scheduler/core/agent_protocol.py`
 
 **Aufgaben**:
 - [ ] Pydantic BaseMessage Model erstellen
@@ -42,7 +42,7 @@
 - [ ] Serialization Methods (to_dict, from_dict, to_json, from_json)
 - [ ] Message Factory/Builder Pattern
 
-**Test-Datei**: `tests/core/test_lam_protocol.py`
+**Test-Datei**: `tests/core/test_agent_protocol.py`
 
 **Tests**:
 - [ ] Test Message Creation (alle Typen)
@@ -159,7 +159,7 @@ docker-compose up redis -d
 1. **Test zuerst schreiben** (Red)
    ```bash
    # Test erstellen
-   # tests/core/test_lam_protocol.py
+   # tests/core/test_agent_protocol.py
    
    def test_create_request_message():
        msg = RequestMessage(
@@ -174,13 +174,13 @@ docker-compose up redis -d
 
 2. **Implementierung** (Green)
    ```bash
-   # scheduler/core/lam_protocol.py implementieren
+   # scheduler/core/agent_protocol.py implementieren
    # bis Test grün wird
    ```
 
 3. **Test ausführen**
    ```bash
-   poetry run pytest tests/core/test_lam_protocol.py -v
+   poetry run pytest tests/core/test_agent_protocol.py -v
    ```
 
 4. **Refactoring** (Refactor)
@@ -211,12 +211,12 @@ Eine Aufgabe ist erst "Done", wenn:
 ## 🎯 Ziel für diese Woche
 
 **Bis 2025-11-10**:
-- ✅ LAM Protocol vollständig implementiert & getestet
+- ✅ Agent Communication Protocol vollständig implementiert & getestet
 - ✅ Task Graph vollständig implementiert & getestet
 - ✅ Intent Router (Rule-based) vollständig implementiert & getestet
 
 **Deliverables**:
-- 3 neue Module (`lam_protocol.py`, `task_graph.py`, `intent_router.py`)
+- 3 neue Module (`agent_protocol.py`, `task_graph.py`, `intent_router.py`)
 - 3 Test-Suites (mit >80% Coverage)
 - 1 Config-Datei (`intents.yaml`)
 - Aktualisierte Dokumentation
@@ -254,17 +254,17 @@ Eine Aufgabe ist erst "Done", wenn:
 
 ## 🚀 Los geht's!
 
-**Nächster Schritt**: LAM Protocol Implementation starten
+**Nächster Schritt**: Agent Communication Protocol Implementation starten
 
 ```bash
 # Neuen Branch erstellen
 git checkout -b feature/lam-protocol
 
 # Editor öffnen
-code scheduler/core/lam_protocol.py
+code scheduler/core/agent_protocol.py
 
 # Test-Datei öffnen
-code tests/core/test_lam_protocol.py
+code tests/core/test_agent_protocol.py
 
 # Let's go! 🚀
 ```

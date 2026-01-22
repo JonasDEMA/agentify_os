@@ -2,7 +2,7 @@
 
 ## 🚀 Übersicht
 
-Der CPA Server ist die zentrale Monitoring- und Management-Plattform für LuminaOS CPA Agents.
+Der CPA Server ist die zentrale Monitoring- und Management-Plattform für Agentify CPA Agents.
 
 **Features:**
 - ✅ Agent-Registrierung mit automatischer ID-Vergabe

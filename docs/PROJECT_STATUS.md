@@ -22,8 +22,8 @@
 - [x] `docs/PROJECT_STATUS.md` - Dieses Dokument
 - [x] `__init__.py` Dateien für alle Python-Packages
 
-### LAM Protocol Implementation (2025-11-03)
-- [x] `scheduler/core/lam_protocol.py` erstellt
+### Agent Communication Protocol Implementation (2025-11-03)
+- [x] `scheduler/core/agent_protocol.py` erstellt
 - [x] Pydantic BaseMessage Model mit allen LAM-Feldern
 - [x] 12 Message Types implementiert (Request, Inform, Propose, Agree, Refuse, Confirm, Failure, Done, Route, Discover, Offer, Assign)
 - [x] Message Validation mit Pydantic
@@ -103,13 +103,13 @@
 
 ## 📋 Aktuelle Phase: Phase 1 - Foundation & Core ✅ ABGESCHLOSSEN!
 
-**Ziel**: Grundlegende Komponenten implementieren (LAM Protocol, Task Graph, Intent Router, Job Queue)
+**Ziel**: Grundlegende Komponenten implementieren (Agent Communication Protocol, Task Graph, Intent Router, Job Queue)
 
 **Fortschritt**: 1.1 ✅ | 1.2 ✅ | 1.3 ✅ | 1.4 ✅ | 1.5 ✅
 
 ### Phase 1 Übersicht:
 - ✅ **1.1 Projekt-Struktur** (abgeschlossen)
-- ✅ **1.2 LAM Protocol** (abgeschlossen)
+- ✅ **1.2 Agent Communication Protocol** (abgeschlossen)
 - ✅ **1.3 ToDo-Schema & Task Graph** (abgeschlossen)
 - ✅ **1.4 Intent Router** (abgeschlossen)
 - ✅ **1.5 Job Queue (Redis)** (abgeschlossen)
@@ -141,7 +141,7 @@
 ### Code-Statistiken
 - **Zeilen Code**: ~1.350 (Setup, Config, Core Modules, Job Queue)
 - **Test Coverage**: 90%+ (Durchschnitt)
-- **Anzahl Module**: 5 (lam_protocol, task_graph, task_executor_interface, intent_router, job_queue)
+- **Anzahl Module**: 5 (agent_protocol, task_graph, task_executor_interface, intent_router, job_queue)
 - **Anzahl Tests**: 69 (alle grün ✅)
 
 ### Entwicklungs-Fortschritt
@@ -185,7 +185,7 @@
 - ✅ Git Repository initialisiert mit 4 strukturierten Commits
 
 ### 2025-11-03 (Nachmittag - Teil 1)
-- ✅ LAM Protocol implementiert (`scheduler/core/lam_protocol.py`)
+- ✅ Agent Communication Protocol implementiert (`scheduler/core/agent_protocol.py`)
 - ✅ 18 Unit Tests geschrieben und bestanden
 - ✅ Code Coverage: 92%
 - ✅ Linting & Type Checking: ✅ Alle Checks grün
@@ -230,7 +230,7 @@
 1. **Repository Pattern**: Für einfache DB-Migration (SQLite → Supabase)
 2. **LLM Provider Pattern**: Austauschbare LLM-Backends
 3. **Executor Registry**: Plugin-basierte Executor-Architektur
-4. **LAM Protocol**: Standardisiertes Agent-zu-Agent Messaging
+4. **Agent Communication Protocol**: Standardisiertes Agent-zu-Agent Messaging
 
 ### Offene Fragen
 - [ ] Wie soll die Authentifizierung zwischen Scheduler und CPA Desktop AI funktionieren?

@@ -243,7 +243,7 @@ Eine **zentrale Plattform** für alle Geschäftsbereiche mit:
 ## 📞 **Kontakt**
 
 **Für weitere Informationen:**
-- Email: support@lumina-os.com
+- Email: support@agentify.dev
 - GitHub: https://github.com/JonasDEMA/cpa_agent_platform
 
 **Dokumentation:**

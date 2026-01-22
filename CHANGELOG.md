@@ -145,7 +145,7 @@ For detailed migration guide, see [docs/MIGRATION.md](docs/MIGRATION.md).
 
 - **Issues**: https://github.com/JonasDEMA/cpa_agent_platform/issues
 - **Discussions**: https://github.com/JonasDEMA/cpa_agent_platform/discussions
-- **Email**: support@lumina-os.com
+- **Email**: support@agentify.dev
 
 ---
 

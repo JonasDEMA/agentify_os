@@ -2,7 +2,7 @@
 
 ## Übersicht
 
-Der **CPA Scheduler** kommuniziert mit spezialisierten Agenten über **REST API** und das **LAM Protocol** (Lumina Agent Messages).
+Der **CPA Scheduler** kommuniziert mit spezialisierten Agenten über **REST API** und das **Agent Communication Protocol** (Lumina Agent Messages).
 
 ## Architektur
 
@@ -13,7 +13,7 @@ Der **CPA Scheduler** kommuniziert mit spezialisierten Agenten über **REST API*
 │ • Job Queue                                             │
 │ • Task Graph                                            │
 └─────────────┬───────────────────────────────────────────┘
-              │ REST API + LAM Protocol
+              │ REST API + Agent Communication Protocol
               │
     ┌─────────┴─────────┬─────────────┬──────────────┐
     │                   │             │              │

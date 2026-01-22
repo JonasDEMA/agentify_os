@@ -1,11 +1,11 @@
-"""Test Agent Communication with LuminaOS."""
+"""Test Agent Communication with Agentify."""
 
 import asyncio
 import logging
 
 from agents.desktop_rpa.agent_comm import AgentDiscovery, AgentRegistry
 from agents.desktop_rpa.agent_comm.models import AgentRequest
-from agents.desktop_rpa.config.luminaos_config import luminaos_config
+from agents.desktop_rpa.config.agentify_config import agentify_config
 
 # Configure logging
 logging.basicConfig(
@@ -21,9 +21,9 @@ async def test_discovery():
     print("=" * 60)
 
     discovery = AgentDiscovery(
-        api_token=luminaos_config.api_token,
-        gateway_url=luminaos_config.gateway_url,
-        sender_id=luminaos_config.sender_id,
+        api_token=agentify_config.api_token,
+        gateway_url=agentify_config.gateway_url,
+        sender_id=agentify_config.sender_id,
     )
 
     # Discover all agents
@@ -52,8 +52,8 @@ async def test_find_agent():
     print("=" * 60)
 
     discovery = AgentDiscovery(
-        api_token=luminaos_config.api_token,
-        gateway_url=luminaos_config.gateway_url,
+        api_token=agentify_config.api_token,
+        gateway_url=agentify_config.gateway_url,
     )
 
     # Find SMS agent
@@ -87,8 +87,8 @@ async def test_send_sms():
     print("=" * 60)
 
     discovery = AgentDiscovery(
-        api_token=luminaos_config.api_token,
-        gateway_url=luminaos_config.gateway_url,
+        api_token=agentify_config.api_token,
+        gateway_url=agentify_config.gateway_url,
     )
 
     # Find SMS agent
@@ -131,8 +131,8 @@ async def test_registry():
 
     registry = AgentRegistry()
     discovery = AgentDiscovery(
-        api_token=luminaos_config.api_token,
-        gateway_url=luminaos_config.gateway_url,
+        api_token=agentify_config.api_token,
+        gateway_url=agentify_config.gateway_url,
     )
 
     # Discover and register SMS agent
@@ -186,9 +186,9 @@ async def main():
     print("\n" + "=" * 60)
     print("🚀 AGENT COMMUNICATION TEST SUITE")
     print("=" * 60)
-    print(f"\n📡 Gateway: {luminaos_config.gateway_url}")
-    print(f"🔑 Token: {luminaos_config.api_token[:20]}...")
-    print(f"👤 Sender: {luminaos_config.sender_id}")
+    print(f"\n📡 Gateway: {agentify_config.gateway_url}")
+    print(f"🔑 Token: {agentify_config.api_token[:20]}...")
+    print(f"👤 Sender: {agentify_config.sender_id}")
     print("\n" + "=" * 60)
 
     try:

@@ -21,7 +21,7 @@ For **non-commercial use**, research, education, and personal projects, the CPA 
 ```
 MIT License
 
-Copyright (c) 2026 Moßler GmbH / LuminaOS
+Copyright (c) 2026 Moßler GmbH / Agentify
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -56,8 +56,8 @@ For **commercial use**, including but not limited to:
 **A separate Commercial License is required.**
 
 **To obtain a Commercial License:**
-- 📧 Email: licensing@lumina-os.com
-- 🌐 Website: https://lumina-os.com/licensing
+- 📧 Email: licensing@agentify.dev
+- 🌐 Website: https://agentify.dev/licensing
 - 📞 Contact: Moßler GmbH
 
 **Commercial License Benefits:**
@@ -98,7 +98,7 @@ For **commercial use**, including but not limited to:
 **A:** Yes! Use the MIT License for evaluation and development. Contact us when you're ready to go commercial.
 
 ### **Q: What if I'm not sure which license I need?**
-**A:** Contact us at licensing@lumina-os.com - we're happy to help!
+**A:** Contact us at licensing@agentify.dev - we're happy to help!
 
 ### **Q: Can I contribute to the project?**
 **A:** Yes! All contributions are welcome under the MIT License.
@@ -110,10 +110,10 @@ For **commercial use**, including but not limited to:
 
 ## 📞 **Contact**
 
-**Moßler GmbH / LuminaOS**
+**Moßler GmbH / Agentify**
 
-- 📧 Email: licensing@lumina-os.com
-- 🌐 Website: https://lumina-os.com
+- 📧 Email: licensing@agentify.dev
+- 🌐 Website: https://agentify.dev
 - 💬 GitHub Discussions: https://github.com/JonasDEMA/cpa_agent_platform/discussions
 
 ---

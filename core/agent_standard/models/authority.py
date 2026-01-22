@@ -95,8 +95,8 @@ class OversightAuthority(BaseModel):
 
 class EscalationConfig(BaseModel):
     """Configuration for incident escalation."""
-    
-    channels: list[Literal["human", "ethics-board", "system", "email", "webhook"]] = Field(
+
+    channels: list[Literal["human", "ethics-board", "system", "email", "webhook", "slack", "pagerduty", "teams", "discord"]] = Field(
         default_factory=lambda: ["human"],
         description="Available escalation channels",
     )

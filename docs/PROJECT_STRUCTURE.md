@@ -16,7 +16,7 @@
 │   ├── main.py                     # FastAPI Application Entry Point
 │   │
 │   ├── 📂 core/                    # Kern-Komponenten
-│   │   ├── lam_protocol.py         # LAM Message Models (Pydantic)
+│   │   ├── agent_protocol.py         # Agent Message Models (Pydantic)
 │   │   ├── task_graph.py           # ToDo Schema & Dependency Resolution
 │   │   ├── intent_router.py        # Intent Classification (Rule-based)
 │   │   └── task_executor_interface.py  # Abstract Executor Interface
@@ -82,7 +82,7 @@
 │   ├── conftest.py                 # Pytest Fixtures
 │   │
 │   ├── 📂 core/                    # Core Component Tests
-│   │   ├── test_lam_protocol.py
+│   │   ├── test_agent_protocol.py
 │   │   ├── test_task_graph.py
 │   │   └── test_intent_router.py
 │   │
@@ -260,9 +260,9 @@ graph LR
 
 ## Nächste Schritte
 
-1. **Phase 1.2**: LAM Protocol Implementation
-   - `scheduler/core/lam_protocol.py`
-   - `tests/core/test_lam_protocol.py`
+1. **Phase 1.2**: Agent Communication Protocol Implementation
+   - `scheduler/core/agent_protocol.py`
+   - `tests/core/test_agent_protocol.py`
 
 2. **Phase 1.3**: Task Graph Implementation
    - `scheduler/core/task_graph.py`

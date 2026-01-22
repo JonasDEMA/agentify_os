@@ -38,7 +38,7 @@ async def lifespan(app: FastAPI):
 # Create FastAPI app
 app = FastAPI(
     title="CPA Server",
-    description="Agent monitoring and management server for LuminaOS CPA",
+    description="Agent monitoring and management server for Agentify CPA",
     version="0.1.0",
     lifespan=lifespan,
 )

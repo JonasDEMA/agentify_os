@@ -12,7 +12,7 @@ from agents.desktop_rpa.agent_comm import AgentDiscovery, AgentRegistry
 from agents.desktop_rpa.agent_comm.models import AgentRequest
 from agents.desktop_rpa.cognitive.llm_wrapper import LLMWrapper
 from agents.desktop_rpa.cognitive.models import LLMRequest
-from agents.desktop_rpa.config.luminaos_config import luminaos_config
+from agents.desktop_rpa.config.agentify_config import agentify_config
 from agents.desktop_rpa.config.settings import settings
 from agents.desktop_rpa.state_graph import PathFinder, StateGraph, StateTracker
 from agents.desktop_rpa.vision.element_detector import ElementDetector
@@ -41,7 +41,7 @@ class CognitiveExecutor:
             use_vision: Whether to use Vision Layer (UI Automation + OCR)
             use_state_graph: Whether to use State Graph for navigation
             use_window_manager: Whether to use Window Manager for intelligent window handling
-            use_agent_comm: Whether to use Agent Communication for LuminaOS integration
+            use_agent_comm: Whether to use Agent Communication for Agentify integration
         """
         self.llm = llm_wrapper or LLMWrapper()
         self.screenshot_dir = Path(settings.screenshot_dir)
@@ -87,17 +87,17 @@ class CognitiveExecutor:
         else:
             self.window_manager = None
 
-        # Agent Communication (LuminaOS)
-        if use_agent_comm and luminaos_config.enabled:
+        # Agent Communication (Agentify)
+        if use_agent_comm and agentify_config.enabled:
             try:
                 self.agent_discovery = AgentDiscovery(
-                    api_token=luminaos_config.api_token,
-                    gateway_url=luminaos_config.gateway_url,
-                    sender_id=luminaos_config.sender_id,
-                    timeout=luminaos_config.timeout,
+                    api_token=agentify_config.api_token,
+                    gateway_url=agentify_config.gateway_url,
+                    sender_id=agentify_config.sender_id,
+                    timeout=agentify_config.timeout,
                 )
                 self.agent_registry = AgentRegistry()
-                logger.info("Agent Communication enabled (LuminaOS)")
+                logger.info("Agent Communication enabled (Agentify)")
             except Exception as e:
                 logger.warning(f"Failed to initialize Agent Communication: {e}")
                 self.agent_discovery = None
@@ -568,7 +568,7 @@ class CognitiveExecutor:
         return {"status": "success", "action": "wait", "duration": duration}
 
     async def _send_user_prompt_sms(self, prompt: UserPrompt, phone_number: str | None = None) -> bool:
-        """Send user prompt via SMS using LuminaOS agent.
+        """Send user prompt via SMS using Agentify agent.
 
         Args:
             prompt: User prompt to send

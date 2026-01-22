@@ -236,5 +236,5 @@ agents/desktop_rpa/
 
 ## License
 
-Part of the LuminaOS CPA Platform.
+Part of the Agentify CPA Platform.
 

@@ -1,8 +1,16 @@
 # 🤖 Agent Standard v1 - Agentic Economy
 
-**Version**: 1.0.0  
-**Status**: Production  
-**Last Updated**: 2026-01-14
+**Version**: 1.0.0
+**Status**: Production
+**Last Updated**: 2026-01-19
+
+> 🚀 **Quick Start:** [QUICKSTART_COMPLETE.md](QUICKSTART_COMPLETE.md) - Create your first agent in 5 minutes!
+>
+> 📖 **Agent Anatomy:** [AGENT_ANATOMY.md](AGENT_ANATOMY.md) - Complete reference for all 14 core areas
+>
+> 📊 **Implementation Status:** [../platform/agentify/agent_standard/IMPLEMENTATION_STATUS.md](../platform/agentify/agent_standard/IMPLEMENTATION_STATUS.md)
+>
+> 📝 **Complete Example:** [examples/complete_agent_example.json](examples/complete_agent_example.json) - All 14 sections
 
 ---
 
@@ -17,6 +25,7 @@ This module implements the **Agentic Economy Agent Standard v1** - a comprehensi
 - ✅ **Universal Runtime**: Same agent definition works on Cloud, Edge, Desktop
 - ✅ **Incident Reporting**: Non-punitive reporting without consequences
 - ✅ **Recursive Oversight**: Oversight agents are themselves overseen
+- ✅ **JSON-First**: Agents describe themselves purely via JSON manifest
 
 ---
 
@@ -198,13 +207,27 @@ Agents run **identically** across environments:
 
 ---
 
+## 📚 Related Documentation
+
+**Developer Resources:**
+- [Developer Guide](../../platform/agentify/DEVELOPER_GUIDE.md) - Complete guide to building agents & apps
+- [Platform Architecture](../../platform/agentify/PLATFORM_ARCHITECTURE.md) - How Apps, Orchestrators, Marketplaces & Hosting work together
+- [Agent Anatomy](AGENT_ANATOMY.md) - Complete reference for all 14 core areas
+- [Quick Start](QUICKSTART_COMPLETE.md) - Create your first agent in 5 minutes
+
+**Business & Research:**
+- [Capabilities Overview](../../docs/AGENTIFY_CAPABILITIES_OVERVIEW.md) - Detailed platform capabilities
+- [Executive Summary](../../docs/AGENTIFY_EXECUTIVE_SUMMARY.md) - Compact overview for stakeholders
+
+---
+
 ## 📞 Support
 
 For questions or issues, see the main documentation or create an issue.
 
 ---
 
-**Created**: 2026-01-14  
-**Authors**: HarmonyOS Team  
+**Created**: 2026-01-14
+**Authors**: HarmonyOS Team
 **License**: Proprietary
 

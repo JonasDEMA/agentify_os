@@ -1,4 +1,4 @@
-"""Tests for LAM (Lumina Agent Messages) Protocol."""
+"""Tests for Agent Communication Protocol Protocol."""
 
 import json
 from datetime import datetime, timezone
@@ -7,7 +7,7 @@ from uuid import UUID
 import pytest
 from pydantic import ValidationError
 
-from scheduler.core.lam_protocol import (
+from scheduler.core.agent_protocol import (
     AgreeMessage,
     AssignMessage,
     BaseMessage,
