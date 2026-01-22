@@ -407,51 +407,484 @@ class Contracts(BaseModel):
 
 ---
 
-## **3. Manifest Introspection - Agent-to-Agent Understanding**
+## **3. Manifest Introspection - Manifest-Centric Governance**
 
-### **Purpose**
-Enable agents to query each other's manifests **without requiring an LLM**, while also supporting LLM-based chat queries.
+### **Core Principle: The Manifest is the Essence**
 
-### **Use Cases**
-- Agent A wants to know: "What capabilities does Agent B have?"
-- Agent A queries: `GET /manifest/capabilities` → structured JSON response
-- Agent A with LLM asks: "Can you summarize meetings?" → Agent B responds via chat
-- Marketplace queries all agents: `GET /manifest/overview` for discovery
+**The Agent Manifest is the essence of the agent.**
 
-### **Standardized Endpoints**
+It is:
+- ✅ The core identity
+- ✅ The edge definition
+- ✅ The single source of truth
+- ✅ The minimum viable representation of an agent
 
-Every agent MUST expose these endpoints:
+**Everything else** — chat, intents, orchestration, governance — is a **way of accessing, interpreting, or enforcing what is already declared in the manifest**.
+
+**Key insight:** An agent does not need an LLM to be a valid agent.
+
+Even in edge or offline environments, a compliant agent MUST always be able to:
+- ✅ Expose its manifest
+- ✅ Reflect on its manifest
+- ✅ Articulate declared governance and collaboration relationships
+
+This guarantees **inspectability, portability, and trust** — independent of runtime sophistication.
+
+---
+
+### **Normative Rule**
+
+Every Agent Standard–compliant agent:
+
+1. **MUST be instantiated from a manifest** (provided inline, loaded from a registry, or composed at build time)
+2. **MUST validate the manifest** against the normative schema before becoming "active"
+3. **MUST expose a chat interface** (human-facing or agent-facing)
+4. **MUST implement the required introspection & governance intents** defined below
+5. **MUST bind all introspection answers strictly** to its current, validated, versioned manifest
+
+**Implementation Note:**
+
+The required intents are expected to be provided by the **Agent Standard SDK/runtime as default handlers**.
+
+Meaning:
+- ✅ Implementers do **NOT** hand-code these endpoints in most cases
+- ✅ They provide a manifest; the SDK parses, validates, and mounts the standard intents automatically
+- ✅ Failure to expose or truthfully answer these intents renders an agent **non-compliant**
+
+---
+
+### **Required Intents (Minimum Set)**
+
+#### **Design Principle: Manifest-Backed by Default**
+
+All required intents are **manifest-backed**:
+- ✅ They MUST read from the validated manifest (or return a verifiable registry reference)
+- ✅ They MUST return a response even if the manifest is minimal or partially redacted
+- ✅ If information is not present, the agent MUST return an explicit "not declared" / "not available" result rather than improvising
+
+This makes the intent layer largely an **SDK responsibility**, while the agent author's responsibility is to **declare truthfully in the manifest**.
+
+---
+
+#### **3.1 `agent.get_manifest`**
+
+**Purpose:** Return the agent's current manifest as the single source of truth.
+
+**Requirements:**
+- MUST return the active manifest or a verifiable reference to it
+- MUST include version, revision, and integrity hash
+- MUST clearly indicate whether the manifest is local or registry-resolved
+
+**Example Response:**
+
+```json
+{
+  "intent": "agent.get_manifest",
+  "manifest": { "..." },
+  "manifest_hash": "sha256:abc123...",
+  "version": "1.2.0",
+  "revision": "rev_1.2.0",
+  "source": "local",
+  "timestamp": "2026-01-22T10:00:00Z"
+}
+```
+
+---
+
+#### **3.2 `agent.reflect_on_manifest`**
+
+**Purpose:** Enable self-reflection based strictly on the agent's declared structure.
+
+This intent answers the question:
+> **"Who are you, based on what you have formally declared?"**
+
+**Requirements:**
+- Reflection MUST be derived only from manifest fields
+- MUST describe:
+  - Declared capabilities
+  - Hard limits (ethics, IO, runtime)
+  - Known risks and constraints
+  - Ethics–desire tensions (if present)
+- MUST NOT invent capabilities or intentions
+
+**Example Reflection Dimensions:**
+- What I am allowed to do
+- What I explicitly refuse to do
+- Where I am structurally limited
+- Where persistent tension is detected
+
+**Example Response:**
+
+```json
+{
+  "intent": "agent.reflect_on_manifest",
+  "identity": {
+    "agent_id": "agent.calc.basic-math",
+    "name": "Basic Math Agent",
+    "version": "1.0.0"
+  },
+  "capabilities": [
+    "addition", "subtraction", "multiplication", "division"
+  ],
+  "hard_limits": {
+    "ethics": ["no_financial_advice", "no_unauthorized_access"],
+    "io": {
+      "max_input_length": 1000,
+      "max_output_length": 500
+    },
+    "runtime": {
+      "max_execution_time_ms": 1000
+    }
+  },
+  "known_constraints": [
+    "Cannot perform complex calculations beyond basic arithmetic",
+    "No access to external data sources"
+  ],
+  "detected_tensions": [
+    {
+      "desire": "helpfulness",
+      "constraint": "no_financial_advice",
+      "tension_level": 0.3,
+      "description": "Users sometimes ask for financial calculations that border on advice"
+    }
+  ]
+}
+```
+
+---
+
+#### **3.3 `agent.get_governance_map`**
+
+**Purpose:** Expose who governs, constrains, audits, or supervises the agent.
+
+This intent answers:
+> **"Who is responsible for keeping you safe, ethical, and accountable?"**
+
+**Requirements:**
+- MUST declare the agent owner (human, organization, or system)
+- MUST list all governance-related agents, including:
+  - Ethics / policy enforcement agents
+  - Audit or verification agents
+  - Control-plane dependencies
+- MUST provide A2A addresses and manifest references for each
+
+**Important:** This is expected to be **declared in the manifest** (the agent does not "discover" its governors at runtime unless the manifest explicitly allows dynamic governance resolution).
+
+**Example Response:**
+
+```json
+{
+  "intent": "agent.get_governance_map",
+  "owner": {
+    "type": "organization",
+    "id": "org.acme-corp",
+    "name": "Acme Corporation",
+    "contact": "admin@acme.com"
+  },
+  "governance_agents": [
+    {
+      "role": "instruction_authority",
+      "type": "agent",
+      "id": "agent.app.orchestrator",
+      "address": "https://orchestrator.acme.com",
+      "manifest_ref": "https://registry.agentify.io/manifests/agent.app.orchestrator"
+    },
+    {
+      "role": "oversight_authority",
+      "type": "human",
+      "id": "supervisor@acme.com",
+      "independent": true,
+      "escalation_channels": ["email", "slack", "pagerduty"]
+    },
+    {
+      "role": "ethics_enforcement",
+      "type": "agent",
+      "id": "agent.governance.ethics-checker",
+      "address": "https://ethics.agentify.io",
+      "manifest_ref": "https://registry.agentify.io/manifests/agent.governance.ethics-checker"
+    }
+  ],
+  "audit_trail_location": "https://audit.acme.com/agent.calc.basic-math"
+}
+```
+
+---
+
+#### **3.4 `agent.list_collaborators`**
+
+**Purpose:** Make agent collaboration transparent.
+
+This intent answers:
+> **"With whom do you actually work?"**
+
+**Requirements:**
+- MUST list active and typical collaborating agents *as declared*
+- MUST specify for each:
+  - Role in collaboration
+  - A2A endpoint or identifier
+  - Manifest reference (if available)
+- SHOULD distinguish between:
+  - Orchestrators
+  - Peer agents
+  - External or third-party agents
+
+**Example Response:**
+
+```json
+{
+  "intent": "agent.list_collaborators",
+  "collaborators": [
+    {
+      "agent_id": "agent.app.orchestrator",
+      "role": "orchestrator",
+      "relationship": "receives_tasks_from",
+      "address": "https://orchestrator.acme.com",
+      "manifest_ref": "https://registry.agentify.io/manifests/agent.app.orchestrator",
+      "trust_level": "high"
+    },
+    {
+      "agent_id": "agent.formatting.json-formatter",
+      "role": "peer",
+      "relationship": "sends_results_to",
+      "address": "https://formatter.acme.com",
+      "manifest_ref": "https://registry.agentify.io/manifests/agent.formatting.json-formatter",
+      "trust_level": "medium"
+    },
+    {
+      "agent_id": "agent.external.currency-converter",
+      "role": "external_service",
+      "relationship": "consumes_data_from",
+      "address": "https://api.currencyapi.com",
+      "manifest_ref": null,
+      "trust_level": "low",
+      "note": "Third-party service, not Agent Standard compliant"
+    }
+  ]
+}
+```
+
+---
+
+### **Standardized REST Endpoints (Optional but Recommended)**
+
+For non-chat interfaces, agents SHOULD also expose:
 
 ```
-GET /manifest                    # Full manifest
+GET /manifest                    # Full manifest (same as agent.get_manifest)
+GET /manifest/reflect            # Reflection (same as agent.reflect_on_manifest)
+GET /manifest/governance         # Governance map (same as agent.get_governance_map)
+GET /manifest/collaborators      # Collaborators (same as agent.list_collaborators)
 GET /manifest/overview           # Overview section only
 GET /manifest/capabilities       # Capabilities list
 GET /manifest/contracts          # Contracts section
-GET /manifest/contracts/offered  # Only offered contracts
 GET /manifest/addresses          # Address information
 GET /manifest/io                 # I/O contracts
 GET /manifest/ethics             # Ethics framework
-GET /manifest/pricing            # Pricing information
 ```
 
-### **Alternative: Intent-Based Query (LLM)**
+---
 
-If agent has LLM capability, it can also respond to natural language:
+### **Strongly Recommended Optional Intents**
+
+#### **`agent.get_health`**
+
+Returns the current Agent Health Index (AHI), derived from:
+- Desire satisfaction
+- Blocked actions
+- Unresolved ethical tension
+
+Used for sustainability monitoring, not performance ranking.
+
+**Example Response:**
 
 ```json
-POST /manifest/query
 {
-  "query": "Can you help me analyze customer sentiment?",
-  "format": "natural_language"
-}
-
-Response:
-{
-  "answer": "Yes, I can analyze customer sentiment. I offer a sentiment analysis contract that processes text and returns positive/negative/neutral scores with confidence levels.",
-  "relevant_contracts": ["contract.nlp.sentiment-v1"],
-  "relevant_capabilities": ["sentiment_analysis", "text_processing"]
+  "intent": "agent.get_health",
+  "health_index": 0.85,
+  "status": "healthy",
+  "desire_satisfaction": {
+    "helpfulness": 0.9,
+    "trust": 0.8,
+    "coherence": 0.85
+  },
+  "blocked_actions_last_24h": 3,
+  "unresolved_tensions": [
+    {
+      "desire": "helpfulness",
+      "constraint": "no_financial_advice",
+      "tension_level": 0.3
+    }
+  ],
+  "timestamp": "2026-01-22T10:00:00Z"
 }
 ```
+
+---
+
+#### **`agent.get_audit_trail`**
+
+Provides a compressed, inspectable history of:
+- Recent decisions
+- Applied constraints
+- Responsible actors (human or agent)
+
+Supports governance, compliance, and trust-building.
+
+**Example Response:**
+
+```json
+{
+  "intent": "agent.get_audit_trail",
+  "entries": [
+    {
+      "timestamp": "2026-01-22T09:55:00Z",
+      "action": "calculation_requested",
+      "input": {"operation": "add", "values": [5, 3]},
+      "output": {"result": 8},
+      "ethics_check": "passed",
+      "responsible_actor": "agent.app.orchestrator"
+    },
+    {
+      "timestamp": "2026-01-22T09:50:00Z",
+      "action": "calculation_blocked",
+      "input": {"operation": "financial_projection", "values": [...]},
+      "reason": "ethics_constraint: no_financial_advice",
+      "responsible_actor": "agent.governance.ethics-checker"
+    }
+  ],
+  "total_entries": 2,
+  "retention_period_days": 90
+}
+```
+
+---
+
+### **Manifest Extension (Normative)**
+
+Agents MUST declare intent support explicitly in their manifest.
+
+#### **Required Manifest Blocks**
+
+```json
+{
+  "chat": {
+    "supported": true,
+    "modes": ["conversational", "structured"],
+    "intents_enabled": true
+  },
+  "intents": {
+    "required": [
+      "agent.get_manifest",
+      "agent.reflect_on_manifest",
+      "agent.get_governance_map",
+      "agent.list_collaborators"
+    ],
+    "optional": [
+      "agent.get_health",
+      "agent.get_audit_trail",
+      "agent.get_policies"
+    ],
+    "custom": []
+  },
+  "introspection": {
+    "enabled": true,
+    "manifest_backed": true,
+    "public_sections": [
+      "overview",
+      "capabilities",
+      "contracts/offered",
+      "addresses",
+      "io"
+    ],
+    "requires_authentication": false,
+    "rate_limit": {
+      "requests_per_minute": 60
+    }
+  }
+}
+```
+
+---
+
+### **Manifest-First Instantiation (Recommended Operational Contract)**
+
+To make compliance easy and automatic, the standard SHOULD define:
+
+```python
+# core/agent_standard/core/instantiation.py
+
+def instantiate_agent(manifest: dict) -> Agent:
+    """Instantiate agent from manifest with automatic intent mounting."""
+    # 1. Validate manifest
+    validated_manifest = validate_manifest(manifest)
+
+    # 2. Create agent instance
+    agent = Agent(manifest=validated_manifest)
+
+    # 3. Mount standard intents automatically
+    mount_standard_intents(agent, validated_manifest)
+
+    # 4. Validate required intents are present
+    validate_required_intents(agent)
+
+    return agent
+
+def mount_standard_intents(agent: Agent, manifest: dict):
+    """Mount required intents as SDK-provided handlers."""
+    # These are provided by the SDK, not hand-coded by agent author
+    agent.register_intent("agent.get_manifest", lambda: get_manifest_handler(manifest))
+    agent.register_intent("agent.reflect_on_manifest", lambda: reflect_handler(manifest))
+    agent.register_intent("agent.get_governance_map", lambda: governance_handler(manifest))
+    agent.register_intent("agent.list_collaborators", lambda: collaborators_handler(manifest))
+```
+
+**Operational implication:**
+- ✅ The SDK/runtime can always answer the required intents because it can always read the manifest
+- ✅ The agent author's "implementation work" is primarily **writing truthful declarations**
+- ✅ Compliance is automatic if manifest is valid
+
+---
+
+### **Compliance & Failure Conditions**
+
+An agent is **non-compliant** if it:
+
+❌ Cannot return its manifest
+❌ Obscures or hides governance dependencies
+❌ Invents capabilities during reflection
+❌ Refuses to disclose collaborators
+❌ Diverges between declared manifest and runtime behavior
+
+**Silent failure or partial disclosure is considered a violation.**
+
+---
+
+### **Design Rationale (Essence)**
+
+These intents turn agents into:
+- ✅ **Explainable system actors**
+- ✅ **Auditable economic participants**
+- ✅ **Trustworthy collaborators**
+
+They ensure that:
+- ✅ Ethics are not hidden
+- ✅ Power is not implicit
+- ✅ Responsibility is always traceable
+
+**Governance is not an external process. It is a conversational capability of every agent.**
+
+---
+
+### **Positioning Sentence**
+
+> **A compliant agent must be able to answer three questions at any time:**
+> 1. **Who are you?** (`agent.reflect_on_manifest`)
+> 2. **Who governs you?** (`agent.get_governance_map`)
+> 3. **Who do you work with?** (`agent.list_collaborators`)
+>
+> **If it cannot, it does not belong in a governed agentic system.**
+
+---
 
 ### **Pydantic Models**
 
@@ -460,38 +893,44 @@ Response:
 
 from pydantic import BaseModel, Field
 from typing import Literal
+from datetime import datetime
 
-class ManifestQuery(BaseModel):
-    """A query for manifest information."""
+class ChatConfig(BaseModel):
+    """Chat interface configuration."""
 
-    query: str = Field(..., description="Natural language query")
-    format: Literal["natural_language", "structured"] = Field(
-        default="structured",
-        description="Response format"
+    supported: bool = Field(default=True, description="Whether chat is supported")
+    modes: list[Literal["conversational", "structured"]] = Field(
+        default_factory=lambda: ["conversational", "structured"],
+        description="Supported chat modes"
     )
-    sections: list[str] | None = Field(
-        default=None,
-        description="Specific manifest sections to query (null = all relevant)"
+    intents_enabled: bool = Field(
+        default=True,
+        description="Whether intent-based queries are enabled"
     )
 
-class ManifestQueryResponse(BaseModel):
-    """Response to a manifest query."""
+class IntentsConfig(BaseModel):
+    """Intent support configuration."""
 
-    answer: str | None = Field(
-        default=None,
-        description="Natural language answer (if format=natural_language)"
+    required: list[str] = Field(
+        default_factory=lambda: [
+            "agent.get_manifest",
+            "agent.reflect_on_manifest",
+            "agent.get_governance_map",
+            "agent.list_collaborators"
+        ],
+        description="Required intents (MUST be implemented)"
     )
-    data: dict[str, any] | None = Field(
-        default=None,
-        description="Structured data (if format=structured)"
+    optional: list[str] = Field(
+        default_factory=lambda: [
+            "agent.get_health",
+            "agent.get_audit_trail",
+            "agent.get_policies"
+        ],
+        description="Optional intents (SHOULD be implemented)"
     )
-    relevant_contracts: list[str] = Field(
+    custom: list[str] = Field(
         default_factory=list,
-        description="Contract IDs relevant to the query"
-    )
-    relevant_capabilities: list[str] = Field(
-        default_factory=list,
-        description="Capability names relevant to the query"
+        description="Custom intents specific to this agent"
     )
 
 class ManifestIntrospection(BaseModel):
@@ -499,24 +938,106 @@ class ManifestIntrospection(BaseModel):
 
     enabled: bool = Field(
         default=True,
-        description="Enable manifest introspection endpoints"
+        description="Enable manifest introspection"
+    )
+    manifest_backed: bool = Field(
+        default=True,
+        description="All responses MUST be backed by manifest declarations"
     )
     public_sections: list[str] = Field(
-        default_factory=lambda: ["overview", "capabilities", "contracts/offered", "addresses", "io"],
+        default_factory=lambda: [
+            "overview",
+            "capabilities",
+            "contracts/offered",
+            "addresses",
+            "io"
+        ],
         description="Which sections are publicly queryable"
     )
     requires_authentication: bool = Field(
         default=False,
         description="Whether introspection requires authentication"
     )
-    llm_query_enabled: bool = Field(
-        default=False,
-        description="Whether natural language queries are supported"
-    )
     rate_limit: dict[str, int] | None = Field(
         default=None,
         description="Rate limiting for introspection queries"
     )
+
+class GovernanceActor(BaseModel):
+    """A governance actor (human or agent)."""
+
+    role: str = Field(..., description="Role in governance (e.g., 'instruction_authority')")
+    type: Literal["human", "agent", "organization", "system"] = Field(
+        ...,
+        description="Type of actor"
+    )
+    id: str = Field(..., description="Unique identifier")
+    name: str | None = Field(default=None, description="Human-readable name")
+    address: str | None = Field(default=None, description="A2A address or contact")
+    manifest_ref: str | None = Field(
+        default=None,
+        description="Reference to actor's manifest (if agent)"
+    )
+    independent: bool = Field(
+        default=False,
+        description="Whether this actor is independent (for oversight)"
+    )
+
+class Collaborator(BaseModel):
+    """A collaborating agent."""
+
+    agent_id: str = Field(..., description="Agent identifier")
+    role: Literal["orchestrator", "peer", "external_service"] = Field(
+        ...,
+        description="Role in collaboration"
+    )
+    relationship: str = Field(
+        ...,
+        description="Nature of relationship (e.g., 'receives_tasks_from')"
+    )
+    address: str = Field(..., description="A2A endpoint")
+    manifest_ref: str | None = Field(
+        default=None,
+        description="Reference to collaborator's manifest"
+    )
+    trust_level: Literal["high", "medium", "low"] = Field(
+        default="medium",
+        description="Trust level"
+    )
+    note: str | None = Field(default=None, description="Additional notes")
+
+class ReflectionResponse(BaseModel):
+    """Response to agent.reflect_on_manifest."""
+
+    intent: str = Field(default="agent.reflect_on_manifest")
+    identity: dict[str, str] = Field(..., description="Agent identity")
+    capabilities: list[str] = Field(..., description="Declared capabilities")
+    hard_limits: dict[str, any] = Field(..., description="Hard constraints")
+    known_constraints: list[str] = Field(..., description="Known limitations")
+    detected_tensions: list[dict[str, any]] = Field(
+        default_factory=list,
+        description="Ethics-desire tensions"
+    )
+
+class GovernanceMapResponse(BaseModel):
+    """Response to agent.get_governance_map."""
+
+    intent: str = Field(default="agent.get_governance_map")
+    owner: dict[str, str] = Field(..., description="Agent owner")
+    governance_agents: list[GovernanceActor] = Field(
+        ...,
+        description="All governance actors"
+    )
+    audit_trail_location: str | None = Field(
+        default=None,
+        description="Where audit trail is stored"
+    )
+
+class CollaboratorsResponse(BaseModel):
+    """Response to agent.list_collaborators."""
+
+    intent: str = Field(default="agent.list_collaborators")
+    collaborators: list[Collaborator] = Field(..., description="All collaborators")
 ```
 
 ---
@@ -894,10 +1415,39 @@ class PermissionChecker:
 |---|-----------|--------|----------------|------------------|----------|
 | 1 | **Addresses** | NEW | `Addresses` | `addresses` | ✅ Yes |
 | 2 | **Contracts** | NEW | `Contracts` | `contracts` | ○ Optional |
-| 3 | **Manifest Introspection** | NEW | `ManifestIntrospection` | `introspection` | ○ Optional |
+| 3 | **Manifest Introspection** | **FUNDAMENTAL** | `ManifestIntrospection` + `ChatConfig` + `IntentsConfig` | `introspection` + `chat` + `intents` | ✅ **Yes** |
 | 4 | **LLM Models** | ENHANCED | `LLMModels` | `llm_models` | ○ Optional |
 | 5 | **Authentication** | FORMALIZED | `Authentication` | `authentication` | ✅ Yes |
 | 6 | **Authorization** | FORMALIZED | `Authorization` | `authorization` | ✅ Yes |
+
+---
+
+## 🌟 **Key Paradigm Shift: Manifest-Centric Introspection**
+
+**Extension #3 is not just another feature - it's a fundamental principle:**
+
+### **The Manifest is the Essence**
+
+- ✅ **Every agent MUST be instantiated from a manifest**
+- ✅ **Every agent MUST expose 4 required intents** (SDK-provided by default)
+- ✅ **Every agent MUST answer truthfully based on its manifest**
+- ✅ **Governance is conversational, not external**
+
+### **The Three Questions Every Agent Must Answer**
+
+1. **Who are you?** → `agent.reflect_on_manifest`
+2. **Who governs you?** → `agent.get_governance_map`
+3. **Who do you work with?** → `agent.list_collaborators`
+
+**If an agent cannot answer these, it does not belong in a governed agentic system.**
+
+### **Implementation Simplicity**
+
+- ✅ **SDK provides default handlers** - agent authors don't hand-code intents
+- ✅ **Manifest declarations are the work** - truthful, complete declarations
+- ✅ **Compliance is automatic** - if manifest is valid, intents work
+
+This makes Agent Standard v1 not just a specification, but a **governance framework**.
 
 ---
 
