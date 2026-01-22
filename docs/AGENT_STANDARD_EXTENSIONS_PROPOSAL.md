@@ -8,11 +8,14 @@
 
 ## 📋 **Overview**
 
-This document proposes **4 critical extensions** to Agent Standard v1 to enable:
+This document proposes **7 critical extensions** to Agent Standard v1 to enable:
 1. **Agent Discovery & Routing** via addresses
 2. **Contract-Based Collaboration** beyond simple I/O
 3. **Manifest Introspection** for agent-to-agent understanding
 4. **Dynamic LLM Configuration** for flexible model management
+5. **Authentication** - Formalized IAM integration
+6. **Authorization** - Permission management
+7. **Marketplaces** - Agent discovery and team building with governance
 
 Additionally, we clarify **IAM/Permission Management** - who holds permissions and how agents know what they're allowed to do.
 
@@ -1229,7 +1232,367 @@ class LLMModels(BaseModel):
 
 ---
 
-## **5. IAM / Permission Management - Clarification**
+## **5. Marketplaces - Agent Discovery & Team Building with Governance**
+
+### **Purpose**
+Enable agents to discover and request help from other agents via marketplace(s), with mandatory governance oversight.
+
+### **Core Principle**
+
+When an agent needs help (based on its task/desires), it can:
+1. **Search marketplace(s)** for agents with required capabilities
+2. **Request team members** from discovered agents
+3. **Require human approval** before adding to team (governance)
+4. **Use multiple marketplaces** (default + private/sector-specific)
+
+**Key insight:** Agents don't just have static teams - they can **dynamically discover and request collaborators** when needed, but **governance ensures safety**.
+
+---
+
+### **Use Cases**
+
+1. **Agent needs help with task:**
+   - Agent A receives task: "Analyze energy consumption and optimize"
+   - Agent A has capability: "data_analysis" but not "optimization"
+   - Agent A searches marketplace for "optimization" capability
+   - Finds Agent B (optimizer), requests approval from oversight
+   - Human approves → Agent B joins team
+
+2. **Multiple marketplaces:**
+   - Default marketplace: `marketplace.meet-harmony.ai` (public agents)
+   - Private marketplace: `marketplace.acme-corp.internal` (company-only agents)
+   - Sector marketplace: `marketplace.energy-sector.eu` (energy-specific agents)
+   - Agent searches all configured marketplaces
+
+3. **Governance validation:**
+   - Agent finds candidate on marketplace
+   - Oversight authority checks: Is this marketplace allowed?
+   - Oversight authority checks: Is this agent trustworthy?
+   - Oversight authority approves/denies team addition
+
+---
+
+### **Manifest Schema**
+
+```json
+{
+  "marketplaces": {
+    "discovery_enabled": true,
+    "default_marketplace": {
+      "url": "https://marketplace.meet-harmony.ai",
+      "type": "public",
+      "trusted": true,
+      "auto_register": true
+    },
+    "additional_marketplaces": [
+      {
+        "url": "https://marketplace.acme-corp.internal",
+        "type": "private",
+        "trusted": true,
+        "requires_approval": false,
+        "description": "Company-internal agents only"
+      },
+      {
+        "url": "https://marketplace.energy-sector.eu",
+        "type": "sector",
+        "trusted": true,
+        "requires_approval": true,
+        "description": "Energy sector certified agents"
+      }
+    ],
+    "governance": {
+      "approval_required": true,
+      "approval_authority": "oversight",
+      "marketplace_validation": true,
+      "allowed_marketplace_types": ["public", "private", "sector"],
+      "blocked_marketplaces": []
+    },
+    "search_preferences": {
+      "min_rating": 7.0,
+      "max_price_per_action": 0.1,
+      "verified_creators_only": true,
+      "prefer_co_located": false
+    }
+  }
+}
+```
+
+---
+
+### **Discovery Flow**
+
+```
+1. Agent receives task beyond its capabilities
+   ↓
+2. Agent checks: Is discovery_enabled?
+   ↓
+3. Agent searches configured marketplaces for required capability
+   ↓
+4. Marketplace returns candidate agents (filtered by preferences)
+   ↓
+5. Agent checks governance: Is this marketplace allowed?
+   ↓
+6. Agent requests approval from oversight authority
+   ↓
+7. Human/Oversight Agent reviews:
+   - Marketplace trustworthiness
+   - Candidate agent credentials
+   - Cost implications
+   - Security/ethics alignment
+   ↓
+8. Approval granted → Agent added to team
+   ↓
+9. Collaboration begins (via contracts)
+```
+
+---
+
+### **Marketplace Validation (Governance)**
+
+**Question:** How do we ensure agents only use trusted marketplaces?
+
+**Answer:** Governance validates marketplace before search:
+
+```python
+def can_use_marketplace(marketplace_url: str, manifest: AgentManifest) -> bool:
+    """Check if agent is allowed to use this marketplace."""
+
+    # 1. Check if marketplace is blocked
+    if marketplace_url in manifest.marketplaces.governance.blocked_marketplaces:
+        return False
+
+    # 2. Check marketplace type
+    marketplace_type = get_marketplace_type(marketplace_url)
+    if marketplace_type not in manifest.marketplaces.governance.allowed_marketplace_types:
+        return False
+
+    # 3. Check if marketplace is in configured list
+    all_marketplaces = [manifest.marketplaces.default_marketplace.url]
+    all_marketplaces.extend([m.url for m in manifest.marketplaces.additional_marketplaces])
+
+    if marketplace_url not in all_marketplaces:
+        return False
+
+    # 4. Check if marketplace requires approval
+    marketplace_config = get_marketplace_config(marketplace_url, manifest)
+    if marketplace_config.requires_approval:
+        # Must get approval from oversight before using
+        return request_marketplace_approval(marketplace_url)
+
+    return True
+```
+
+---
+
+### **Integration with Team Section**
+
+The `marketplaces` section works together with the existing `team` section:
+
+```json
+{
+  "team": {
+    "discovery": {
+      "enabled": true,
+      "source": "marketplaces"  // References marketplaces section
+    },
+    "members": [
+      {
+        "agent_id": "agent.acme.data-analyst",
+        "role": "data_analysis",
+        "trust_level": 0.9,
+        "status": "active",
+        "discovered_from": "marketplace.meet-harmony.ai",
+        "approved_by": "supervisor@acme.com",
+        "approved_at": "2026-01-22T10:00:00Z"
+      }
+    ]
+  },
+  "marketplaces": {
+    "discovery_enabled": true,
+    "default_marketplace": { "..." },
+    "governance": { "..." }
+  }
+}
+```
+
+---
+
+### **Pydantic Models**
+
+```python
+# core/agent_standard/models/marketplaces.py
+
+from pydantic import BaseModel, Field, HttpUrl
+from typing import Literal
+
+class MarketplaceConfig(BaseModel):
+    """Configuration for a single marketplace."""
+
+    url: HttpUrl = Field(..., description="Marketplace URL")
+    type: Literal["public", "private", "sector", "custom"] = Field(
+        ...,
+        description="Marketplace type"
+    )
+    trusted: bool = Field(
+        default=False,
+        description="Whether this marketplace is trusted by default"
+    )
+    requires_approval: bool = Field(
+        default=True,
+        description="Whether using this marketplace requires approval"
+    )
+    auto_register: bool = Field(
+        default=False,
+        description="Whether to auto-register agent on this marketplace"
+    )
+    description: str | None = Field(
+        default=None,
+        description="Human-readable description"
+    )
+
+class MarketplaceGovernance(BaseModel):
+    """Governance rules for marketplace usage."""
+
+    approval_required: bool = Field(
+        default=True,
+        description="Whether team additions from marketplace require approval"
+    )
+    approval_authority: Literal["instruction", "oversight", "both"] = Field(
+        default="oversight",
+        description="Who must approve marketplace discoveries"
+    )
+    marketplace_validation: bool = Field(
+        default=True,
+        description="Whether to validate marketplace before search"
+    )
+    allowed_marketplace_types: list[str] = Field(
+        default_factory=lambda: ["public", "private", "sector"],
+        description="Which marketplace types are allowed"
+    )
+    blocked_marketplaces: list[str] = Field(
+        default_factory=list,
+        description="Explicitly blocked marketplace URLs"
+    )
+
+class SearchPreferences(BaseModel):
+    """Preferences for marketplace search."""
+
+    min_rating: float = Field(
+        default=0.0,
+        ge=0.0,
+        le=10.0,
+        description="Minimum agent rating (0-10)"
+    )
+    max_price_per_action: float = Field(
+        default=float("inf"),
+        ge=0.0,
+        description="Maximum price per action"
+    )
+    verified_creators_only: bool = Field(
+        default=False,
+        description="Only show agents from verified creators"
+    )
+    prefer_co_located: bool = Field(
+        default=False,
+        description="Prefer agents in same region/host"
+    )
+
+class Marketplaces(BaseModel):
+    """Complete marketplace configuration."""
+
+    discovery_enabled: bool = Field(
+        default=True,
+        description="Whether marketplace discovery is enabled"
+    )
+    default_marketplace: MarketplaceConfig = Field(
+        default_factory=lambda: MarketplaceConfig(
+            url="https://marketplace.meet-harmony.ai",
+            type="public",
+            trusted=True,
+            auto_register=True
+        ),
+        description="Default marketplace"
+    )
+    additional_marketplaces: list[MarketplaceConfig] = Field(
+        default_factory=list,
+        description="Additional marketplaces to search"
+    )
+    governance: MarketplaceGovernance = Field(
+        default_factory=MarketplaceGovernance,
+        description="Governance rules"
+    )
+    search_preferences: SearchPreferences = Field(
+        default_factory=SearchPreferences,
+        description="Search preferences"
+    )
+
+    def get_all_marketplace_urls(self) -> list[str]:
+        """Get all configured marketplace URLs."""
+        urls = [str(self.default_marketplace.url)]
+        urls.extend([str(m.url) for m in self.additional_marketplaces])
+        return urls
+
+    def is_marketplace_allowed(self, marketplace_url: str) -> bool:
+        """Check if marketplace is allowed."""
+        # Check if blocked
+        if marketplace_url in self.governance.blocked_marketplaces:
+            return False
+
+        # Check if in configured list
+        if marketplace_url not in self.get_all_marketplace_urls():
+            return False
+
+        return True
+```
+
+---
+
+### **Example: Agent Discovers Help**
+
+**Scenario:** Energy analysis agent needs optimization capability
+
+```python
+# Agent receives task
+task = {
+    "action": "optimize_energy_consumption",
+    "data": {...}
+}
+
+# Agent checks capabilities
+if "optimization" not in agent.manifest.capabilities:
+    # Need help!
+
+    # 1. Check if discovery enabled
+    if not agent.manifest.marketplaces.discovery_enabled:
+        raise CapabilityError("Cannot fulfill task: optimization capability missing")
+
+    # 2. Search marketplaces
+    candidates = await agent.search_marketplaces(
+        capability="optimization",
+        min_rating=agent.manifest.marketplaces.search_preferences.min_rating,
+        max_price=agent.manifest.marketplaces.search_preferences.max_price_per_action
+    )
+
+    # 3. Request approval from oversight
+    for candidate in candidates:
+        approval = await agent.request_team_approval(
+            candidate_agent=candidate,
+            reason="Need optimization capability for task",
+            marketplace=candidate.discovered_from
+        )
+
+        if approval.granted:
+            # 4. Add to team
+            await agent.add_team_member(candidate)
+            break
+
+    # 5. Execute task with team
+    result = await agent.execute_with_team(task)
+```
+
+---
+
+## **6. Authentication - IAM Integration (Formalized)**
 
 ### **Current State**
 
@@ -1241,7 +1604,21 @@ class LLMModels(BaseModel):
 - JWT token validation
 
 ❌ **What's Missing:**
-- `authentication` and `authorization` sections not in `AgentManifest` Pydantic model
+- `authentication` section not in `AgentManifest` Pydantic model
+- Need formalized Pydantic model for authentication configuration
+
+---
+
+## **7. Authorization - Permission Management (Formalized)**
+
+### **Current State**
+
+✅ **We HAVE authorization concepts:**
+- Documented in `platform/agentify/agent_standard/AUTHENTICATION.md`
+- Visibility levels, RBAC, custom policies
+
+❌ **What's Missing:**
+- `authorization` section not in `AgentManifest` Pydantic model
 - No clear answer: "Who holds the permissions?"
 - No clear answer: "How does agent know if it can do operation X?"
 
@@ -1417,8 +1794,9 @@ class PermissionChecker:
 | 2 | **Contracts** | NEW | `Contracts` | `contracts` | ○ Optional |
 | 3 | **Manifest Introspection** | **FUNDAMENTAL** | `ManifestIntrospection` + `ChatConfig` + `IntentsConfig` | `introspection` + `chat` + `intents` | ✅ **Yes** |
 | 4 | **LLM Models** | ENHANCED | `LLMModels` | `llm_models` | ○ Optional |
-| 5 | **Authentication** | FORMALIZED | `Authentication` | `authentication` | ✅ Yes |
-| 6 | **Authorization** | FORMALIZED | `Authorization` | `authorization` | ✅ Yes |
+| 5 | **Marketplaces** | **NEW** | `Marketplaces` | `marketplaces` | ✅ **Yes** |
+| 6 | **Authentication** | FORMALIZED | `Authentication` | `authentication` | ✅ Yes |
+| 7 | **Authorization** | FORMALIZED | `Authorization` | `authorization` | ✅ Yes |
 
 ---
 
@@ -1451,6 +1829,53 @@ This makes Agent Standard v1 not just a specification, but a **governance framew
 
 ---
 
+## 🏪 **Marketplace-Driven Discovery with Governance**
+
+**Extension #5 (Marketplaces) enables dynamic team building while maintaining control:**
+
+### **The Discovery Principle**
+
+- ✅ **Agents can seek help** when they lack capabilities for a task
+- ✅ **Multiple marketplaces** - default public + private/sector-specific
+- ✅ **Governance validates** marketplace trustworthiness before search
+- ✅ **Human approval required** before adding discovered agents to team
+
+### **Why This Matters**
+
+**Without marketplaces:**
+- Agents have static, pre-configured teams
+- Cannot adapt to new requirements
+- Limited to capabilities known at design time
+
+**With marketplaces + governance:**
+- ✅ **Dynamic capability expansion** - agents find help when needed
+- ✅ **Controlled discovery** - only approved marketplaces
+- ✅ **Human oversight** - approval required for team changes
+- ✅ **Sector-specific agents** - energy, healthcare, finance marketplaces
+- ✅ **Private agents** - company-internal marketplaces
+
+### **Governance Flow**
+
+```
+Agent needs capability
+    ↓
+Check: Is discovery_enabled?
+    ↓
+Check: Is marketplace allowed? (governance.allowed_marketplace_types)
+    ↓
+Search marketplace(s)
+    ↓
+Request approval from oversight authority
+    ↓
+Human reviews: marketplace trust, agent credentials, cost, ethics
+    ↓
+Approval granted → Add to team
+```
+
+**This ensures agents can grow and adapt, but never without human oversight.**
+
+---
+
 ## **🚀 Implementation Plan**
 
 ### **Phase 1: Core Models (Week 1)**
@@ -1458,26 +1883,33 @@ This makes Agent Standard v1 not just a specification, but a **governance framew
 - [ ] Create `core/agent_standard/models/contracts.py`
 - [ ] Create `core/agent_standard/models/manifest_introspection.py`
 - [ ] Create `core/agent_standard/models/llm_models.py`
+- [ ] Create `core/agent_standard/models/marketplaces.py`
 - [ ] Create `core/agent_standard/models/authentication.py`
+- [ ] Create `core/agent_standard/models/authorization.py`
 - [ ] Update `core/agent_standard/models/manifest.py` to include new fields
 
 ### **Phase 2: Runtime Support (Week 2)**
 - [ ] Create `core/agent_standard/core/permissions.py` (PermissionChecker)
 - [ ] Create `core/agent_standard/core/address_registry.py` (Address discovery)
 - [ ] Create `core/agent_standard/core/contract_manager.py` (Contract lifecycle)
+- [ ] Create `core/agent_standard/core/marketplace_client.py` (Marketplace discovery)
+- [ ] Create `core/agent_standard/core/instantiation.py` (Manifest-first instantiation)
 - [ ] Update `core/agent_standard/core/agent.py` to support new features
 
-### **Phase 3: API Endpoints (Week 3)**
+### **Phase 3: API Endpoints & Intents (Week 3)**
+- [ ] Implement required intents (`agent.get_manifest`, `agent.reflect_on_manifest`, etc.)
 - [ ] Implement manifest introspection endpoints (`GET /manifest/*`)
 - [ ] Implement contract management endpoints (`POST /contracts/request`, etc.)
 - [ ] Implement LLM model switching endpoint (`PUT /llm/model`)
 - [ ] Implement address registration endpoint (`POST /addresses/register`)
+- [ ] Implement marketplace search endpoint (`POST /marketplace/search`)
 
 ### **Phase 4: Documentation & Examples (Week 4)**
 - [ ] Update Agent Standard documentation
-- [ ] Create example manifests with all new sections
-- [ ] Update Developer Guide
+- [ ] Create example manifests with all 7 new sections
+- [ ] Update Developer Guide with marketplace discovery examples
 - [ ] Create migration guide for existing agents
+- [ ] Document governance approval workflows
 
 ---
 
