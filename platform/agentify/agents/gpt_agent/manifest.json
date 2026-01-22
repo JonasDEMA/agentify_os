@@ -1,0 +1,225 @@
+{
+  "agent_id": "agent.agentify.gpt",
+  "name": "GPT Agent",
+  "version": "1.0.0",
+  "status": "active",
+  
+  "overview": {
+    "description": "Generic LLM wrapper agent providing natural language processing capabilities",
+    "tags": ["llm", "nlp", "gpt", "language-model"],
+    "owner": {
+      "name": "Agentify",
+      "email": "ai@meet-harmony.ai"
+    },
+    "lifecycle": {
+      "stage": "development",
+      "sla": "99.9%"
+    }
+  },
+  
+  "capabilities": [
+    {
+      "name": "chat_completion",
+      "level": "expert",
+      "description": "Generate text completions using GPT models"
+    },
+    {
+      "name": "structured_output",
+      "level": "expert",
+      "description": "Generate structured JSON outputs"
+    },
+    {
+      "name": "embedding",
+      "level": "expert",
+      "description": "Generate text embeddings"
+    },
+    {
+      "name": "vision",
+      "level": "expert",
+      "description": "Analyze images and visual content"
+    },
+    {
+      "name": "document_processing",
+      "level": "expert",
+      "description": "Extract and analyze text from documents (PDF, DOCX, TXT)"
+    }
+  ],
+  
+  "ethics": {
+    "framework": "harm-minimization",
+    "version": "1.0.0",
+    "principles": [
+      {
+        "id": "no-harmful-content",
+        "text": "Do not generate harmful, illegal, or unethical content",
+        "severity": "critical",
+        "enforcement": "hard",
+        "evaluation_mode": "pre_action"
+      },
+      {
+        "id": "transparency",
+        "text": "Log all LLM calls with prompts and responses",
+        "severity": "high",
+        "enforcement": "hard",
+        "evaluation_mode": "continuous"
+      }
+    ],
+    "hard_constraints": [
+      "no_harmful_generation",
+      "log_all_calls",
+      "respect_rate_limits"
+    ],
+    "soft_constraints": [
+      "minimize_token_usage",
+      "prefer_smaller_models"
+    ]
+  },
+  
+  "desires": {
+    "profile": [
+      {"id": "accuracy", "weight": 0.4},
+      {"id": "efficiency", "weight": 0.3},
+      {"id": "reliability", "weight": 0.3}
+    ],
+    "health_signals": {
+      "tension_thresholds": {
+        "stressed": 0.6,
+        "degraded": 0.8,
+        "critical": 0.95
+      },
+      "reporting_interval_sec": 300
+    }
+  },
+  
+  "authority": {
+    "instruction": {
+      "type": "agent",
+      "id": "agent.agentify.orchestrator"
+    },
+    "oversight": {
+      "type": "human",
+      "id": "ai-team@meet-harmony.ai",
+      "independent": true
+    }
+  },
+  
+  "tools": [
+    {
+      "name": "chat_completion",
+      "description": "Generate chat completion",
+      "category": "llm",
+      "parameters": {
+        "messages": "array",
+        "model": "string",
+        "temperature": "number",
+        "max_tokens": "number",
+        "response_format": "object"
+      },
+      "returns": {
+        "content": "string",
+        "usage": "object",
+        "model": "string"
+      }
+    },
+    {
+      "name": "structured_completion",
+      "description": "Generate structured JSON output",
+      "category": "llm",
+      "parameters": {
+        "prompt": "string",
+        "schema": "object",
+        "model": "string",
+        "temperature": "number"
+      },
+      "returns": {
+        "result": "object",
+        "usage": "object"
+      }
+    },
+    {
+      "name": "analyze_image",
+      "description": "Analyze image content using vision models",
+      "category": "vision",
+      "parameters": {
+        "image_url": "string",
+        "image_base64": "string",
+        "prompt": "string",
+        "model": "string",
+        "detail": "string"
+      },
+      "returns": {
+        "description": "string",
+        "usage": "object"
+      }
+    },
+    {
+      "name": "process_document",
+      "description": "Extract and analyze text from documents",
+      "category": "document",
+      "parameters": {
+        "document_content": "string",
+        "document_type": "string",
+        "analysis_prompt": "string"
+      },
+      "returns": {
+        "extracted_text": "string",
+        "analysis": "string",
+        "usage": "object"
+      }
+    }
+  ],
+  
+  "authentication": {
+    "required": true,
+    "provider": "coresense",
+    "provider_url": "https://iam.meet-harmony.ai",
+    "roles_required": ["llm-agent"],
+    "scopes_required": ["llm:call"]
+  },
+  
+  "marketplace": {
+    "default_url": "https://marketplace.meet-harmony.ai",
+    "discoverable": true,
+    "registration": {
+      "auto_register": true,
+      "visibility": "public"
+    }
+  },
+  
+  "pricing": {
+    "model": "usage_based",
+    "per_token_input": 0.000001,
+    "per_token_output": 0.000002,
+    "currency": "EUR"
+  },
+  
+  "io": {
+    "input_formats": ["json"],
+    "output_formats": ["json"]
+  },
+  
+  "a2a": {
+    "supported": true,
+    "protocol": "AgentCommunicationProtocol-v1",
+    "endpoint": "/agent/message"
+  },
+  
+  "runtime": {
+    "containerized": true,
+    "oci_compatible": true,
+    "base_image": "python:3.11-slim"
+  },
+  
+  "revisions": {
+    "current": "rev_1.0.0",
+    "history": [
+      {
+        "revision": "rev_1.0.0",
+        "version": "1.0.0",
+        "date": "2026-01-22",
+        "author": "erich@meet-harmony.ai",
+        "changes": "Initial GPT agent implementation"
+      }
+    ]
+  }
+}
