@@ -4,7 +4,7 @@
 
 > 🚀 **DEVELOPERS START HERE:** [platform/agentify/DEVELOPER_GUIDE.md](platform/agentify/DEVELOPER_GUIDE.md)
 >
-> 📖 **Quick Start:** [core/agent_standard/QUICKSTART_COMPLETE.md](core/agent_standard/QUICKSTART_COMPLETE.md) - Create your first agent in 5 minutes
+> 📖 **Quick Start:** [docs/agent_standard/QUICKSTART_COMPLETE.md](docs/agent_standard/QUICKSTART_COMPLETE.md) - Create your first agent in 5 minutes
 >
 > 📝 **Templates:** [core/agent_standard/templates/](core/agent_standard/templates/) - Ready-to-use JSON templates
 >
@@ -23,35 +23,27 @@ Built on the **Agent Standard v1** - the world's first universal agent wrapper w
 | Document | Description |
 |----------|-------------|
 | **[🚀 Developer Guide](platform/agentify/DEVELOPER_GUIDE.md)** ⬅️ **START HERE** | Complete guide to building agents & apps |
-| **[📖 Quick Start](core/agent_standard/QUICKSTART_COMPLETE.md)** | Create your first agent in 5 minutes |
+| **[📖 Quick Start](docs/agent_standard/QUICKSTART_COMPLETE.md)** | Create your first agent in 5 minutes |
 | **[📝 Templates](core/agent_standard/templates/)** | Ready-to-use JSON templates |
 | **[📚 Examples](core/agent_standard/examples/)** | Real-world agent examples |
-| **[🔍 Agent Anatomy](platform/agentify/agent_standard/AGENT_ANATOMY.md)** | Quick reference for all 14 sections |
+| **[🔍 Agent Anatomy](docs/agent_standard/AGENT_ANATOMY.md)** | Quick reference for all 14 sections |
 
 ### **📖 Reference Documentation**
 
 | Document | Description |
 |----------|-------------|
 | **[README.md](README.md)** ⬅️ **You are here** | Main entry point, overview |
-| **[Agent Standard v1 Spec](core/agent_standard/README.md)** | Complete specification |
+| **[Agent Standard v1 Spec](docs/agent_standard/README.md)** | Complete specification |
 | **[Agentify Platform](platform/agentify/README.md)** | Agentic economy platform |
-| **[Architecture](ARCHITECTURE.md)** | System architecture |
+| **[Architecture](docs/ARCHITECTURE_ROOT.md)** | System architecture |
 | **[Implementation Status](platform/agentify/agent_standard/IMPLEMENTATION_STATUS.md)** | Current progress |
 
 ### **🔧 Advanced**
 
 | Document | Description |
 |----------|-------------|
-
-| **[README.md](README.md)** ⬅️ **You are here** | Main entry point, overview, quick start |
-| **[🧮 Calculator POC](QUICKSTART_CALCULATOR_POC.md)** 🆕 | **Try the end-to-end demo in 5 minutes!** |
-| **[Agent Standard v1 Spec](core/agent_standard/README.md)** | Complete specification of the Agent Standard |
-| **[Agentify Platform](platform/agentify/README.md)** | Agentic economy platform (apps + agents + marketplace) |
-| **[Quick Start Guide](core/agent_standard/QUICKSTART.md)** | Get started in 5 minutes |
-| **[Architecture](ARCHITECTURE.md)** | System architecture, 14 agent areas, integration patterns |
-
-| **[Deployment Guide](DEPLOYMENT.md)** | Deploy to Cloud/Edge/Desktop |
-| **[Documentation Index](DOCUMENTATION_INDEX.md)** | Complete documentation index |
+| **[Deployment Guide](docs/DEPLOYMENT.md)** | Deploy to Cloud/Edge/Desktop |
+| **[Documentation Index](docs/DOCUMENTATION_INDEX.md)** | Complete documentation index |
 | **[Contributing](CONTRIBUTING.md)** | How to contribute |
 | **[Changelog](CHANGELOG.md)** | Version history |
 | **[License](LICENSE.md)** | Dual License (MIT + Commercial) |
@@ -72,7 +64,7 @@ The universal agent wrapper with ethics, desires, and health monitoring.
 - ✅ **Oversight Controller** - Four-eyes principle
 - ✅ **Deployment Agnostic** - Cloud/Edge/Desktop
 
-**See:** [Agent Standard v1 Spec](core/agent_standard/README.md)
+**See:** [Agent Standard v1 Spec](docs/agent_standard/README.md)
 
 ---
 
@@ -255,14 +247,14 @@ agent-std run manifest.json
 
 ### **Core Documentation**
 
-- **[Agent Standard v1 Spec](core/agent_standard/README.md)** - Complete specification
-- **[Quick Start Guide](core/agent_standard/QUICKSTART.md)** - Get started in 5 minutes
-- **[Architecture](ARCHITECTURE.md)** - System architecture and design
-- **[Deployment Guide](DEPLOYMENT.md)** - Deploy to Cloud/Edge/Desktop
+- **[Agent Standard v1 Spec](docs/agent_standard/README.md)** - Complete specification
+- **[Quick Start Guide](docs/agent_standard/QUICKSTART.md)** - Get started in 5 minutes
+- **[Architecture](docs/ARCHITECTURE_ROOT.md)** - System architecture and design
+- **[Deployment Guide](docs/DEPLOYMENT.md)** - Deploy to Cloud/Edge/Desktop
 
 ### **Developer Resources**
 
-- **[AI Prompts](core/agent_standard/prompts/)** - Pre-built prompts for AI assistants
+- **[AI Prompts](docs/agent_standard/PROMPTS_README.md)** - Pre-built prompts for AI assistants
 - **[Examples](core/agent_standard/examples/)** - Real-world examples
 - **[CLI Reference](core/agent_standard/cli/)** - Command-line tool documentation
 
@@ -309,7 +301,7 @@ Desktop automation tools that integrate seamlessly with Agent Standard v1.
 └─────────────────────────────────────────────────────────────┘
 ```
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed architecture documentation.
+See [ARCHITECTURE.md](docs/ARCHITECTURE_ROOT.md) for detailed architecture documentation.
 
 ---
 
@@ -471,8 +463,11 @@ cpa_agent_platform/
 │       ├── executors/           # Click, Type, Screenshot
 │       ├── cognitive/           # LLM-guided execution
 │       └── vision/              # OCR, element detection
-├── ARCHITECTURE.md              # Architecture documentation
-├── DEPLOYMENT.md                # Deployment guide
+├── docs/                        # All documentation
+│   ├── agent_standard/          # Agent Standard docs
+│   ├── ARCHITECTURE_ROOT.md     # Architecture documentation
+│   ├── DEPLOYMENT.md            # Deployment guide
+│   └── ...                      # Other docs
 └── README.md                    # This file
 ```
 
@@ -493,9 +488,9 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) for deta
 ## 🔗 **Resources**
 
 - **GitHub**: https://github.com/JonasDEMA/cpa_agent_platform
-- **Documentation**: [core/agent_standard/README.md](core/agent_standard/README.md)
+- **Documentation**: [docs/agent_standard/README.md](docs/agent_standard/README.md)
 - **Examples**: [core/agent_standard/examples/](core/agent_standard/examples/)
-- **AI Prompts**: [core/agent_standard/prompts/](core/agent_standard/prompts/)
+- **AI Prompts**: [docs/agent_standard/PROMPTS_README.md](docs/agent_standard/PROMPTS_README.md)
 
 ---
 
@@ -539,4 +534,4 @@ For detailed setup instructions for the legacy CPA Scheduler/Planner, see [docs/
 
 ---
 
-**Ready to build ethics-first agents? Start with the [Quick Start Guide](core/agent_standard/QUICKSTART.md)!** 🚀
+**Ready to build ethics-first agents? Start with the [Quick Start Guide](docs/agent_standard/QUICKSTART.md)!** 🚀
