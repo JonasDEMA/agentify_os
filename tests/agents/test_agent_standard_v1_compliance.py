@@ -75,20 +75,22 @@ class TestAgentStandardV1Core:
 
 
 class TestAgentStandardV1Extensions:
-    """Test recommended/optional extension fields."""
+    """Test mandatory extension fields per Agent Standard v1."""
 
     @pytest.mark.parametrize("manifest_path", AGENT_MANIFESTS, ids=lambda p: p.parent.name)
     def test_capabilities_section(self, manifest_path: Path):
-        """Validate capabilities section exists and is non-empty."""
+        """Validate capabilities section (MANDATORY per Agent Standard v1)."""
         manifest = load_manifest(manifest_path)
         agent_name = manifest_path.parent.name
 
-        assert "capabilities" in manifest, f"{agent_name}: Missing 'capabilities' section"
+        assert "capabilities" in manifest, (
+            f"{agent_name}: Missing MANDATORY 'capabilities' section"
+        )
         assert isinstance(manifest["capabilities"], list), (
             f"{agent_name}: 'capabilities' must be a list"
         )
         assert len(manifest["capabilities"]) > 0, (
-            f"{agent_name}: 'capabilities' must contain at least one capability"
+            f"{agent_name}: 'capabilities' must contain at least one capability (MANDATORY)"
         )
 
         # Validate capability structure
@@ -98,29 +100,35 @@ class TestAgentStandardV1Extensions:
 
     @pytest.mark.parametrize("manifest_path", AGENT_MANIFESTS, ids=lambda p: p.parent.name)
     def test_ethics_section(self, manifest_path: Path):
-        """Validate ethics section (Ethical Core)."""
+        """Validate ethics section (MANDATORY - Ethical Core)."""
         manifest = load_manifest(manifest_path)
         agent_name = manifest_path.parent.name
 
-        assert "ethics" in manifest, f"{agent_name}: Missing 'ethics' section"
+        assert "ethics" in manifest, (
+            f"{agent_name}: Missing MANDATORY 'ethics' section"
+        )
         ethics = manifest["ethics"]
 
-        assert "framework" in ethics, f"{agent_name}: ethics missing 'framework'"
+        assert "framework" in ethics, (
+            f"{agent_name}: ethics missing MANDATORY 'framework'"
+        )
         assert ethics["framework"], f"{agent_name}: ethics.framework is empty"
 
         # Ethics should have constraints
         if "hard_constraints" not in ethics and "soft_constraints" not in ethics:
             pytest.fail(
-                f"{agent_name}: ethics must have either 'hard_constraints' or 'soft_constraints'"
+                f"{agent_name}: ethics must have either 'hard_constraints' or 'soft_constraints' (MANDATORY)"
             )
 
     @pytest.mark.parametrize("manifest_path", AGENT_MANIFESTS, ids=lambda p: p.parent.name)
     def test_desires_section(self, manifest_path: Path):
-        """Validate desires section (Intent Profile)."""
+        """Validate desires section (MANDATORY - Intent Profile)."""
         manifest = load_manifest(manifest_path)
         agent_name = manifest_path.parent.name
 
-        assert "desires" in manifest, f"{agent_name}: Missing 'desires' section"
+        assert "desires" in manifest, (
+            f"{agent_name}: Missing MANDATORY 'desires' section"
+        )
         desires = manifest["desires"]
 
         assert "profile" in desires, f"{agent_name}: desires missing 'profile'"
@@ -144,11 +152,13 @@ class TestAgentStandardV1Extensions:
 
     @pytest.mark.parametrize("manifest_path", AGENT_MANIFESTS, ids=lambda p: p.parent.name)
     def test_authority_section(self, manifest_path: Path):
-        """Validate authority section (Split Authority)."""
+        """Validate authority section (MANDATORY - Split Authority / Four-Eyes Principle)."""
         manifest = load_manifest(manifest_path)
         agent_name = manifest_path.parent.name
 
-        assert "authority" in manifest, f"{agent_name}: Missing 'authority' section"
+        assert "authority" in manifest, (
+            f"{agent_name}: Missing MANDATORY 'authority' section"
+        )
         authority = manifest["authority"]
 
         # Split Authority: instruction and oversight must be separate
@@ -172,11 +182,13 @@ class TestAgentStandardV1Extensions:
 
     @pytest.mark.parametrize("manifest_path", AGENT_MANIFESTS, ids=lambda p: p.parent.name)
     def test_authentication_section(self, manifest_path: Path):
-        """Validate authentication section exists."""
+        """Validate authentication section (MANDATORY)."""
         manifest = load_manifest(manifest_path)
         agent_name = manifest_path.parent.name
 
-        assert "authentication" in manifest, f"{agent_name}: Missing 'authentication' section"
+        assert "authentication" in manifest, (
+            f"{agent_name}: Missing MANDATORY 'authentication' section"
+        )
         auth = manifest["authentication"]
 
         assert "required" in auth, f"{agent_name}: authentication missing 'required' field"
@@ -186,11 +198,13 @@ class TestAgentStandardV1Extensions:
 
     @pytest.mark.parametrize("manifest_path", AGENT_MANIFESTS, ids=lambda p: p.parent.name)
     def test_marketplace_section(self, manifest_path: Path):
-        """Validate marketplace section exists."""
+        """Validate marketplace section (MANDATORY)."""
         manifest = load_manifest(manifest_path)
         agent_name = manifest_path.parent.name
 
-        assert "marketplace" in manifest, f"{agent_name}: Missing 'marketplace' section"
+        assert "marketplace" in manifest, (
+            f"{agent_name}: Missing MANDATORY 'marketplace' section"
+        )
         marketplace = manifest["marketplace"]
 
         assert "discoverable" in marketplace, f"{agent_name}: marketplace missing 'discoverable'"
@@ -200,11 +214,13 @@ class TestAgentStandardV1Extensions:
 
     @pytest.mark.parametrize("manifest_path", AGENT_MANIFESTS, ids=lambda p: p.parent.name)
     def test_pricing_section(self, manifest_path: Path):
-        """Validate pricing section exists."""
+        """Validate pricing section (MANDATORY)."""
         manifest = load_manifest(manifest_path)
         agent_name = manifest_path.parent.name
 
-        assert "pricing" in manifest, f"{agent_name}: Missing 'pricing' section"
+        assert "pricing" in manifest, (
+            f"{agent_name}: Missing MANDATORY 'pricing' section"
+        )
         pricing = manifest["pricing"]
 
         assert "model" in pricing, f"{agent_name}: pricing missing 'model'"
@@ -219,11 +235,13 @@ class TestAgentStandardV1Extensions:
 
     @pytest.mark.parametrize("manifest_path", AGENT_MANIFESTS, ids=lambda p: p.parent.name)
     def test_io_section(self, manifest_path: Path):
-        """Validate I/O contracts section."""
+        """Validate I/O contracts section (MANDATORY)."""
         manifest = load_manifest(manifest_path)
         agent_name = manifest_path.parent.name
 
-        assert "io" in manifest, f"{agent_name}: Missing 'io' section"
+        assert "io" in manifest, (
+            f"{agent_name}: Missing MANDATORY 'io' section"
+        )
         io = manifest["io"]
 
         assert "input_formats" in io, f"{agent_name}: io missing 'input_formats'"
