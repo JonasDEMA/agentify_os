@@ -521,6 +521,116 @@ class TestAgentComplianceSummary:
         assert True
 
 
+class TestPydanticModelValidation:
+    """Test that manifests can be loaded by Pydantic models."""
+
+    @pytest.mark.parametrize("manifest_path", AGENT_MANIFESTS, ids=lambda p: p.parent.name)
+    def test_pydantic_model_loading(self, manifest_path: Path):
+        """Attempt to load manifest with Pydantic AgentManifest model."""
+        manifest = load_manifest(manifest_path)
+        agent_name = manifest_path.parent.name
+
+        try:
+            from core.agent_standard.models.manifest import AgentManifest
+            
+            # Try to load the manifest with Pydantic
+            agent = AgentManifest(**manifest)
+            print(f"\n✅ {agent_name}: Successfully loaded by Pydantic AgentManifest model")
+            
+        except ImportError as e:
+            pytest.skip(f"{agent_name}: Cannot import AgentManifest model: {e}")
+            
+        except Exception as e:
+            # Print detailed error for devs to see
+            print(f"\n❌ {agent_name}: FAILED to load with Pydantic model")
+            print(f"   Error: {type(e).__name__}: {str(e)}")
+            print(f"\n   🔧 ACTION REQUIRED: Fix manifest or update AgentManifest model")
+            pytest.fail(
+                f"{agent_name}: Manifest cannot be loaded by Pydantic AgentManifest model: {e}"
+            )
+
+
+class TestSchemaConsistency:
+    """Test consistency between JSON manifests and Pydantic schema."""
+
+    @pytest.mark.parametrize("manifest_path", AGENT_MANIFESTS, ids=lambda p: p.parent.name)
+    def test_unmodeled_fields_warning(self, manifest_path: Path):
+        """Warn about fields in JSON that aren't in Pydantic model."""
+        manifest = load_manifest(manifest_path)
+        agent_name = manifest_path.parent.name
+
+        # Known fields that should be in AgentManifest model
+        known_pydantic_fields = {
+            "agent_id", "name", "version", "status", "revisions", "overview",
+            "capabilities", "ethics", "desires", "authority", "io",
+            "ai_model", "framework_adapter", "tools", "knowledge", "memory",
+            "schedule", "activities", "prompt", "guardrails", "team",
+            "customers", "pricing", "observability",
+            # Extensions we currently use
+            "authentication", "marketplace", "a2a", "runtime"
+        }
+
+        # Fields in the JSON that aren't in the Pydantic model
+        json_fields = set(manifest.keys())
+        unmodeled_fields = json_fields - known_pydantic_fields
+
+        if unmodeled_fields:
+            print(f"\n⚠️  {agent_name}: Fields in JSON but NOT in Pydantic AgentManifest model:")
+            for field in sorted(unmodeled_fields):
+                print(f"   - {field}")
+            print(f"\n   🔧 ACTION: Add these fields to core/agent_standard/models/manifest.py")
+            print(f"          OR remove them from the manifest if they're not needed\n")
+
+        # Always pass - this is just a warning
+        assert True
+
+    @pytest.mark.parametrize("manifest_path", AGENT_MANIFESTS, ids=lambda p: p.parent.name)
+    def test_dict_any_fields_warning(self, manifest_path: Path):
+        """Warn about dict[str, Any] fields that should have proper Pydantic models."""
+        manifest = load_manifest(manifest_path)
+        agent_name = manifest_path.parent.name
+
+        # Fields in AgentManifest that use dict[str, Any] instead of proper models
+        dict_any_fields = {
+            "io": "IOContract model exists but not used in manifest.py",
+            "knowledge": "Needs a Knowledge model",
+            "memory": "Needs a Memory model",
+            "schedule": "Needs a Schedule model",
+            "team": "Needs a Team model",
+            "customers": "Needs a Customers model",
+            "pricing": "Needs a Pricing model (basic dict currently)",
+            "observability": "Needs an Observability model",
+        }
+
+        present_dict_fields = {k: v for k, v in dict_any_fields.items() if k in manifest}
+
+        if present_dict_fields:
+            print(f"\n⚠️  {agent_name}: Fields using dict[str, Any] instead of proper Pydantic models:")
+            for field, note in present_dict_fields.items():
+                print(f"   - {field}: {note}")
+            print(f"\n   🔧 RECOMMENDATION: Create proper Pydantic models for type safety")
+            print(f"          See: core/agent_standard/models/ for examples\n")
+
+        # Always pass - this is just a warning
+        assert True
+
+    @pytest.mark.parametrize("manifest_path", AGENT_MANIFESTS, ids=lambda p: p.parent.name)
+    def test_io_model_not_used(self, manifest_path: Path):
+        """Specific check: IOContract model exists but manifest.py uses dict[str, Any]."""
+        manifest = load_manifest(manifest_path)
+        agent_name = manifest_path.parent.name
+
+        if "io" in manifest:
+            print(f"\n⚠️  {agent_name}: 'io' field is present")
+            print(f"   ℹ️  IOContract model exists at: core/agent_standard/models/io_contracts.py")
+            print(f"   ⚠️  But manifest.py uses: io: dict[str, Any] = Field(...)")
+            print(f"\n   🔧 ACTION: Update manifest.py to use IOContract model:")
+            print(f"          io: IOContract = Field(..., description='Input/output configuration')\n")
+
+        # Always pass - this is just a warning
+        assert True
+
+
 class TestManifestConsistency:
     """Test internal consistency of manifests."""
 
