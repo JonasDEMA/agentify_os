@@ -32,12 +32,12 @@ class TestBaseMessage:
         """Test creating a message with minimal required fields."""
         msg = BaseMessage(
             type=MessageType.REQUEST,
-            sender="agent://orchestrator/test",
+            sender="agent://coordinator/test",
             intent="test_intent",
         )
         
         assert msg.type == MessageType.REQUEST
-        assert msg.sender == "agent://orchestrator/test"
+        assert msg.sender == "agent://coordinator/test"
         assert msg.intent == "test_intent"
         assert isinstance(UUID(msg.id), UUID)  # Valid UUID
         assert isinstance(msg.ts, datetime)
@@ -49,7 +49,7 @@ class TestBaseMessage:
         """Test creating a message with all fields."""
         msg = BaseMessage(
             type=MessageType.REQUEST,
-            sender="agent://orchestrator/Marketing",
+            sender="agent://coordinator/Marketing",
             to=["agent://worker/Analysis"],
             intent="analyse",
             task="Analysiere Q3 Churn",
@@ -79,7 +79,7 @@ class TestBaseMessage:
             },
         )
         
-        assert msg.sender == "agent://orchestrator/Marketing"
+        assert msg.sender == "agent://coordinator/Marketing"
         assert msg.to == ["agent://worker/Analysis"]
         assert msg.task == "Analysiere Q3 Churn"
         assert msg.payload["datasetRef"] == "s3://acme/crm/q3.parquet"
@@ -161,7 +161,7 @@ class TestRequestMessage:
     def test_create_request_message(self):
         """Test creating a request message."""
         msg = RequestMessage(
-            sender="agent://orchestrator/Marketing",
+            sender="agent://coordinator/Marketing",
             to=["agent://worker/Analysis"],
             intent="analyse",
             task="Analysiere Churn-Risiko für Q3",
@@ -169,7 +169,7 @@ class TestRequestMessage:
         )
         
         assert msg.type == MessageType.REQUEST
-        assert msg.sender == "agent://orchestrator/Marketing"
+        assert msg.sender == "agent://coordinator/Marketing"
         assert msg.task == "Analysiere Churn-Risiko für Q3"
 
 
@@ -180,7 +180,7 @@ class TestInformMessage:
         """Test creating an inform message."""
         msg = InformMessage(
             sender="agent://worker/Analysis",
-            to=["agent://orchestrator/Marketing"],
+            to=["agent://coordinator/Marketing"],
             intent="analysis_result",
             payload={
                 "churnRate": 0.083,
@@ -204,7 +204,7 @@ class TestFailureMessage:
         """Test creating a failure message."""
         msg = FailureMessage(
             sender="agent://worker/Analysis",
-            to=["agent://orchestrator/Marketing"],
+            to=["agent://coordinator/Marketing"],
             intent="analysis_result",
             correlation={
                 "conversationId": "conv-123",
@@ -227,7 +227,7 @@ class TestDiscoveryMessages:
     def test_create_discover_message(self):
         """Test creating a discover message."""
         msg = DiscoverMessage(
-            sender="agent://orchestrator/Marketing",
+            sender="agent://coordinator/Marketing",
             intent="help_needed",
             task="Wer kann kurzfristig eine Vertriebs-Scorecard bauen?",
             context={"tenant": "acme", "domain": "sales"},
@@ -329,7 +329,7 @@ class TestCorrelationTracking:
         """Test correlation between request and response."""
         # Create request
         request = RequestMessage(
-            sender="agent://orchestrator",
+            sender="agent://coordinator",
             to=["agent://worker"],
             intent="process",
             task="Do something",
@@ -338,7 +338,7 @@ class TestCorrelationTracking:
         # Create response with correlation
         response = InformMessage(
             sender="agent://worker",
-            to=["agent://orchestrator"],
+            to=["agent://coordinator"],
             intent="result",
             payload={"status": "done"},
             correlation={

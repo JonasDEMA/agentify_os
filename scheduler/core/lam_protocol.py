@@ -24,7 +24,7 @@ class MessageType(str, Enum):
     CONFIRM = "confirm"  # Bestätigung
     FAILURE = "failure"  # Fehler/Abbruch
     DONE = "done"  # Task abgeschlossen
-    ROUTE = "route"  # Routing-Info vom Orchestrator
+    ROUTE = "route"  # Routing-Info vom Coordinator
 
     # Discovery messages
     DISCOVER = "discover"  # Suche nach Agenten mit Capability
@@ -45,7 +45,7 @@ class BaseMessage(BaseModel):
         description="Timestamp ISO-8601",
     )
     type: MessageType = Field(..., description="Message type")
-    sender: str = Field(..., description="Agent URI (e.g., agent://orchestrator/Marketing)")
+    sender: str = Field(..., description="Agent URI (e.g., agent://coordinator/Marketing)")
     intent: str = Field(..., description="Task intent")
 
     # Optional fields
@@ -151,7 +151,7 @@ class DoneMessage(BaseMessage):
 
 
 class RouteMessage(BaseMessage):
-    """Route message - Routing-Info vom Orchestrator."""
+    """Route message - Routing-Info vom Coordinator."""
 
     type: MessageType = Field(default=MessageType.ROUTE, frozen=True)
 

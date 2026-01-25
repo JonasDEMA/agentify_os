@@ -1,13 +1,13 @@
-"""Test Ethics Agent using Base Orchestrator."""
+"""Test Ethics Agent using Base Coordinator."""
 import asyncio
 import sys
 from pathlib import Path
 
-# Add base_orchestrator to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "base_orchestrator"))
+# Add base_coordinator to path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "base_coordinator"))
 
-from base_orchestrator.agent_protocol import AgentProtocol
-from base_orchestrator.models import MessageType
+from base_coordinator.agent_protocol import AgentProtocol
+from base_coordinator.models import MessageType
 
 
 async def test_ethics_agent():

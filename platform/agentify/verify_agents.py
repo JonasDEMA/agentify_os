@@ -6,7 +6,7 @@ Verify Agentify Agents in the Marketplace
 import requests
 import json
 
-# Marketplace API Configuration
+# Marketplace API Configuration (Note: endpoint URL is external service, 'orchestrator-agent' in URL is legacy naming)
 MARKETPLACE_API = "https://uigsswdxmjqfccuxguxb.supabase.co/functions/v1/orchestrator-agent/chat"
 API_KEY = "agfy_4c17ec3b634b11afd03e3ab003846729cc3837a56d1aafd57ae3647353239241"
 

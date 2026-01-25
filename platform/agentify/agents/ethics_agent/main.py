@@ -3,15 +3,15 @@
 ARCHITECTURAL EVOLUTION:
 -----------------------
 This agent demonstrates the transition from direct peer-to-peer communication
-to orchestrator-mediated routing in the Agentify platform.
+to coordinator-mediated routing in the Agentify platform.
 
 CURRENT IMPLEMENTATION (v1.0.0 - Standalone Mode):
   - Direct A2A communication with LLM agent via httpx
   - Configurable LLM_AGENT_URL for flexibility
-  - Suitable for development and testing without full orchestrator
+  - Suitable for development and testing without full coordinator
 
-FUTURE IMPLEMENTATION (v2.0.0 - Orchestrated Mode):
-  - Capability-based routing via Orchestrator Agent
+FUTURE IMPLEMENTATION (v2.0.0 - Coordinated Mode):
+  - Capability-based routing via Coordinator Agent
   - Dynamic LLM agent discovery from marketplace
   - No hard-coded agent URLs - all discovered at runtime
   - Follows "Recursive System Architecture" principle
@@ -21,11 +21,11 @@ Key Design Principles:
   2. Dependency Injection: LLM agent URL is configurable
   3. Graceful Degradation: Falls back to rule-based if LLM unavailable
   4. Standards Compliance: Full Agent Standard v1 + A2A protocol
-  5. Future-Ready: Designed for easy migration to orchestrator routing
+  5. Future-Ready: Designed for easy migration to coordinator routing
 
 For architecture details, see:
   - platform/agentify/ARCHITECTURE.md
-  - platform/agentify/orchestrator/README.md
+  - platform/agentify/coordinator/README.md
   - platform/agentify/PLATFORM_ARCHITECTURE.md
 """
 import sys
@@ -39,10 +39,10 @@ from typing import Any
 import uvicorn
 import httpx
 
-# Add base_orchestrator to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "base_orchestrator"))
+# Add base_coordinator to path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "base_coordinator"))
 
-from base_orchestrator.models import AgentMessage, MessageType
+from base_coordinator.models import AgentMessage, MessageType
 
 app = FastAPI(title="Ethics Agent", version="1.0.0")
 
@@ -118,17 +118,17 @@ async def handle_evaluate_action(message: AgentMessage) -> AgentMessage:
     ARCHITECTURAL NOTE:
     -------------------
     Current implementation uses direct A2A communication to an LLM agent.
-    This is a transitional approach while the full Orchestrator Agent is being developed.
+    This is a transitional approach while the full Coordinator Agent is being developed.
     
     CURRENT BEHAVIOR (v1.0.0):
     - Ethics Agent directly calls LLM agent via LLM_AGENT_URL
     - Uses Agent Communication Protocol for peer-to-peer communication
     - Falls back to rule-based evaluation if LLM unavailable
     
-    FUTURE BEHAVIOR (v2.0.0 - when Orchestrator is ready):
-    - Ethics Agent declares "I need NLP capability" to Orchestrator
-    - Orchestrator discovers available LLM agents in team (GPT/Claude/Llama/etc.)
-    - Orchestrator routes the request to best available LLM agent
+    FUTURE BEHAVIOR (v2.0.0 - when Coordinator is ready):
+    - Ethics Agent declares "I need NLP capability" to Coordinator
+    - Coordinator discovers available LLM agents in team (GPT/Claude/Llama/etc.)
+    - Coordinator routes the request to best available LLM agent
     - Ethics Agent receives response without knowing which LLM was used
     
     This follows the "Recursive System Architecture" principle:
@@ -136,14 +136,14 @@ async def handle_evaluate_action(message: AgentMessage) -> AgentMessage:
     - Marketplace can offer competing LLM agents (price/quality trade-offs)
     - True loose coupling between agents
     
-    See: platform/agentify/ARCHITECTURE.md - Orchestrator Agent responsibilities
-    See: platform/agentify/orchestrator/README.md - Dynamic team composition
+    See: platform/agentify/ARCHITECTURE.md - Coordinator Agent responsibilities
+    See: platform/agentify/coordinator/README.md - Dynamic team composition
     
-    TODO (when Orchestrator Agent v1 is deployed):
+    TODO (when Coordinator Agent v1 is deployed):
     [ ] Remove direct LLM_AGENT_URL configuration
     [ ] Add capability declaration: {"required_capability": "llm.structured_completion"}
-    [ ] Update to use orchestrator.route_message() instead of direct httpx call
-    [ ] Let orchestrator handle LLM agent discovery and routing
+    [ ] Update to use coordinator.route_message() instead of direct httpx call
+    [ ] Let coordinator handle LLM agent discovery and routing
     """
     
     payload = message.payload
@@ -158,7 +158,7 @@ async def handle_evaluate_action(message: AgentMessage) -> AgentMessage:
     print(f"   Framework: {framework}")
     
     # TEMPORARY: Direct LLM agent call (v1.0.0)
-    # This will be replaced by orchestrator routing in v2.0.0
+    # This will be replaced by coordinator routing in v2.0.0
     # The LLM_AGENT_URL can point to ANY LLM-capable agent (GPT, Claude, Llama, etc.)
     llm_agent_url = os.getenv("LLM_AGENT_URL", "http://localhost:8004")
     

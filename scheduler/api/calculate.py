@@ -79,7 +79,7 @@ async def calculate(
         HTTPException: If job creation fails
     """
     try:
-        # Create empty task graph (orchestrator will handle the flow)
+        # Create empty task graph (coordinator will handle the flow)
         task_graph = TaskGraph()
 
         # Create job with calculation parameters in metadata
@@ -89,7 +89,7 @@ async def calculate(
             max_retries=3,
         )
 
-        # Store calculation parameters in job result (will be used by orchestrator)
+        # Store calculation parameters in job result (will be used by coordinator)
         job.result = {
             "num1": request.num1,
             "num2": request.num2,

@@ -28,7 +28,7 @@ class InstructionAuthority(BaseModel):
     id: str = Field(
         ...,
         description="Unique identifier for this authority",
-        examples=["orchestrator.agent.alpha", "jonas.mossler", "org.abacus-alpha"],
+        examples=["coordinator.agent.alpha", "jonas.mossler", "org.abacus-alpha"],
     )
     
     name: str | None = Field(
@@ -165,8 +165,8 @@ class Authority(BaseModel):
             "example": {
                 "instruction": {
                     "type": "agent",
-                    "id": "orchestrator.meetings",
-                    "name": "Meeting Orchestrator",
+                    "id": "coordinator.meetings",
+                    "name": "Meeting Coordinator",
                 },
                 "oversight": {
                     "type": "agent",

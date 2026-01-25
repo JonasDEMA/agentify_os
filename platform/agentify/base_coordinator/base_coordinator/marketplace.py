@@ -10,10 +10,10 @@ from .models import Agent, MessageType
 class MarketplaceDiscovery:
     """Handles marketplace discovery."""
 
-    def __init__(self, orchestrator_id: str, marketplace_url: str):
-        self.orchestrator_id = orchestrator_id
+    def __init__(self, coordinator_id: str, marketplace_url: str):
+        self.coordinator_id = coordinator_id
         self.marketplace_url = marketplace_url
-        self.protocol = AgentProtocol(sender_id=orchestrator_id)
+        self.protocol = AgentProtocol(sender_id=coordinator_id)
 
     async def discover_agents(
         self,

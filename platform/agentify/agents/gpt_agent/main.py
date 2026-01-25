@@ -39,10 +39,10 @@ import openai
 import PyPDF2
 import io
 
-# Add base_orchestrator to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "base_orchestrator"))
+# Add base_coordinator to path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "base_coordinator"))
 
-from base_orchestrator.models import AgentMessage, MessageType
+from base_coordinator.models import AgentMessage, MessageType
 
 app = FastAPI(title="GPT Agent", version="1.0.0")
 
