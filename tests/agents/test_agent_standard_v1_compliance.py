@@ -354,6 +354,173 @@ class TestAgentStandardV1FutureExtensions:
         )
 
 
+class TestAgentComplianceSummary:
+    """Generate comprehensive compliance summary for each agent."""
+
+    @pytest.mark.parametrize("manifest_path", AGENT_MANIFESTS, ids=lambda p: p.parent.name)
+    def test_generate_compliance_summary(self, manifest_path: Path):
+        """Generate and print comprehensive compliance summary."""
+        manifest = load_manifest(manifest_path)
+        agent_name = manifest_path.parent.name
+        agent_id = manifest.get("agent_id", "N/A")
+        version = manifest.get("version", "N/A")
+        status = manifest.get("status", "N/A")
+
+        print(f"\n{'='*80}")
+        print(f"AGENT STANDARD V1 COMPLIANCE REPORT: {agent_name}")
+        print(f"{'='*80}")
+        print(f"Agent ID:      {agent_id}")
+        print(f"Version:       {version}")
+        print(f"Status:        {status}")
+        print(f"Manifest Path: {manifest_path}")
+        print(f"\n{'─'*80}")
+        print("REQUIRED CORE FIELDS")
+        print(f"{'─'*80}")
+
+        # Required core fields
+        core_fields = {
+            "agent_id": "✅" if "agent_id" in manifest else "❌",
+            "name": "✅" if "name" in manifest else "❌",
+            "version": "✅" if "version" in manifest else "❌",
+            "overview": "✅" if "overview" in manifest and "description" in manifest.get("overview", {}) else "❌",
+        }
+
+        for field, status_icon in core_fields.items():
+            print(f"  {status_icon} {field}")
+
+        print(f"\n{'─'*80}")
+        print("MANDATORY EXTENSIONS")
+        print(f"{'─'*80}")
+
+        # Mandatory extensions
+        extensions = {
+            "capabilities": manifest.get("capabilities", []),
+            "ethics": manifest.get("ethics"),
+            "desires": manifest.get("desires"),
+            "authority": manifest.get("authority"),
+            "authentication": manifest.get("authentication"),
+            "marketplace": manifest.get("marketplace"),
+            "pricing": manifest.get("pricing"),
+            "io": manifest.get("io"),
+        }
+
+        for ext_name, ext_value in extensions.items():
+            if ext_value:
+                if isinstance(ext_value, list):
+                    print(f"  ✅ {ext_name} ({len(ext_value)} items)")
+                elif isinstance(ext_value, dict):
+                    keys = list(ext_value.keys())[:3]
+                    keys_str = ", ".join(keys)
+                    if len(ext_value) > 3:
+                        keys_str += "..."
+                    print(f"  ✅ {ext_name} ({keys_str})")
+                else:
+                    print(f"  ✅ {ext_name}")
+            else:
+                print(f"  ❌ {ext_name} (MISSING - MANDATORY)")
+
+        print(f"\n{'─'*80}")
+        print("OPTIONAL EXTENSIONS (CURRENTLY IN USE)")
+        print(f"{'─'*80}")
+
+        # Optional but currently used extensions
+        optional_in_use = {
+            "a2a": manifest.get("a2a"),
+            "runtime": manifest.get("runtime"),
+            "revisions": manifest.get("revisions"),
+            "tools": manifest.get("tools"),
+        }
+
+        for opt_name, opt_value in optional_in_use.items():
+            if opt_value:
+                if isinstance(opt_value, list):
+                    print(f"  ✅ {opt_name} ({len(opt_value)} items)")
+                elif isinstance(opt_value, dict):
+                    supported = opt_value.get("supported", True)
+                    if opt_name == "a2a" and not supported:
+                        print(f"  ⚠️  {opt_name} (declared but not supported)")
+                    else:
+                        print(f"  ✅ {opt_name}")
+                else:
+                    print(f"  ✅ {opt_name}")
+            else:
+                print(f"  ⚠️  {opt_name} (not present - optional)")
+
+        print(f"\n{'─'*80}")
+        print("FUTURE EXTENSIONS")
+        print(f"{'─'*80}")
+
+        # Future extensions
+        future_extensions = {
+            "addresses": manifest.get("addresses"),
+            "contracts": manifest.get("contracts"),
+            "marketplaces": manifest.get("marketplaces"),
+            "llm_models": manifest.get("llm_models"),
+        }
+
+        for future_name, future_value in future_extensions.items():
+            if future_value:
+                print(f"  ✅ {future_name} (implemented early)")
+            else:
+                print(f"  ─  {future_name} (not yet implemented)")
+
+        print(f"\n{'─'*80}")
+        print("DETAILED COMPLIANCE CHECKS")
+        print(f"{'─'*80}")
+
+        # Ethics framework
+        if "ethics" in manifest:
+            framework = manifest["ethics"].get("framework", "N/A")
+            hard_constraints = len(manifest["ethics"].get("hard_constraints", []))
+            soft_constraints = len(manifest["ethics"].get("soft_constraints", []))
+            print(f"  Ethics Framework:      {framework}")
+            print(f"  Hard Constraints:      {hard_constraints}")
+            print(f"  Soft Constraints:      {soft_constraints}")
+
+        # Desires profile
+        if "desires" in manifest:
+            profile = manifest["desires"].get("profile", [])
+            if profile:
+                desires_str = ", ".join([f"{d['id']} ({d['weight']})" for d in profile[:3]])
+                print(f"  Desires Profile:       {desires_str}")
+
+        # Authority
+        if "authority" in manifest:
+            instruction_type = manifest["authority"].get("instruction", {}).get("type", "N/A")
+            oversight_type = manifest["authority"].get("oversight", {}).get("type", "N/A")
+            independent = manifest["authority"].get("oversight", {}).get("independent", False)
+            print(f"  Instruction Authority: {instruction_type}")
+            print(f"  Oversight Authority:   {oversight_type} {'(independent)' if independent else '(not independent)'}")
+
+        # Pricing
+        if "pricing" in manifest:
+            pricing_model = manifest["pricing"].get("model", "N/A")
+            currency = manifest["pricing"].get("currency", "N/A")
+            print(f"  Pricing Model:         {pricing_model} ({currency})")
+
+        print(f"\n{'─'*80}")
+        print("OVERALL COMPLIANCE")
+        print(f"{'─'*80}")
+
+        # Calculate compliance score
+        total_required = len(core_fields) + len(extensions)
+        compliant = sum(1 for v in core_fields.values() if v == "✅")
+        compliant += sum(1 for v in extensions.values() if v)
+        compliance_percent = (compliant / total_required) * 100
+
+        if compliance_percent == 100:
+            print(f"  ✅ FULLY COMPLIANT: {compliant}/{total_required} required fields ({compliance_percent:.0f}%)")
+        elif compliance_percent >= 90:
+            print(f"  ⚠️  MOSTLY COMPLIANT: {compliant}/{total_required} required fields ({compliance_percent:.0f}%)")
+        else:
+            print(f"  ❌ NON-COMPLIANT: {compliant}/{total_required} required fields ({compliance_percent:.0f}%)")
+
+        print(f"{'='*80}\n")
+
+        # This test always passes - it's just for reporting
+        assert True
+
+
 class TestManifestConsistency:
     """Test internal consistency of manifests."""
 
