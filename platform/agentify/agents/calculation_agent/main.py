@@ -2,6 +2,7 @@
 
 import json
 import os
+import sys
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
@@ -12,6 +13,10 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
 import uvicorn
+
+# Add base_coordinator to path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "base_coordinator"))
+from base_coordinator.workflow_handler import handle_workflow_chain
 
 
 # ========== Models ==========
@@ -172,15 +177,25 @@ async def handle_message(message: AgentMessage) -> AgentMessage:
             })
 
             # Create response
+            result_payload = {
+                "result": result,
+                "operation": f"{a} {op} {b}",
+            }
+            
+            # Check if this is part of a workflow chain
+            if "__workflow__" in message.payload:
+                return await handle_workflow_chain(
+                    message=message,
+                    my_result=result_payload,
+                    agent_id=AGENT_ID
+                )
+            
             response = AgentMessage(
                 type=MessageType.INFORM,
                 sender=AGENT_ID,
                 to=[message.sender],
                 intent="calculation_result",
-                payload={
-                    "result": result,
-                    "operation": f"{a} {op} {b}",
-                },
+                payload=result_payload,
             )
 
             # Log outbound communication

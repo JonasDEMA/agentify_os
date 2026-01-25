@@ -43,6 +43,7 @@ import httpx
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "base_coordinator"))
 
 from base_coordinator.models import AgentMessage, MessageType
+from base_coordinator.workflow_handler import handle_workflow_chain
 
 app = FastAPI(title="Ethics Agent", version="1.0.0")
 
@@ -240,6 +241,27 @@ Consider:
         print(f"   Violations: {violations}")
     if recommendations:
         print(f"   Recommendations: {recommendations}")
+    
+    # Check if this is part of a workflow chain
+    if "__workflow__" in message.payload:
+        # If not allowed, terminate the workflow early by marking this as the final step
+        if not allowed:
+            workflow = message.payload.get("__workflow__") or {}
+            try:
+                current_step = workflow.get("current_step", 0)
+                steps = workflow.get("steps", [])
+                # Truncate remaining steps so handle_workflow_chain treats this as last
+                workflow["total_steps"] = current_step + 1
+                if isinstance(steps, list) and steps:
+                    workflow["steps"] = steps[: current_step + 1]
+                message.payload["__workflow__"] = workflow
+            except Exception as e:
+                print(f"   ⚠️ Failed to adjust workflow for blocked action: {e}")
+        return await handle_workflow_chain(
+            message=message,
+            my_result=result,
+            agent_id="agent.agentify.ethics"
+        )
     
     return AgentMessage(
         type=MessageType.INFORM,

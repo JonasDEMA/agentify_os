@@ -159,7 +159,20 @@
   
   "io": {
     "input_formats": ["json"],
-    "output_formats": ["json"]
+    "output_formats": ["json"],
+    "schemas": {
+      "calculate": {
+        "input": {
+          "a": "number",
+          "b": "number",
+          "op": "string (one of: +, -, *, /)"
+        },
+        "output": {
+          "result": "number",
+          "operation": "string"
+        }
+      }
+    }
   },
 
   "logging": {

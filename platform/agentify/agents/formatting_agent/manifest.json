@@ -118,7 +118,21 @@
   
   "io": {
     "input_formats": ["json"],
-    "output_formats": ["json"]
+    "output_formats": ["json"],
+    "schemas": {
+      "format": {
+        "input": {
+          "value": "number",
+          "locale": "string (e.g., en-US, de-DE)",
+          "decimals": "number (optional, default: 2)"
+        },
+        "output": {
+          "formatted": "string",
+          "locale": "string",
+          "original": "number"
+        }
+      }
+    }
   }
 }
 

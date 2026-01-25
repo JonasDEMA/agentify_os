@@ -77,7 +77,7 @@ function createMessage(type, sender, to, intent, payload) {
  * POST /agent/message
  * Handle incoming agent messages
  */
-app.post('/agent/message', (req, res) => {
+app.post('/agent/message', async (req, res) => {
   const message = req.body;
   console.log(`📨 Received message: ${message.intent} from ${message.sender}`);
 
@@ -85,7 +85,7 @@ app.post('/agent/message', (req, res) => {
   if (message.intent === 'format') {
     try {
       // Extract parameters
-      const { value, locale, decimals } = message.payload;
+      const { value, locale, decimals, __workflow__ } = message.payload;
 
       if (value === undefined) {
         throw new Error('Missing parameter: value required');
@@ -98,17 +98,107 @@ app.post('/agent/message', (req, res) => {
         decimals !== undefined ? decimals : 2
       );
 
-      // Return result
+      const result = {
+        formatted,
+        locale: locale || 'en-US',
+        original: value,
+      };
+      
+      // Check if this is part of a workflow chain
+      if (__workflow__) {
+        const workflow = __workflow__;
+        const currentStep = workflow.current_step || 0;
+        const totalSteps = workflow.total_steps || 0;
+        const trace = workflow.trace || [];
+        
+        // Add current step to trace
+        trace.push({
+          step: currentStep + 1,
+          agent: AGENT_ID,
+          result: result,
+          timestamp: new Date().toISOString(),
+          duration_ms: 0
+        });
+        
+        console.log(`\n🔗 Workflow step ${currentStep + 1}/${totalSteps} complete`);
+        console.log(`   Result: ${JSON.stringify(result).substring(0, 100)}...`);
+        
+        // Check if this is the last step
+        if (currentStep + 1 >= totalSteps) {
+          // Last step - return to coordinator
+          console.log(`✅ Final step complete, returning to coordinator`);
+          const response = createMessage(
+            'inform',
+            AGENT_ID,
+            [message.sender],
+            'workflow_complete',
+            {
+              ...result,
+              __workflow__: {
+                ...workflow,
+                trace,
+                completed: true
+              }
+            }
+          );
+          return res.json(response);
+        }
+        
+        // Not the last step - call next agent
+        const nextStepIdx = currentStep + 1;
+        const nextStep = workflow.steps[nextStepIdx];
+        const nextAgentAddress = nextStep.agent_address;
+        const nextIntent = nextStep.intent;
+        const nextParams = { ...nextStep.params };
+        
+        console.log(`➡️  Calling next agent: ${nextStep.agent_id}`);
+        
+        // Auto-wire params from my result
+        for (const [key, value] of Object.entries(result)) {
+          if (!(key in nextParams) && typeof value !== 'object') {
+            nextParams[key] = value;
+          }
+        }
+        
+        // Update workflow context
+        const updatedWorkflow = {
+          ...workflow,
+          current_step: nextStepIdx,
+          trace,
+          previous_result: result
+        };
+        
+        // Call next agent
+        try {
+          console.log(`📤 Delegating to ${nextAgentAddress}`);
+          const axios = require('axios');
+          const nextResponse = await axios.post(
+            `${nextAgentAddress}/agent/message`,
+            createMessage(
+              'request',
+              AGENT_ID,
+              [nextStep.agent_id],
+              nextIntent,
+              {
+                ...nextParams,
+                __workflow__: updatedWorkflow
+              }
+            )
+          );
+          
+          return res.json(nextResponse.data);
+        } catch (error) {
+          throw new Error(`Failed to call next agent: ${error.message}`);
+        }
+      }
+      
+      // Normal response (no workflow)
       const response = createMessage(
         'inform',
         AGENT_ID,
         [message.sender],
         'formatting_result',
-        {
-          formatted,
-          locale: locale || 'en-US',
-          original: value,
-        }
+        result
       );
 
       return res.json(response);
