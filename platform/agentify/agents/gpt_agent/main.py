@@ -67,6 +67,14 @@ async def health():
     }
 
 
+@app.get("/manifest")
+async def get_manifest():
+    """Return agent manifest."""
+    manifest_path = Path(__file__).parent / "manifest.json"
+    with open(manifest_path, "r") as f:
+        return json.load(f)
+
+
 @app.post("/agent/message")
 async def agent_message(message: AgentMessage):
     """Handle Agent Communication Protocol messages."""

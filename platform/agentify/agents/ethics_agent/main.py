@@ -30,6 +30,7 @@ For architecture details, see:
 """
 import sys
 import os
+import json
 from pathlib import Path
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -72,6 +73,14 @@ class EvaluationResponse(BaseModel):
 async def health():
     """Health check endpoint."""
     return {"status": "ok", "agent": "ethics", "version": "1.0.0"}
+
+
+@app.get("/manifest")
+async def get_manifest():
+    """Return agent manifest."""
+    manifest_path = Path(__file__).parent / "manifest.json"
+    with open(manifest_path, "r") as f:
+        return json.load(f)
 
 
 @app.post("/agent/message")

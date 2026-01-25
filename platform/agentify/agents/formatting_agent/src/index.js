@@ -4,6 +4,13 @@
 
 import express from 'express';
 import { randomUUID } from 'crypto';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+// Get __dirname equivalent in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // ========== Constants ==========
 
@@ -154,13 +161,13 @@ app.get('/health', (req, res) => {
  * Return agent manifest
  */
 app.get('/manifest', (req, res) => {
-  res.json({
-    agent_id: AGENT_ID,
-    name: 'Formatting Agent',
-    version: '1.0.0',
-    status: 'active',
-    capabilities: ['formatting', 'localization'],
-  });
+  try {
+    const manifestPath = join(__dirname, '..', 'manifest.json');
+    const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+    res.json(manifest);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to load manifest' });
+  }
 });
 
 // ========== Start Server ==========
