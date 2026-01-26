@@ -10,6 +10,7 @@
 platform/agentify/
 ├── app_standard/          # App Standard (React apps)
 ├── agent_standard/        # Agent Standard (autonomous agents)
+├── agents/                # Agent implementations
 ├── marketplace/           # Marketplace (discovery & acquisition)
 ├── data_sharing/          # Data Sharing Protocol (RBAC)
 ├── orchestrator/          # Orchestrator Agent (team builder)

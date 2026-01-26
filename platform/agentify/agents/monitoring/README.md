@@ -43,7 +43,7 @@ The Monitoring Agent transforms infrastructure monitoring into an AI-orchestrabl
 ### Installation
 
 ```bash
-cd platform/agentify/monitoring
+cd platform/agentify/agents/monitoring
 npm install
 ```
 

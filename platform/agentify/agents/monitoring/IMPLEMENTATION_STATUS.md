@@ -138,7 +138,7 @@
 ## 📁 File Structure
 
 ```
-platform/agentify/monitoring/
+platform/agentify/agents/monitoring/
 ├── manifest.json                 # Agent manifest (Agent Standard v1)
 ├── package.json                  # Dependencies
 ├── tsconfig.json                 # TypeScript configuration

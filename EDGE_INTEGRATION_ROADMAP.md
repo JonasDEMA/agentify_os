@@ -237,7 +237,7 @@ The system automatically:
 ### 3.1 Energy Agent Core ✅ **COMPLETE**
 **Status:** ✅ COMPLETE
 **Completed:** 2026-01-26
-**Location:** `platform/agentify/energy/`
+**Location:** `platform/agentify/agents/energy/`
 
 **Implementation:**
 - [x] Create Energy Agent
@@ -281,7 +281,7 @@ The system automatically:
 ### 3.2 Power Optimization ✅ **COMPLETE**
 **Status:** ✅ COMPLETE
 **Completed:** 2026-01-26
-**Location:** `platform/agentify/energy/src/optimizer.ts`
+**Location:** `platform/agentify/agents/energy/src/optimizer.ts`
 
 **Goal:** Implement the `optimize_power` tool with intelligent optimization algorithms.
 

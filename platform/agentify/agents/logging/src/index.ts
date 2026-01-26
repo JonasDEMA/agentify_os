@@ -6,6 +6,8 @@ import express, { Request, Response } from 'express';
 import dotenv from 'dotenv';
 import { WebSocketServer, WebSocket } from 'ws';
 import http from 'http';
+import fs from 'fs';
+import path from 'path';
 import logger from './logger';
 import { database } from './database';
 import { logCollector } from './log-collector';
@@ -33,6 +35,11 @@ const config = {
   logRetentionDays: parseInt(process.env.LOG_RETENTION_DAYS || '30'),
   logCleanupIntervalMs: parseInt(process.env.LOG_CLEANUP_INTERVAL_MS || '86400000'), // 24 hours
 };
+
+// Load manifest
+const manifest = JSON.parse(
+  fs.readFileSync(path.join(__dirname, '../manifest.json'), 'utf-8')
+);
 
 // ========== Agent Communication Protocol ==========
 
@@ -270,6 +277,14 @@ app.get('/health', (req: Request, res: Response) => {
       timestamp: new Date().toISOString(),
     },
   } as ApiResponse);
+});
+
+/**
+ * Manifest endpoint
+ * GET /manifest
+ */
+app.get('/manifest', (req: Request, res: Response) => {
+  res.json(manifest);
 });
 
 /**

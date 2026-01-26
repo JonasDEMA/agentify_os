@@ -5,6 +5,8 @@
 
 import express, { Request, Response } from 'express';
 import dotenv from 'dotenv';
+import fs from 'fs';
+import path from 'path';
 import { logger } from './logger';
 import { Database } from './database';
 import { SessionManager } from './session-manager';
@@ -33,6 +35,11 @@ const config = {
 const database = new Database();
 const sessionManager = new SessionManager(database);
 
+// Load manifest
+const manifest = JSON.parse(
+  fs.readFileSync(path.join(__dirname, '../manifest.json'), 'utf-8')
+);
+
 /**
  * Health check endpoint
  */
@@ -43,6 +50,13 @@ app.get('/health', (req: Request, res: Response) => {
     version: '1.0.0',
     timestamp: new Date().toISOString(),
   });
+});
+
+/**
+ * Manifest endpoint
+ */
+app.get('/manifest', (req: Request, res: Response) => {
+  res.json(manifest);
 });
 
 /**
