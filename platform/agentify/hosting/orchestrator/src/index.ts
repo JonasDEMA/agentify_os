@@ -5,6 +5,8 @@
 
 import express, { Request, Response } from 'express';
 import dotenv from 'dotenv';
+import fs from 'fs';
+import path from 'path';
 import { RailwayDeployer } from './railway-deployer';
 import { EdgeDeployer } from './edge-deployer';
 import { Database } from './database';
@@ -45,6 +47,11 @@ const edgeDeployer = new EdgeDeployer();
 const app = express();
 app.use(express.json());
 
+// Load manifest
+const manifest = JSON.parse(
+  fs.readFileSync(path.join(__dirname, '../manifest.json'), 'utf-8')
+);
+
 /**
  * Health check endpoint
  */
@@ -54,6 +61,13 @@ app.get('/health', (req: Request, res: Response) => {
     agent_id: config.agent_id,
     timestamp: new Date().toISOString(),
   });
+});
+
+/**
+ * Manifest endpoint
+ */
+app.get('/manifest', (req: Request, res: Response) => {
+  res.json(manifest);
 });
 
 /**

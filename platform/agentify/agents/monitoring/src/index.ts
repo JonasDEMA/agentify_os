@@ -5,6 +5,8 @@
 import express, { Request, Response } from 'express';
 import dotenv from 'dotenv';
 import cron from 'node-cron';
+import fs from 'fs';
+import path from 'path';
 import logger from './logger';
 import { database } from './database';
 import { metricsCollector } from './metrics-collector';
@@ -27,6 +29,11 @@ const app = express();
 const PORT = process.env.PORT || 3005;
 
 app.use(express.json());
+
+// Load manifest
+const manifest = JSON.parse(
+  fs.readFileSync(path.join(__dirname, '../manifest.json'), 'utf-8')
+);
 
 // ========== Agent Communication Protocol ==========
 
@@ -608,6 +615,13 @@ app.get('/health', (req: Request, res: Response) => {
     service: 'monitoring-agent',
     timestamp: new Date().toISOString(),
   });
+});
+
+/**
+ * Manifest endpoint
+ */
+app.get('/manifest', (req: Request, res: Response) => {
+  res.json(manifest);
 });
 
 // ========== Background Jobs ==========

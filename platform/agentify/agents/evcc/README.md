@@ -172,7 +172,7 @@ Optimize charging based on objective.
 ### Installation
 
 ```bash
-cd platform/agentify/evcc
+cd platform/agentify/agents/evcc
 npm install
 ```
 
@@ -270,7 +270,7 @@ The agent registers with the Marketplace Orchestrator for AI-powered discovery a
 ### Project Structure
 
 ```
-platform/agentify/evcc/
+platform/agentify/agents/evcc/
 ├── manifest.json              # Agent Standard v1 manifest
 ├── package.json
 ├── tsconfig.json
