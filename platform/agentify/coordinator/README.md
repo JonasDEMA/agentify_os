@@ -1,12 +1,12 @@
-# 🎯 Agentify Orchestrator Agent
+# 🎯 Agentify Coordinator Agent
 
 **Every app's built-in team builder and manager**
 
 ---
 
-## 🎯 **What is an Orchestrator?**
+## 🎯 **What is a Coordinator?**
 
-Every Agentify app includes an **orchestrator agent** that:
+Every Agentify app includes a **coordinator agent** that:
 
 - 🔍 **Discovers Agents** - Queries marketplace for capabilities
 - 🤝 **Builds Teams** - LLM-guided team selection
@@ -21,7 +21,7 @@ Every Agentify app includes an **orchestrator agent** that:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                  Orchestrator Agent                          │
+│                  Coordinator Agent                          │
 │              (Agent Standard v1 Compliant)                   │
 ├─────────────────────────────────────────────────────────────┤
 │                                                              │
@@ -55,14 +55,14 @@ Every Agentify app includes an **orchestrator agent** that:
 
 ---
 
-## 📄 **Orchestrator Manifest**
+## 📄 **Coordinator Manifest**
 
-Every orchestrator is an **Agent Standard v1 compliant agent**:
+Every coordinator is an **Agent Standard v1 compliant agent**:
 
 ```json
 {
-  "agent_id": "agent.{APP_ID}.orchestrator",
-  "name": "{APP_NAME} Orchestrator",
+  "agent_id": "agent.{APP_ID}.coordinator",
+  "name": "{APP_NAME} Coordinator",
   "version": "1.0.0",
   "status": "active",
   
@@ -99,7 +99,7 @@ Every orchestrator is an **Agent Standard v1 compliant agent**:
       "name": "query_marketplace",
       "description": "Query marketplace for agents by capability",
       "category": "discovery",
-      "executor": "agents.orchestrator.tools.MarketplaceQuery",
+      "executor": "agents.coordinator.tools.MarketplaceQuery",
       "input_schema": {
         "type": "object",
         "properties": {
@@ -114,7 +114,7 @@ Every orchestrator is an **Agent Standard v1 compliant agent**:
       "name": "recommend_team",
       "description": "Get LLM-guided team recommendations",
       "category": "orchestration",
-      "executor": "agents.orchestrator.tools.TeamRecommender",
+      "executor": "agents.coordinator.tools.TeamRecommender",
       "input_schema": {
         "type": "object",
         "properties": {
@@ -128,7 +128,7 @@ Every orchestrator is an **Agent Standard v1 compliant agent**:
       "name": "build_team",
       "description": "Build team from selected agents",
       "category": "orchestration",
-      "executor": "agents.orchestrator.tools.TeamBuilder",
+      "executor": "agents.coordinator.tools.TeamBuilder",
       "input_schema": {
         "type": "object",
         "properties": {
@@ -142,7 +142,7 @@ Every orchestrator is an **Agent Standard v1 compliant agent**:
       "name": "monitor_team",
       "description": "Monitor team health and performance",
       "category": "monitoring",
-      "executor": "agents.orchestrator.tools.TeamMonitor"
+      "executor": "agents.coordinator.tools.TeamMonitor"
     }
   ],
   
@@ -194,7 +194,7 @@ async analyzeRequirements(input: string): Promise<Requirements> {
 ```typescript
 const input = "I need to automate email campaigns with scheduling and analytics. Budget is $100/month.";
 
-const requirements = await orchestrator.analyzeRequirements(input);
+const requirements = await coordinator.analyzeRequirements(input);
 // {
 //   description: "Automate email campaigns with scheduling and analytics",
 //   capabilities: ["email_sending", "scheduling", "analytics"],
@@ -421,7 +421,7 @@ async monitorTeam(): Promise<TeamHealth> {
 
 ## 🔒 **Ethics & Compliance**
 
-All orchestrators enforce:
+All coordinators enforce:
 
 - ✅ **No unauthorized team changes** - Human approval required
 - ✅ **No budget overruns** - Cost checks before booking
@@ -433,12 +433,12 @@ All orchestrators enforce:
 ## 📚 **Examples**
 
 See [examples/](examples/) for:
-- Basic orchestrator implementation
+- Basic coordinator implementation
 - LLM-guided team building
 - Human-in-the-loop workflow
 - Team monitoring and scaling
 
 ---
 
-**Next:** [Implementation Guide](IMPLEMENTATION.md) - Build your orchestrator
+**Next:** [Implementation Guide](IMPLEMENTATION.md) - Build your coordinator
 

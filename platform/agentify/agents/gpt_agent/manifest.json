@@ -94,7 +94,7 @@
   "authority": {
     "instruction": {
       "type": "agent",
-      "id": "agent.agentify.orchestrator"
+      "id": "agent.agentify.coordinator"
     },
     "oversight": {
       "type": "human",

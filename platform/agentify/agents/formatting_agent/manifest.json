@@ -59,7 +59,7 @@
   "authority": {
     "instruction": {
       "type": "agent",
-      "id": "agent.app.orchestrator"
+      "id": "agent.app.coordinator"
     },
     "oversight": {
       "type": "human",
@@ -108,7 +108,7 @@
     "co_location_with": []
   },
   
-  "preferred_host": "agent.agentify.hosting-orchestrator",
+  "preferred_host": "agent.agentify.hosting-coordinator",
   
   "pricing": {
     "model": "per_request",
@@ -118,7 +118,21 @@
   
   "io": {
     "input_formats": ["json"],
-    "output_formats": ["json"]
+    "output_formats": ["json"],
+    "schemas": {
+      "format": {
+        "input": {
+          "value": "number",
+          "locale": "string (e.g., en-US, de-DE)",
+          "decimals": "number (optional, default: 2)"
+        },
+        "output": {
+          "formatted": "string",
+          "locale": "string",
+          "original": "number"
+        }
+      }
+    }
   }
 }
 

@@ -86,7 +86,7 @@ curl http://localhost:8001/health
 ```json
 {
   "type": "request",
-  "sender": "agent.app.orchestrator",
+  "sender": "agent.app.coordinator",
   "to": ["agent.calculator.formatting"],
   "intent": "format",
   "payload": {
@@ -102,7 +102,7 @@ curl http://localhost:8001/health
 {
   "type": "inform",
   "sender": "agent.calculator.formatting",
-  "to": ["agent.app.orchestrator"],
+  "to": ["agent.app.coordinator"],
   "intent": "formatting_result",
   "payload": {
     "formatted": "1.234,57",

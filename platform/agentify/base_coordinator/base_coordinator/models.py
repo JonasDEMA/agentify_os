@@ -1,4 +1,4 @@
-"""Pydantic models for Base Orchestrator."""
+"""Pydantic models for Base Coordinator."""
 
 from datetime import datetime
 from enum import Enum

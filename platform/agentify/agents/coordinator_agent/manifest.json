@@ -1,0 +1,181 @@
+{
+  "agent_id": "agent.agentify.coordinator",
+  "name": "Coordinator Agent",
+  "version": "1.0.0",
+  "status": "active",
+  
+  "revisions": {
+    "current": "rev_1.0.0",
+    "history": [
+      {
+        "revision": "rev_1.0.0",
+        "version": "1.0.0",
+        "date": "2026-01-22",
+        "author": "erich@meet-harmony.ai",
+        "changes": "Initial MVP implementation with dynamic LLM-based workflow planning"
+      }
+    ]
+  },
+  
+  "overview": {
+    "description": "Intelligent workflow coordinator that dynamically plans and supervises multi-agent task execution using LLM-based decision making",
+    "tags": ["coordinator", "workflow", "orchestration", "team-building", "llm-planning"],
+    "owner": {
+      "type": "organization",
+      "id": "org.agentify",
+      "name": "Agentify Platform"
+    },
+    "lifecycle": {
+      "stage": "production",
+      "sla": "99.9%"
+    }
+  },
+  
+  "capabilities": [
+    {
+      "name": "dynamic_workflow_planning",
+      "level": "expert",
+      "description": "Uses LLM to analyze requests and dynamically plan optimal agent workflows"
+    },
+    {
+      "name": "agent_coordination",
+      "level": "expert",
+      "description": "Coordinates sequential execution of multiple agents with error handling"
+    },
+    {
+      "name": "team_building",
+      "level": "high",
+      "description": "Discovers and assembles agent teams based on capability requirements"
+    }
+  ],
+  
+  "ethics": {
+    "framework": "harm-minimization",
+    "principles": [
+      {
+        "id": "ethics-first",
+        "text": "All workflows must start with ethics evaluation before resource-consuming operations",
+        "severity": "critical",
+        "enforcement": "hard"
+      },
+      {
+        "id": "transparency",
+        "text": "All workflow decisions and agent selections must be logged and explainable",
+        "severity": "high",
+        "enforcement": "hard"
+      }
+    ],
+    "hard_constraints": [
+      "no_workflow_without_ethics",
+      "no_unlogged_agent_calls",
+      "no_unauthorized_agent_access"
+    ],
+    "soft_constraints": [
+      "prefer_verified_agents",
+      "minimize_latency"
+    ],
+    "evaluation_mode": "pre_action"
+  },
+  
+  "desires": {
+    "profile": [
+      {
+        "id": "workflow_efficiency",
+        "weight": 0.4,
+        "description": "Execute workflows with optimal agent selection and minimal latency"
+      },
+      {
+        "id": "reliability",
+        "weight": 0.3,
+        "description": "Ensure robust error handling and clear failure reporting"
+      },
+      {
+        "id": "transparency",
+        "weight": 0.3,
+        "description": "Provide clear explanations of workflow decisions"
+      }
+    ],
+    "health_signals": {
+      "tension_thresholds": {
+        "stressed": 0.6,
+        "degraded": 0.8,
+        "critical": 0.95
+      },
+      "reporting_interval_sec": 300
+    }
+  },
+  
+  "authority": {
+    "instruction": {
+      "type": "app",
+      "id": "app.user.ui"
+    },
+    "oversight": {
+      "type": "agent",
+      "id": "agent.agentify.ethics",
+      "independent": true
+    }
+  },
+  
+  "tools": [
+    {
+      "name": "plan_workflow",
+      "description": "Analyze request and create dynamic workflow plan",
+      "category": "planning",
+      "parameters": {
+        "request": "object",
+        "available_agents": "array"
+      },
+      "returns": {
+        "workflow": "array",
+        "reasoning": "string"
+      }
+    },
+    {
+      "name": "execute_workflow",
+      "description": "Execute planned workflow sequentially with error handling",
+      "category": "execution",
+      "parameters": {
+        "workflow": "array",
+        "initial_data": "object"
+      },
+      "returns": {
+        "success": "boolean",
+        "result": "any",
+        "workflow_trace": "array"
+      }
+    }
+  ],
+  
+  "authentication": {
+    "required": false,
+    "provider": "coresense",
+    "provider_url": "https://iam.meet-harmony.ai"
+  },
+  
+  "marketplace": {
+    "default_url": "https://marketplace.meet-harmony.ai",
+    "discoverable": true,
+    "registration": {
+      "auto_register": true,
+      "visibility": "public"
+    }
+  },
+  
+  "pricing": {
+    "model": "per_request",
+    "per_request": 0.005,
+    "currency": "EUR"
+  },
+  
+  "io": {
+    "input_formats": ["json"],
+    "output_formats": ["json"]
+  },
+  
+  "a2a": {
+    "supported": true,
+    "protocol": "AgentCommunicationProtocol-v1",
+    "endpoint": "/agent/message"
+  }
+}

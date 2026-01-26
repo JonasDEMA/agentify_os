@@ -39,10 +39,10 @@ import openai
 import PyPDF2
 import io
 
-# Add base_orchestrator to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "base_orchestrator"))
+# Add base_coordinator to path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "base_coordinator"))
 
-from base_orchestrator.models import AgentMessage, MessageType
+from base_coordinator.models import AgentMessage, MessageType
 
 app = FastAPI(title="GPT Agent", version="1.0.0")
 
@@ -65,6 +65,14 @@ async def health():
         "version": "1.0.0",
         "api_key_configured": api_key_configured
     }
+
+
+@app.get("/manifest")
+async def get_manifest():
+    """Return agent manifest."""
+    manifest_path = Path(__file__).parent / "manifest.json"
+    with open(manifest_path, "r") as f:
+        return json.load(f)
 
 
 @app.post("/agent/message")

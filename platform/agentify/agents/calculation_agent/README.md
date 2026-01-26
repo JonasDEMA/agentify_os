@@ -85,7 +85,7 @@ curl http://localhost:8000/health
 ```json
 {
   "type": "request",
-  "sender": "agent.app.orchestrator",
+  "sender": "agent.app.coordinator",
   "to": ["agent.calculator.calculation"],
   "intent": "calculate",
   "payload": {
@@ -101,7 +101,7 @@ curl http://localhost:8000/health
 {
   "type": "inform",
   "sender": "agent.calculator.calculation",
-  "to": ["agent.app.orchestrator"],
+  "to": ["agent.app.coordinator"],
   "intent": "calculation_result",
   "payload": {
     "result": 8,

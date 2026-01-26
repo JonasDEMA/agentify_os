@@ -104,8 +104,8 @@
   "authority": {
     "instruction": {
       "type": "agent",
-      "id": "agent.agentify.hosting-orchestrator",
-      "name": "Hosting Orchestrator"
+      "id": "agent.agentify.hosting-coordinator",
+      "name": "Hosting Coordinator"
     },
     "oversight": {
       "type": "human",
