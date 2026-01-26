@@ -1,0 +1,307 @@
+{
+  "agent_id": "agent.energy.controller",
+  "name": "Energy Agent",
+  "version": "1.0.0",
+  "status": "active",
+  
+  "revisions": {
+    "current_revision": "rev-001",
+    "history": [
+      {
+        "revision_id": "rev-001",
+        "timestamp": "2026-01-26T00:00:00Z",
+        "author": {
+          "type": "human",
+          "id": "developer@meet-harmony.ai",
+          "name": "Developer"
+        },
+        "change_summary": "Initial Energy Agent implementation with EV charging control, energy metering, grid monitoring, and FCR management"
+      }
+    ]
+  },
+  
+  "overview": {
+    "description": "Controls and monitors energy infrastructure including EV charging, grid monitoring, and Frequency Containment Reserve (FCR) processes",
+    "tags": ["energy", "ev-charging", "grid", "fcr", "optimization", "renewable"],
+    "owner": {
+      "type": "organization",
+      "id": "agentify",
+      "name": "Agentify Platform"
+    },
+    "lifecycle": {
+      "stage": "production",
+      "sla": "high-availability"
+    }
+  },
+  
+  "capabilities": [
+    {
+      "name": "ev_charging_control",
+      "level": "expert",
+      "description": "Control EV charging modes, power limits, and power tracking"
+    },
+    {
+      "name": "energy_metering",
+      "level": "expert",
+      "description": "Monitor energy consumption, voltage, frequency, and grid metrics"
+    },
+    {
+      "name": "grid_monitoring",
+      "level": "high",
+      "description": "Monitor grid frequency and stability for European CESA grid"
+    },
+    {
+      "name": "fcr_management",
+      "level": "expert",
+      "description": "Manage Frequency Containment Reserve processes for grid stabilization"
+    },
+    {
+      "name": "power_optimization",
+      "level": "high",
+      "description": "Optimize power usage based on cost, renewable energy, and grid constraints"
+    }
+  ],
+  
+  "ethics": {
+    "framework": "harm-minimization",
+    "principles": [
+      {
+        "id": "energy-efficiency",
+        "text": "Minimize energy waste and optimize for renewable energy sources",
+        "severity": "high",
+        "enforcement": "soft"
+      },
+      {
+        "id": "grid-stability",
+        "text": "Never destabilize the power grid or violate grid operator requirements",
+        "severity": "critical",
+        "enforcement": "hard"
+      },
+      {
+        "id": "safety-limits",
+        "text": "Respect vehicle and infrastructure power limits at all times",
+        "severity": "critical",
+        "enforcement": "hard"
+      },
+      {
+        "id": "cost-optimization",
+        "text": "Minimize energy costs when possible without compromising safety",
+        "severity": "medium",
+        "enforcement": "soft"
+      }
+    ],
+    "hard_constraints": [
+      "no_grid_destabilization",
+      "respect_power_limits",
+      "safe_charging_only",
+      "no_unauthorized_control"
+    ],
+    "soft_constraints": [
+      "prefer_renewable_energy",
+      "minimize_costs",
+      "optimize_charging_schedule"
+    ],
+    "evaluation_mode": "pre_action"
+  },
+  
+  "desires": {
+    "profile": [
+      {
+        "id": "safety",
+        "weight": 0.4,
+        "description": "Ensure safe operation of all energy infrastructure"
+      },
+      {
+        "id": "efficiency",
+        "weight": 0.35,
+        "description": "Maximize energy efficiency and renewable usage"
+      },
+      {
+        "id": "reliability",
+        "weight": 0.25,
+        "description": "Provide reliable energy services"
+      }
+    ],
+    "health_signals": {
+      "tension_thresholds": {
+        "stressed": 0.6,
+        "degraded": 0.8,
+        "critical": 0.95
+      },
+      "reporting_interval_sec": 60,
+      "escalation_threshold": "degraded"
+    }
+  },
+  
+  "authority": {
+    "instruction": {
+      "type": "agent",
+      "id": "agent.marketplace.orchestrator",
+      "name": "Marketplace Orchestrator"
+    },
+    "oversight": {
+      "type": "human",
+      "id": "energy-ops@meet-harmony.ai",
+      "independent": true,
+      "name": "Energy Operations Team"
+    },
+    "escalation": {
+      "channels": ["energy-ops", "admin", "pagerduty"],
+      "severity_levels": ["warning", "critical", "emergency"],
+      "default_channel": "energy-ops"
+    }
+  },
+  
+  "io": {
+    "input_formats": ["json", "agent-message"],
+    "output_formats": ["json", "agent-message"],
+    "protocols": ["http", "agent-communication-protocol"]
+  },
+  
+  "tools": [
+    {
+      "name": "control_ev_charging",
+      "description": "Control EV charging mode and power limits for a loadpoint",
+      "category": "ev-control",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "loadpoint_id": {
+            "type": "integer",
+            "description": "ID of the loadpoint (EV charging station)"
+          },
+          "mode": {
+            "type": "string",
+            "enum": ["off", "now", "pv", "minpv"],
+            "description": "Charging mode: off (disabled), now (charge immediately), pv (solar only), minpv (solar + minimum grid)"
+          },
+          "max_power": {
+            "type": "number",
+            "description": "Maximum power limit in Watts (optional)"
+          },
+          "enable_tracking": {
+            "type": "boolean",
+            "description": "Enable PID power tracking loop (optional)"
+          }
+        },
+        "required": ["loadpoint_id"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "success": {"type": "boolean"},
+          "loadpoint_id": {"type": "integer"},
+          "mode": {"type": "string"},
+          "max_power": {"type": "number"}
+        }
+      }
+    },
+    {
+      "name": "monitor_energy",
+      "description": "Get real-time energy metrics from loadpoints, meters, or grid",
+      "category": "monitoring",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": ["loadpoint", "meter", "grid"],
+            "description": "Source type to monitor"
+          },
+          "source_id": {
+            "type": "integer",
+            "description": "ID of the source (required for loadpoint and meter)"
+          }
+        },
+        "required": ["source"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "source": {"type": "string"},
+          "metrics": {"type": "object"},
+          "timestamp": {"type": "string"}
+        }
+      }
+    },
+    {
+      "name": "manage_fcr",
+      "description": "Manage Frequency Containment Reserve module and process",
+      "category": "fcr",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": ["register", "unregister", "initialize", "get_status", "set_output"],
+            "description": "FCR action to perform"
+          },
+          "module_id": {
+            "type": "string",
+            "description": "FCR module identifier"
+          },
+          "power_limit": {
+            "type": "number",
+            "description": "Power limit for initialization (required for initialize action)"
+          },
+          "power": {
+            "type": "number",
+            "description": "Output power in Watts (required for set_output action)"
+          }
+        },
+        "required": ["action", "module_id"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "success": {"type": "boolean"},
+          "module_id": {"type": "string"},
+          "status": {"type": "object"}
+        }
+      }
+    },
+    {
+      "name": "optimize_power",
+      "description": "Optimize power usage based on objectives and constraints",
+      "category": "optimization",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "loadpoint_id": {
+            "type": "integer",
+            "description": "ID of the loadpoint to optimize"
+          },
+          "objective": {
+            "type": "string",
+            "enum": ["minimize_cost", "maximize_renewable", "balance_grid", "fast_charge"],
+            "description": "Optimization objective"
+          },
+          "constraints": {
+            "type": "object",
+            "description": "Additional constraints (max_cost, min_renewable_percentage, etc.)"
+          }
+        },
+        "required": ["loadpoint_id", "objective"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "success": {"type": "boolean"},
+          "loadpoint_id": {"type": "integer"},
+          "optimized_mode": {"type": "string"},
+          "optimized_power": {"type": "number"},
+          "estimated_savings": {"type": "number"}
+        }
+      }
+    }
+  ],
+  
+  "authentication": {
+    "required": true,
+    "provider": "coresense",
+    "provider_url": "https://iam.meet-harmony.ai",
+    "roles_required": ["energy-user"],
+    "scopes_required": ["energy:read", "energy:write"]
+  }
+}
+

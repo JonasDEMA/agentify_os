@@ -1,0 +1,222 @@
+{
+  "agent_id": "agent.agentify.monitoring",
+  "name": "Monitoring Agent",
+  "version": "1.0.0",
+  "status": "active",
+  
+  "revisions": {
+    "current_revision": "rev-001",
+    "history": [
+      {
+        "revision_id": "rev-001",
+        "timestamp": "2026-01-22T00:00:00Z",
+        "author": {
+          "type": "human",
+          "id": "developer@meet-harmony.ai",
+          "name": "Developer"
+        },
+        "change_summary": "Initial Monitoring Agent implementation with metrics collection, health checks, and alerting"
+      }
+    ]
+  },
+  
+  "overview": {
+    "description": "Provides comprehensive monitoring, metrics collection, health checks, and alerting for cloud and edge infrastructure",
+    "tags": ["infrastructure", "monitoring", "observability", "metrics", "alerting"],
+    "owner": {
+      "type": "organization",
+      "id": "agentify",
+      "name": "Agentify Platform"
+    },
+    "lifecycle": {
+      "stage": "production",
+      "sla": "high-availability"
+    }
+  },
+  
+  "capabilities": [
+    {
+      "name": "metrics_collection",
+      "level": "expert",
+      "description": "Collect metrics from containers, devices, and agents"
+    },
+    {
+      "name": "health_monitoring",
+      "level": "expert",
+      "description": "Monitor health status of infrastructure components"
+    },
+    {
+      "name": "alerting",
+      "level": "high",
+      "description": "Generate alerts based on thresholds and anomalies"
+    },
+    {
+      "name": "performance_analytics",
+      "level": "high",
+      "description": "Analyze performance trends and patterns"
+    },
+    {
+      "name": "resource_tracking",
+      "level": "expert",
+      "description": "Track resource usage (CPU, memory, disk, network)"
+    }
+  ],
+  
+  "ethics": {
+    "framework": "harm-minimization",
+    "principles": [
+      {
+        "id": "data-accuracy",
+        "text": "Ensure accurate and reliable metrics collection",
+        "severity": "critical",
+        "enforcement": "hard"
+      },
+      {
+        "id": "timely-alerting",
+        "text": "Alert on critical issues without delay",
+        "severity": "critical",
+        "enforcement": "hard"
+      },
+      {
+        "id": "privacy-protection",
+        "text": "Protect sensitive information in metrics",
+        "severity": "high",
+        "enforcement": "hard"
+      }
+    ],
+    "hard_constraints": [
+      "no_false_negatives_critical_alerts",
+      "accurate_metrics_collection",
+      "customer_isolation",
+      "timely_alert_delivery"
+    ],
+    "soft_constraints": [
+      "minimize_false_positives",
+      "optimize_collection_frequency"
+    ],
+    "evaluation_mode": "pre_action"
+  },
+  
+  "desires": {
+    "profile": [
+      {
+        "id": "reliability",
+        "weight": 0.4,
+        "description": "Ensure reliable metrics collection and alerting"
+      },
+      {
+        "id": "accuracy",
+        "weight": 0.35,
+        "description": "Provide accurate metrics and health status"
+      },
+      {
+        "id": "timeliness",
+        "weight": 0.25,
+        "description": "Deliver alerts and metrics in real-time"
+      }
+    ],
+    "health_signals": {
+      "tension_thresholds": {
+        "stressed": 0.6,
+        "degraded": 0.8,
+        "critical": 0.95
+      },
+      "reporting_interval_sec": 60,
+      "escalation_threshold": "degraded"
+    }
+  },
+  
+  "authority": {
+    "instruction": {
+      "type": "agent",
+      "id": "agent.marketplace.orchestrator",
+      "name": "Marketplace Orchestrator"
+    },
+    "oversight": {
+      "type": "human",
+      "id": "ops@meet-harmony.ai",
+      "independent": true,
+      "name": "Operations Team"
+    },
+    "escalation": {
+      "channels": ["ops-team", "admin", "pagerduty"],
+      "severity_levels": ["warning", "critical", "emergency"],
+      "default_channel": "ops-team"
+    }
+  },
+  
+  "io": {
+    "input_formats": ["json", "agent-message", "prometheus"],
+    "output_formats": ["json", "agent-message", "prometheus", "grafana"],
+    "protocols": ["http", "agent-communication-protocol", "websocket"]
+  },
+  
+  "tools": [
+    {
+      "name": "collect_metrics",
+      "description": "Collect metrics from specified source",
+      "category": "metrics-collection",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "source_type": {"type": "string", "enum": ["agent", "container", "device"]},
+          "source_id": {"type": "string", "description": "Source identifier"},
+          "metrics": {"type": "array", "items": {"type": "string"}, "description": "Specific metrics to collect"}
+        },
+        "required": ["source_type", "source_id"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "metrics": {"type": "array"},
+          "timestamp": {"type": "string"}
+        }
+      }
+    },
+    {
+      "name": "check_health",
+      "description": "Check health status of source",
+      "category": "health-monitoring",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "source_type": {"type": "string", "enum": ["agent", "container", "device"]},
+          "source_id": {"type": "string"}
+        },
+        "required": ["source_type", "source_id"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "status": {"type": "string", "enum": ["healthy", "degraded", "unhealthy"]},
+          "checks": {"type": "array"},
+          "timestamp": {"type": "string"}
+        }
+      }
+    },
+    {
+      "name": "create_alert",
+      "description": "Create alert rule",
+      "category": "alerting",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string"},
+          "condition": {"type": "object"},
+          "severity": {"type": "string", "enum": ["info", "warning", "critical", "emergency"]},
+          "channels": {"type": "array", "items": {"type": "string"}}
+        },
+        "required": ["name", "condition", "severity"]
+      }
+    }
+  ],
+  
+  "authentication": {
+    "required": true,
+    "provider": "coresense",
+    "provider_url": "https://iam.meet-harmony.ai",
+    "roles_required": ["monitoring-user"],
+    "scopes_required": ["metrics:read", "alerts:write"]
+  }
+}
+

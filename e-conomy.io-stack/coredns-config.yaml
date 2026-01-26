@@ -1,0 +1,49 @@
+apiVersion: v1
+data:
+  Corefile: |
+    .:53 {
+        errors
+        health
+        ready
+        kubernetes cluster.local in-addr.arpa ip6.arpa {
+          pods insecure
+          fallthrough in-addr.arpa ip6.arpa
+        }
+        hosts /etc/coredns/NodeHosts {
+          ttl 60
+          reload 15s
+          fallthrough
+        }
+        prometheus :9153
+        forward . 8.8.8.8 1.1.1.1
+        cache 30
+        loop
+        reload
+        loadbalance
+        import /etc/coredns/custom/*.override
+    }
+    import /etc/coredns/custom/*.server
+  NodeHosts: |
+    10.10.0.3 xsd-leudesdorff xsd
+    10.10.0.5 fzi xsd
+    10.10.0.6 xsd-austria xsd
+    10.10.0.7 installtest25082025 RevPi130261
+    10.10.0.8 xsdv1-jonas-seckenheim xsd
+    10.10.0.9 fzi-old xsd
+    10.10.0.211 revpi130261 RevPi130261
+    10.132.0.3 e-conomy-server
+kind: ConfigMap
+metadata:
+  annotations:
+    objectset.rio.cattle.io/applied: H4sIAAAAAAAA/4yQwWrzMBCEX0Xs2fEf20nsX9BDybH02lMva2kdq1Z2g6SkBJN3L8IUCiVtbyNGOzvfzoAn90IhOmHQcKmgAIsJQc+wl0CD8wQaSr1t1PzKSilFIUiIix4JfRoXHQjtdZHTuafAlCgq488xUSi9wK2AybEFDXvhwR2e8QQFHCnh50ZkloTJCcf8lP6NTIqUyuCkNJiSp9LJP5czoLjryztTWB0uE2iYmvjFuVSFenJsHx6tFf41gvGY6Y0Eshz/9D2e0OSZfIJVvMZExwzusSf/I9SIcQQNvaG6a+r/XVdV7abBddPtsN9W66Eedi0N7aberM22zaHf6t0tcPsIAAD//8Ix+PfoAQAA
+    objectset.rio.cattle.io/id: ""
+    objectset.rio.cattle.io/owner-gvk: k3s.cattle.io/v1, Kind=Addon
+    objectset.rio.cattle.io/owner-name: coredns
+    objectset.rio.cattle.io/owner-namespace: kube-system
+  creationTimestamp: "2025-03-26T19:29:25Z"
+  labels:
+    objectset.rio.cattle.io/hash: bce283298811743a0386ab510f2f67ef74240c57
+  name: coredns
+  namespace: kube-system
+  resourceVersion: "9510202"
+  uid: 432ba98e-387a-4617-a952-ea77e523abe4

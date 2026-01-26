@@ -1,0 +1,42 @@
+{
+  "name": "@agentify/remote-access",
+  "version": "1.0.0",
+  "description": "Remote Access Agent - Provides secure SSH/VNC access to edge devices",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "lint": "eslint src --ext .ts",
+    "test": "jest"
+  },
+  "keywords": [
+    "agentify",
+    "remote-access",
+    "ssh",
+    "vnc",
+    "tailscale",
+    "infrastructure"
+  ],
+  "author": "Agentify Platform",
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "axios": "^1.6.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "uuid": "^9.0.1",
+    "winston": "^3.11.0",
+    "node-ssh": "^13.1.0",
+    "ssh2": "^1.15.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.10.6",
+    "@types/uuid": "^9.0.7",
+    "@types/ssh2": "^1.15.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  }
+}
+
