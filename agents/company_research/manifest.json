@@ -9,6 +9,7 @@
   "name": "Company Research Agent",
   "version": "1.0.0",
   "status": "active",
+  "repository": "https://github.com/JonasDEMA/agentify_os.git",
   
   "revisions": {
     "current_revision": "rev-001",
