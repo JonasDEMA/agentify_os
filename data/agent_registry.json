@@ -1,0 +1,37 @@
+{
+  "agents": [
+    {
+      "id": "desires-orchestrator",
+      "name": "Bed\u00fcrfnis-Orchestrator",
+      "description": "Hauptverantwortlich f\u00fcr die App-Intelligenz und Kommunikation rund um pers\u00f6nliche, Team- und Organisationsbed\u00fcrfnisse. Koordiniert die systemische Perspektive zwischen Individual-, Team- und Organisationsebene.",
+      "capabilities": [
+        {
+          "name": "unknown",
+          "description": "Hauptverantwortlich f\u00fcr die App-Intelligenz und Kommunikation rund um pers\u00f6nliche, Team- und Organisationsbed\u00fcrfnisse. Koordiniert die systemische Perspektive zwischen Individual-, Team- und Organisationsebene.",
+          "parameters": {},
+          "version": "1.0.0"
+        }
+      ],
+      "endpoint": "agent-gateway?agent=desires-orchestrator",
+      "status": "available",
+      "metadata": {}
+    },
+    {
+      "id": "sms-agent",
+      "name": "SMS Agent",
+      "description": "Sends SMS messages via Vonage API",
+      "capabilities": [
+        {
+          "name": "sms",
+          "description": "Sends SMS messages via Vonage API",
+          "parameters": {},
+          "version": "1.0.0"
+        }
+      ],
+      "endpoint": "agent-gateway?agent=sms-agent",
+      "status": "available",
+      "metadata": {}
+    }
+  ],
+  "updated_at": "2025-11-05T09:39:08.984242"
+}

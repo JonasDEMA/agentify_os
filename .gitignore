@@ -1,7 +1,13 @@
+# Environment variables
+.env
+*.env
+!.env.example
+
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
+*.so
 .Python
 build/
 develop-eggs/
@@ -15,179 +21,53 @@ parts/
 sdist/
 var/
 wheels/
-share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-MANIFEST
 
-# Virtual Environment
+# Virtual environments
 venv/
-env/
 ENV/
-env.bak/
-venv.bak/
-.venv/
+env/
 
-# Poetry
-# poetry.lock - COMMENTED OUT: Railway needs this file!
-
-# VS Code
+# IDEs
 .vscode/
-*.code-workspace
+.idea/
+*.swp
+*.swo
+*~
 
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# pytest
-.pytest_cache/
-.coverage
-htmlcov/
-coverage.xml
-*.cover
-.hypothesis/
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# ruff
-.ruff_cache/
-
-# Environment variables
-.env
-.env.local
-.env.*.local
+# OS
+.DS_Store
+Thumbs.db
 
 # Database
 *.db
 *.sqlite
 *.sqlite3
 
-# Data
-data/
-!data/.gitkeep
-data/screenshots/
-!data/screenshots/.gitkeep
-
 # Logs
 *.log
-logs/
 
-# Docker
-docker-compose.override.yml
+# Coverage
+.coverage
+htmlcov/
 
-# Temporary files
-*.tmp
-*.temp
-*.swp
-*.swo
-
-# Playwright
-playwright/.cache/
-test-results/
-playwright-report/
-
-# OpenTelemetry
-.otel/
-
-# Secrets
-secrets/
-*.pem
-*.key
-*.crt
-
-# CPA Server
-.agent_credentials.json
-.admin_token.txt
-uploads/
-cpa_server.db
-
-# Node.js
+# Node
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-.pnpm-store/
 
-# TypeScript
-*.tsbuildinfo
+# Build artifacts
 dist/
-dist-ssr/
-*.local
+build/
 
-# Build outputs
-out/
-.next/
-.nuxt/
-.cache/
-.parcel-cache/
-.turbo/
+# Credentials
+.agent_credentials.json
+.admin_token.txt
 
-# Package manager lock files (keep these for reproducible builds)
-# package-lock.json - Keep for npm
-# yarn.lock - Keep for yarn
-# pnpm-lock.yaml - Keep for pnpm
-
-# Go
-*.exe
-*.exe~
-*.dll
-*.dylib
-*.test
-*.out
-go.work
-vendor/
-
-# Rust
-target/
-Cargo.lock
-**/*.rs.bk
-*.pdb
-
-# Java
-*.class
-*.jar
-*.war
-*.ear
-.gradle/
-gradle-app.setting
-!gradle-wrapper.jar
-.gradletasknamecache
-
-# IDE - JetBrains
-.idea/
-*.iml
-*.iws
-*.ipr
-out/
-
-# IDE - Eclipse
-.classpath
-.project
-.settings/
-bin/
-
-# macOS
-.DS_Store
-.AppleDouble
-.LSOverride
-._*
-
-# Windows
-Thumbs.db
-Thumbs.db:encryptable
-ehthumbs.db
-ehthumbs_vista.db
-[Dd]esktop.ini
-$RECYCLE.BIN/
-
-# Linux
-*~
-.fuse_hidden*
-.directory
-.Trash-*
+# Screenshots
+data/screenshots/*.png
+!data/screenshots/.gitkeep
 

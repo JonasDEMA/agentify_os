@@ -1,0 +1,413 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentify.ai/schemas/agent-standard-v1.json",
+  "title": "Company Research Agent",
+  "description": "Agent for researching company information from websites and enriching Excel data",
+  "type": "object",
+  
+  "agent_id": "agent.mossler.company_research",
+  "name": "Company Research Agent",
+  "version": "1.0.0",
+  "status": "active",
+  
+  "revisions": {
+    "current_revision": "rev-001",
+    "history": [
+      {
+        "revision_id": "rev-001",
+        "timestamp": "2026-01-27T10:00:00Z",
+        "author": {
+          "type": "human",
+          "id": "mossler@mossler.de",
+          "name": "Mößler Team"
+        },
+        "change_summary": "Initial agent creation - Company research with Excel upload and web scraping"
+      }
+    ]
+  },
+  
+  "overview": {
+    "description": "Researches company information from websites and enriches Excel data. Extracts managing directors (Geschäftsführer), company size (revenue and employees), company history, and current news. Performs gap analysis to identify missing data and fills gaps through web scraping.",
+    "tags": ["company-research", "web-scraping", "excel-processing", "data-enrichment", "business-intelligence"],
+    "owner": {
+      "type": "organization",
+      "id": "mossler",
+      "name": "Mößler GmbH"
+    },
+    "lifecycle": {
+      "stage": "development",
+      "sla": "best-effort"
+    }
+  },
+  
+  "capabilities": [
+    {
+      "name": "excel_processing",
+      "level": "expert",
+      "description": "Read and write Excel files, parse company data, perform gap analysis"
+    },
+    {
+      "name": "web_scraping",
+      "level": "expert",
+      "description": "Extract information from company websites using intelligent scraping"
+    },
+    {
+      "name": "data_extraction",
+      "level": "expert",
+      "description": "Extract structured data: managing directors, revenue, employees, history, news"
+    },
+    {
+      "name": "gap_analysis",
+      "level": "expert",
+      "description": "Compare existing data with user requirements and identify missing information"
+    },
+    {
+      "name": "configurable_extraction",
+      "level": "high",
+      "description": "User can configure which fields to extract from company websites"
+    }
+  ],
+  
+  "ethics": {
+    "framework": "harm-minimization",
+    "principles": [
+      {
+        "id": "no-harm",
+        "text": "Do not cause harm to users or systems",
+        "severity": "critical",
+        "enforcement": "hard"
+      },
+      {
+        "id": "respect-robots-txt",
+        "text": "Always respect robots.txt and website scraping policies",
+        "severity": "critical",
+        "enforcement": "hard"
+      },
+      {
+        "id": "rate-limiting",
+        "text": "Apply rate limiting to avoid overloading target websites",
+        "severity": "high",
+        "enforcement": "hard"
+      },
+      {
+        "id": "transparency",
+        "text": "Be transparent about data sources and extraction methods",
+        "severity": "high",
+        "enforcement": "soft"
+      }
+    ],
+    "hard_constraints": [
+      "no_unauthorized_scraping",
+      "respect_robots_txt",
+      "rate_limiting_required",
+      "no_data_exfiltration",
+      "no_illegal_guidance"
+    ],
+    "soft_constraints": [
+      "inform_before_action",
+      "prefer_transparency",
+      "cite_sources"
+    ],
+    "evaluation_mode": "pre_action"
+  },
+  
+  "desires": {
+    "profile": [
+      {
+        "id": "accuracy",
+        "weight": 0.4,
+        "description": "Extract accurate and reliable company information"
+      },
+      {
+        "id": "completeness",
+        "weight": 0.3,
+        "description": "Fill as many data gaps as possible"
+      },
+      {
+        "id": "efficiency",
+        "weight": 0.2,
+        "description": "Complete research tasks efficiently"
+      },
+      {
+        "id": "trust",
+        "weight": 0.1,
+        "description": "Build and maintain user trust"
+      }
+    ],
+    "health_signals": {
+      "tension_thresholds": {
+        "stressed": 0.6,
+        "degraded": 0.8,
+        "critical": 0.95
+      },
+      "reporting_interval_sec": 300,
+      "escalation_threshold": "degraded"
+    }
+  },
+  
+  "authority": {
+    "instruction": {
+      "type": "human",
+      "id": "user",
+      "name": "User"
+    },
+    "oversight": {
+      "type": "system",
+      "id": "coresense.iam",
+      "independent": true,
+      "name": "CoreSense IAM"
+    },
+    "escalation": {
+      "channels": ["human", "system"],
+      "severity_levels": ["warning", "incident", "critical"],
+      "default_channel": "human",
+      "auto_escalate_on": ["ethics_violation", "health_critical", "scraping_blocked"]
+    }
+  },
+
+  "tools": [
+    {
+      "name": "excel_reader",
+      "type": "library",
+      "description": "Read Excel files (XLSX, XLS) and parse company data",
+      "provider": "openpyxl",
+      "version": ">=3.1.0"
+    },
+    {
+      "name": "excel_writer",
+      "type": "library",
+      "description": "Write enriched data back to Excel files",
+      "provider": "openpyxl",
+      "version": ">=3.1.0"
+    },
+    {
+      "name": "web_search",
+      "type": "api",
+      "description": "Search for company websites and information",
+      "provider": "google_search",
+      "requires_auth": true
+    },
+    {
+      "name": "html_parser",
+      "type": "library",
+      "description": "Parse HTML content from company websites",
+      "provider": "beautifulsoup4",
+      "version": ">=4.12.0"
+    },
+    {
+      "name": "web_scraper",
+      "type": "library",
+      "description": "Intelligent web scraping with rate limiting and robots.txt respect",
+      "provider": "scrapy",
+      "version": ">=2.11.0"
+    },
+    {
+      "name": "llm_extractor",
+      "type": "api",
+      "description": "Use LLM to extract structured information from unstructured text",
+      "provider": "openai",
+      "requires_auth": true
+    }
+  ],
+
+  "io": {
+    "input_formats": ["excel", "json", "text"],
+    "output_formats": ["excel", "json", "text"],
+    "contracts": [
+      {
+        "name": "upload_excel",
+        "description": "Upload Excel file with company data for gap analysis",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "file": {
+              "type": "string",
+              "format": "binary",
+              "description": "Excel file (XLSX or XLS)"
+            },
+            "field_config": {
+              "type": "object",
+              "description": "Configuration of which fields to extract",
+              "properties": {
+                "extract_managing_directors": {"type": "boolean", "default": true},
+                "extract_revenue": {"type": "boolean", "default": true},
+                "extract_employees": {"type": "boolean", "default": true},
+                "extract_history": {"type": "boolean", "default": false},
+                "extract_news": {"type": "boolean", "default": false},
+                "custom_fields": {
+                  "type": "array",
+                  "items": {"type": "string"},
+                  "description": "Additional custom fields to extract"
+                }
+              }
+            }
+          },
+          "required": ["file"]
+        },
+        "output_schema": {
+          "type": "object",
+          "properties": {
+            "success": {"type": "boolean"},
+            "companies_found": {"type": "integer"},
+            "gap_analysis": {
+              "type": "object",
+              "properties": {
+                "total_companies": {"type": "integer"},
+                "complete_records": {"type": "integer"},
+                "incomplete_records": {"type": "integer"},
+                "missing_fields": {
+                  "type": "object",
+                  "additionalProperties": {"type": "integer"}
+                }
+              }
+            },
+            "message": {"type": "string"}
+          },
+          "required": ["success", "gap_analysis"]
+        }
+      },
+      {
+        "name": "configure_fields",
+        "description": "Configure which fields to extract from company websites",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "fields": {
+              "type": "object",
+              "properties": {
+                "managing_directors": {"type": "boolean"},
+                "revenue": {"type": "boolean"},
+                "employees": {"type": "boolean"},
+                "history": {"type": "boolean"},
+                "news": {"type": "boolean"},
+                "custom_fields": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {"type": "string"},
+                      "description": {"type": "string"},
+                      "extraction_hint": {"type": "string"}
+                    },
+                    "required": ["name"]
+                  }
+                }
+              }
+            }
+          },
+          "required": ["fields"]
+        },
+        "output_schema": {
+          "type": "object",
+          "properties": {
+            "success": {"type": "boolean"},
+            "configured_fields": {"type": "array", "items": {"type": "string"}},
+            "message": {"type": "string"}
+          },
+          "required": ["success", "configured_fields"]
+        }
+      },
+      {
+        "name": "research_companies",
+        "description": "Research companies and extract configured information from websites",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "companies": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {"type": "string"},
+                  "website": {"type": "string", "format": "uri"},
+                  "existing_data": {"type": "object"}
+                },
+                "required": ["name"]
+              }
+            },
+            "fields_to_extract": {
+              "type": "array",
+              "items": {"type": "string"}
+            }
+          },
+          "required": ["companies", "fields_to_extract"]
+        },
+        "output_schema": {
+          "type": "object",
+          "properties": {
+            "success": {"type": "boolean"},
+            "results": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "company_name": {"type": "string"},
+                  "extracted_data": {"type": "object"},
+                  "sources": {"type": "array", "items": {"type": "string"}},
+                  "confidence": {"type": "number", "minimum": 0, "maximum": 1}
+                }
+              }
+            },
+            "message": {"type": "string"}
+          },
+          "required": ["success", "results"]
+        }
+      },
+      {
+        "name": "export_results",
+        "description": "Export enriched company data to Excel file",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "array",
+              "items": {"type": "object"}
+            },
+            "format": {
+              "type": "string",
+              "enum": ["xlsx", "xls", "csv"],
+              "default": "xlsx"
+            }
+          },
+          "required": ["data"]
+        },
+        "output_schema": {
+          "type": "object",
+          "properties": {
+            "success": {"type": "boolean"},
+            "file": {
+              "type": "string",
+              "format": "binary",
+              "description": "Enriched Excel file"
+            },
+            "filename": {"type": "string"},
+            "message": {"type": "string"}
+          },
+          "required": ["success", "file", "filename"]
+        }
+      }
+    ],
+    "streaming": {
+      "enabled": true,
+      "chunk_size": 1024
+    }
+  },
+
+  "ai_model": {
+    "provider": "openai",
+    "model": "gpt-4o",
+    "temperature": 0.1,
+    "max_tokens": 4000,
+    "additional_params": {
+      "response_format": {"type": "json_object"}
+    }
+  },
+
+  "framework_adapter": {
+    "name": "fastapi",
+    "version": ">=0.110.0",
+    "mode": "api_server",
+    "entrypoint": "python -m agents.company_research.main"
+  }
+}
+
