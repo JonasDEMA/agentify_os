@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     
     # Server Configuration
     host: str = "0.0.0.0"
-    port: int = 8001
+    port: int = int(os.getenv("PORT", "8001"))
     
     # OpenAI Configuration
     openai_api_key: Optional[str] = None

@@ -4,8 +4,13 @@
 
 import axios from 'axios'
 
+// Use environment variable for production, fallback to proxy for development
+const API_BASE_URL = import.meta.env.VITE_API_URL
+  ? import.meta.env.VITE_API_URL
+  : '/api'
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -147,6 +152,28 @@ export const clearConsoleLogs = async (): Promise<{
   message: string
 }> => {
   const response = await api.post('/console/clear')
+  return response.data
+}
+
+/**
+ * Get all active (running) jobs
+ */
+export const getActiveJobs = async (): Promise<{
+  success: boolean
+  jobs: any[]
+}> => {
+  const response = await api.get('/company/active_jobs')
+  return response.data
+}
+
+/**
+ * Abort a running research job
+ */
+export const abortResearch = async (jobId: string): Promise<{
+  success: boolean
+  message: string
+}> => {
+  const response = await api.post(`/company/research/${jobId}/abort`)
   return response.data
 }
 

@@ -7,6 +7,8 @@ import asyncio
 import tempfile
 import shutil
 import logging
+from logging.handlers import TimedRotatingFileHandler
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any, Optional, List
 from fastapi import FastAPI, UploadFile, File, HTTPException
@@ -20,13 +22,37 @@ from processors.excel_reader import ExcelReader
 from processors.gap_analyzer import GapAnalyzer
 from scrapers.company_scraper import CompanyScraper
 from scrapers.llm_extractor import LLMExtractor
+from job_state import JobStateManager
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+# Configure logging with daily rotation
+log_dir = Path("logs")
+log_dir.mkdir(exist_ok=True)
+
+# Create logger
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+# Console handler
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)
+console_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+console_handler.setFormatter(console_formatter)
+
+# File handler with daily rotation
+file_handler = TimedRotatingFileHandler(
+    filename=log_dir / "company_research.log",
+    when="midnight",
+    interval=1,
+    backupCount=30,  # Keep 30 days of logs
+    encoding="utf-8"
+)
+file_handler.setLevel(logging.INFO)
+file_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+file_handler.setFormatter(file_formatter)
+
+# Add handlers
+logger.addHandler(console_handler)
+logger.addHandler(file_handler)
 
 
 # Initialize FastAPI app
@@ -37,13 +63,18 @@ app = FastAPI(
 )
 
 # Add CORS middleware
+# Get CORS origins from environment variable or use defaults for local development
+cors_origins = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:3001,http://localhost:5173").split(",")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173"],  # Vite dev servers
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Initialize job state manager
+job_state_manager = JobStateManager()
 
 
 # Request/Response Models
@@ -262,9 +293,6 @@ async def configure_fields(config: FieldConfig):
     }
 
 
-# Research job storage (in production, use Redis or database)
-research_jobs: Dict[str, Dict[str, Any]] = {}
-
 # Console logs storage (in production, use Redis or database)
 console_logs: List[Dict[str, Any]] = []
 MAX_CONSOLE_LOGS = 1000  # Keep last 1000 logs
@@ -277,7 +305,7 @@ class ConsoleLogHandler(logging.Handler):
         global console_logs
 
         log_entry = {
-            "timestamp": datetime.datetime.now().isoformat(),
+            "timestamp": datetime.now().isoformat(),
             "level": record.levelname,
             "message": self.format(record)
         }
@@ -296,46 +324,87 @@ logger.addHandler(console_handler)
 
 
 async def research_background_task(job_id: str, companies: List[Dict[str, Any]], fields: List[str]):
-    """Background task to perform research on companies"""
-    import datetime
+    """Background task to perform research on companies with abort handling and rate limiting"""
+    try:
+        logger.info(f"🚀 Starting background research for job {job_id}")
+        logger.info(f"📊 Total companies to process: {len(companies)}")
+        logger.info(f"🔧 Fields to extract: {fields}")
 
-    logger.info(f"🚀 Starting background research for job {job_id}")
+        scraper = CompanyScraper()
+        extractor = LLMExtractor()
 
-    job = research_jobs[job_id]
-    scraper = CompanyScraper()
-    extractor = LLMExtractor()
-
-    total = len(companies)
+        total = len(companies)
+    except Exception as e:
+        logger.error(f"❌ Fatal error initializing research task: {e}")
+        logger.exception(e)
+        try:
+            job = job_state_manager.get_job(job_id)
+            if job:
+                job['status'] = 'failed'
+                job['activity_log'].append({
+                    'timestamp': datetime.now().isoformat(),
+                    'message': f'❌ Fatal error: {str(e)}'
+                })
+                job_state_manager.save_job(job_id, job)
+        except Exception as save_error:
+            logger.error(f"❌ Failed to save error state: {save_error}")
+        return
 
     for idx, company in enumerate(companies):
         try:
+            # Check if abort was requested
+            job = job_state_manager.get_job(job_id)
+            if not job:
+                logger.error(f"❌ Job {job_id} not found in database!")
+                return
+
+            if job.get('abort_requested'):
+                logger.warning(f"🛑 Job {job_id} aborted by user at {idx}/{total}")
+                job['status'] = 'aborted'
+                job['activity_log'].append({
+                    'timestamp': datetime.now().isoformat(),
+                    'message': f'🛑 Research aborted by user at {idx}/{total}'
+                })
+                job_state_manager.save_job(job_id, job)
+                return
             company_name = company.get('company_name', 'Unknown')
             website = company.get('website', '')
 
             logger.info(f"📊 Processing {idx + 1}/{total}: {company_name}")
 
-            # Update activity log
+            # Update current file and activity log
+            job['current_file'] = company_name
             job["activity_log"].append({
-                "timestamp": datetime.datetime.now().isoformat(),
+                "timestamp": datetime.now().isoformat(),
                 "message": f"Researching {company_name}..."
             })
+            job_state_manager.save_job(job_id, job)
 
             if not website:
                 logger.warning(f"⚠️  No website for {company_name}")
                 job["activity_log"].append({
-                    "timestamp": datetime.datetime.now().isoformat(),
+                    "timestamp": datetime.now().isoformat(),
                     "message": f"⚠️  Skipped {company_name} - no website"
                 })
                 job["failed"] += 1
+                job_state_manager.save_job(job_id, job)
                 continue
 
-            # Scrape website
-            scrape_result = await scraper.scrape_company(company_name, website, fields)
+            # Scrape website with timeout protection
+            scrape_result = None
+            try:
+                scrape_result = await scraper.scrape_company(company_name, website, fields)
+            except Exception as scrape_error:
+                logger.error(f"❌ Scraping exception for {company_name}: {scrape_error}")
+                scrape_result = {
+                    "status": "failed",
+                    "error": f"Scraping exception: {str(scrape_error)}"
+                }
 
-            if scrape_result["status"] == "failed":
+            if not scrape_result or scrape_result["status"] == "failed":
                 logger.error(f"❌ Failed to scrape {company_name}")
                 job["activity_log"].append({
-                    "timestamp": datetime.datetime.now().isoformat(),
+                    "timestamp": datetime.now().isoformat(),
                     "message": f"❌ Failed to scrape {company_name}"
                 })
                 job["failed"] += 1
@@ -344,18 +413,30 @@ async def research_background_task(job_id: str, companies: List[Dict[str, Any]],
                 job["results"].append({
                     **company,
                     "research_status": "failed",
-                    "error": scrape_result.get("error", "Unknown error")
+                    "error": scrape_result.get("error", "Unknown error") if scrape_result else "Scraping failed"
                 })
+                job_state_manager.save_job(job_id, job)
                 continue
 
-            # Extract data using LLM
+            # Extract data using LLM with error handling
             logger.info(f"🤖 Extracting data for {company_name} using LLM")
             collected_text = scrape_result.get("collected_text", "")
 
             if collected_text:
-                extraction_result = extractor.extract_company_info(collected_text, fields)
-                extracted_data = extraction_result.get("data", {})
-                confidence = extraction_result.get("confidence", {})
+                try:
+                    extraction_result = extractor.extract_company_info(collected_text, fields)
+                    extracted_data = extraction_result.get("data", {})
+                    confidence = extraction_result.get("confidence", {})
+                except Exception as extract_error:
+                    logger.error(f"❌ LLM extraction error for {company_name}: {extract_error}")
+                    job["failed"] += 1
+                    job["results"].append({
+                        **company,
+                        "research_status": "failed",
+                        "error": f"LLM extraction failed: {str(extract_error)}"
+                    })
+                    job_state_manager.save_job(job_id, job)
+                    continue
 
                 logger.info(f"✅ Extracted data for {company_name}: {list(extracted_data.keys())}")
 
@@ -372,7 +453,7 @@ async def research_background_task(job_id: str, companies: List[Dict[str, Any]],
                 job["completed"] += 1
 
                 job["activity_log"].append({
-                    "timestamp": datetime.datetime.now().isoformat(),
+                    "timestamp": datetime.now().isoformat(),
                     "message": f"✅ Completed {company_name}"
                 })
             else:
@@ -384,40 +465,61 @@ async def research_background_task(job_id: str, companies: List[Dict[str, Any]],
                     "error": "No text collected from website"
                 })
 
-            # Update progress
+            # Update progress and save state
             job["progress"] = int((idx + 1) / total * 100)
+            job_state_manager.save_job(job_id, job)
 
         except Exception as e:
             logger.error(f"❌ Error processing {company.get('company_name', 'Unknown')}: {e}")
             logger.exception(e)
 
-            job["failed"] += 1
-            job["activity_log"].append({
-                "timestamp": datetime.datetime.now().isoformat(),
-                "message": f"❌ Error: {company.get('company_name', 'Unknown')} - {str(e)}"
-            })
+            try:
+                job = job_state_manager.get_job(job_id)
+                if job:
+                    job["failed"] += 1
+                    job["activity_log"].append({
+                        "timestamp": datetime.now().isoformat(),
+                        "message": f"❌ Error: {company.get('company_name', 'Unknown')} - {str(e)}"
+                    })
 
-            job["results"].append({
-                **company,
-                "research_status": "error",
-                "error": str(e)
-            })
+                    job["results"].append({
+                        **company,
+                        "research_status": "error",
+                        "error": str(e)
+                    })
+                    job_state_manager.save_job(job_id, job)
+            except Exception as save_error:
+                logger.error(f"❌ Failed to save error state: {save_error}")
+
+        # Sleep to keep server responsive and avoid overwhelming APIs
+        try:
+            await asyncio.sleep(0.5)  # 500ms pause between companies
+        except Exception as sleep_error:
+            logger.error(f"❌ Sleep error: {sleep_error}")
 
     # Mark job as complete
-    job["status"] = "completed"
-    job["progress"] = 100
-    job["activity_log"].append({
-        "timestamp": datetime.datetime.now().isoformat(),
-        "message": f"🎉 Research completed! {job['completed']} successful, {job['failed']} failed"
-    })
+    try:
+        job = job_state_manager.get_job(job_id)
+        if job:
+            job["status"] = "completed"
+            job["progress"] = 100
+            job["current_file"] = None
+            job["activity_log"].append({
+                "timestamp": datetime.now().isoformat(),
+                "message": f"🎉 Research completed! {job['completed']} successful, {job['failed']} failed"
+            })
+            job_state_manager.save_job(job_id, job)
 
-    logger.info(f"✅ Background research completed for job {job_id}")
+        logger.info(f"✅ Background research completed for job {job_id}")
+    except Exception as e:
+        logger.error(f"❌ Error finalizing job {job_id}: {e}")
+        logger.exception(e)
 
 
 @app.post("/company/research")
 async def start_research():
     """Start research process for uploaded companies"""
-    global uploaded_companies, field_configuration, research_jobs
+    global uploaded_companies, field_configuration
 
     logger.info("=" * 80)
     logger.info("🔍 RESEARCH REQUEST RECEIVED")
@@ -434,7 +536,6 @@ async def start_research():
 
         # Generate job ID
         import uuid
-        import datetime
         job_id = str(uuid.uuid4())
         logger.info(f"📋 Generated job ID: {job_id}")
 
@@ -442,23 +543,27 @@ async def start_research():
         enabled_fields = [field for field, enabled in field_configuration.items() if enabled]
         logger.info(f"📋 Enabled fields: {enabled_fields}")
 
-        # Initialize job
-        research_jobs[job_id] = {
+        # Initialize job in database
+        job_data = {
             "status": "running",
             "progress": 0,
             "total": len(uploaded_companies),
             "completed": 0,
             "failed": 0,
+            "current_file": None,
+            "abort_requested": False,
             "results": [],
             "activity_log": [
                 {
-                    "timestamp": datetime.datetime.now().isoformat(),
+                    "timestamp": datetime.now().isoformat(),
                     "message": f"Started research for {len(uploaded_companies)} companies"
                 }
-            ]
+            ],
+            "created_at": datetime.now().isoformat()
         }
+        job_state_manager.save_job(job_id, job_data)
 
-        logger.info(f"✅ Job initialized: {job_id}")
+        logger.info(f"✅ Job initialized in database: {job_id}")
 
         # Start background task
         asyncio.create_task(research_background_task(job_id, uploaded_companies.copy(), enabled_fields))
@@ -472,12 +577,21 @@ async def start_research():
             "message": f"Research started for {len(uploaded_companies)} companies"
         }
 
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error("=" * 80)
         logger.error(f"❌ ERROR STARTING RESEARCH: {str(e)}")
         logger.exception(e)
         logger.error("=" * 80)
-        raise HTTPException(status_code=500, detail=str(e))
+        return JSONResponse(
+            status_code=500,
+            content={
+                "success": False,
+                "error": str(e),
+                "message": "Failed to start research. Check logs for details."
+            }
+        )
 
 
 @app.get("/company/research/{job_id}/progress")
@@ -485,11 +599,10 @@ async def get_research_progress(job_id: str):
     """Get research progress for a job"""
     logger.info(f"📊 Progress request for job: {job_id}")
 
-    if job_id not in research_jobs:
+    job = job_state_manager.get_job(job_id)
+    if not job:
         logger.error(f"❌ Job not found: {job_id}")
         raise HTTPException(status_code=404, detail="Job not found")
-
-    job = research_jobs[job_id]
 
     return {
         "job_id": job_id,
@@ -498,6 +611,7 @@ async def get_research_progress(job_id: str):
         "total": job["total"],
         "completed": job["completed"],
         "failed": job["failed"],
+        "current_file": job.get("current_file"),
         "activity_log": job["activity_log"]
     }
 
@@ -507,11 +621,10 @@ async def get_research_results(job_id: str):
     """Get research results for a job"""
     logger.info(f"📥 Results request for job: {job_id}")
 
-    if job_id not in research_jobs:
+    job = job_state_manager.get_job(job_id)
+    if not job:
         logger.error(f"❌ Job not found: {job_id}")
         raise HTTPException(status_code=404, detail="Job not found")
-
-    job = research_jobs[job_id]
 
     return {
         "job_id": job_id,
@@ -532,11 +645,11 @@ async def export_results(job_id: str):
 
     logger.info(f"📤 Export request for job: {job_id}")
 
-    if job_id not in research_jobs:
+    job = job_state_manager.get_job(job_id)
+    if not job:
         logger.error(f"❌ Job not found: {job_id}")
         raise HTTPException(status_code=404, detail="Job not found")
 
-    job = research_jobs[job_id]
     results = job.get("results", [])
 
     if not results:
@@ -593,6 +706,46 @@ async def clear_console_logs():
     return {
         "success": True,
         "message": "Console logs cleared"
+    }
+
+
+@app.post("/company/research/{job_id}/abort")
+async def abort_research(job_id: str):
+    """Abort a running research job"""
+    logger.info(f"🛑 Abort request for job: {job_id}")
+
+    job = job_state_manager.get_job(job_id)
+    if not job:
+        logger.error(f"❌ Job not found: {job_id}")
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    if job["status"] != "running":
+        logger.warning(f"⚠️  Job {job_id} is not running (status: {job['status']})")
+        return {
+            "success": False,
+            "message": f"Job is not running (status: {job['status']})"
+        }
+
+    # Request abort
+    job_state_manager.request_abort(job_id)
+    logger.info(f"🛑 Abort requested for job: {job_id}")
+
+    return {
+        "success": True,
+        "message": "Abort requested. Job will stop after current company."
+    }
+
+
+@app.get("/company/active_jobs")
+async def get_active_jobs():
+    """Get all active research jobs"""
+    logger.info("📋 Active jobs request")
+
+    active_jobs = job_state_manager.get_active_jobs()
+
+    return {
+        "success": True,
+        "jobs": active_jobs
     }
 
 
